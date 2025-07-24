@@ -7,3 +7,12 @@ target/jetty/logs/
 target/jetty/work/
 target/jetty/home/db/
 target/jetty/home/indexes/
+
+# Gradle
+.gradle
+build
+logs
+out
+*.log
+*.jar
+*.war
