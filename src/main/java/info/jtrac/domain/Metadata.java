@@ -16,10 +16,16 @@
 
 package info.jtrac.domain;
 
-import static info.jtrac.Constants.*;
-
-import info.jtrac.util.XmlUtils;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
+import java.util.Set;
+import java.util.TreeMap;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,60 +43,34 @@ import java.util.Set;
 import java.util.TreeMap;
 
 
-import org.dom4j.Document;
-import org.dom4j.Element;
-
-/**
- * XML metadata is one of the interesting design decisions of JTrac.
- * Metadata is defined for each space and so Items that belong to a
- * space are customized by the space metadata.  This class can marshall
- * and unmarshall itself to XML and this XML is stored in the database
- * in a single column.  Because of this approach, Metadata can be made more
- * and more complicated in the future without impact to the database schema.
- *
- * Things that the Metadata configures for a Space:
- * 
- * 1) custom Fields for an Item (within a Space)
- * - Label
- * - whether mandatory or not [ DEPRECATED ]
- * - the option values (drop down list options)
- * - the option "key" values are stored in the database (WITHOUT any relationships)
- * - the values corresponding to "key"s are resolved in memory from the Metadata
- *   and not through a database join.
- *
- * 2) the Roles available within a space
- * - for each (from) State the (to) State transitions allowed for this role
- * - and within each (from) State the fields that this Role can view / edit
- *
- * 3) the State labels corresponding to each state 
- * - internally States are integers, but for display we need a label
- * - labels can be customized
- * - special State values: 0 = New, 1 = Open, 99 = Closed
- *
- * 4) the order in which the fields are displayed
- * on the data entry screens and the query result screens etc.
- *
- * There is one downside to this approach and that is there is a limit
- * to the nunmbers of custom fields available.  The existing limits are
- * - Drop Down: 10
- * - Free Text: 5
- * - Numeric: 3
- * - Date/Time: 3 
- *
- * Metadata can be inherited, and this allows for "reuse" TODO
- */
-public class Metadata implements Serializable {    
+@Entity
+@Table(name = "metadata")
+public class Metadata implements Serializable {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    
+    @Version
     private int version;
+    
     private Integer type;
     private String name;
     private String description;
+    
+    @ManyToOne
     private Metadata parent;
 
+    @Transient
     private Map<Field.Name, Field> fields;
+    
+    @Transient
     private Map<String, Role> roles;
+    
+    @Transient
     private Map<Integer, String> states;
+    
+    @Transient
     private List<Field.Name> fieldOrder;    
     
     public Metadata() {
@@ -103,64 +83,6 @@ public class Metadata implements Serializable {
         states = new TreeMap<Integer, String>();
         fieldOrder = new LinkedList<Field.Name>();         
     }
-    
-    /* accessor, will be used by Hibernate */
-    public void setXmlString(String xmlString) {
-        init();
-        if (xmlString == null) {
-            return;
-        }
-        Document document = XmlUtils.parse(xmlString);        
-        for (Element e : (List<Element>) document.selectNodes(FIELD_XPATH)) {
-            Field field = new Field(e);            
-            fields.put(field.getName(), field);
-        }       
-        for (Element e : (List<Element>) document.selectNodes(ROLE_XPATH)) {
-            Role role = new Role(e);            
-            roles.put(role.getName(), role);
-        }
-        for (Element e : (List<Element>) document.selectNodes(STATE_XPATH)) {
-            String key = e.attributeValue(STATUS);
-            String value = e.attributeValue(LABEL);
-            states.put(Integer.parseInt(key), value);
-        }        
-        for (Element e : (List<Element>) document.selectNodes(FIELD_ORDER_XPATH)) {
-            String fieldName = e.attributeValue(NAME);
-            fieldOrder.add(Field.convertToName(fieldName));
-        }         
-    }        
-    
-    /* accessor, will be used by Hibernate */
-    public String getXmlString() {
-        Document d = XmlUtils.getNewDocument(METADATA);
-        Element root = d.getRootElement();
-        Element fs = root.addElement(FIELDS);
-        for (Field field : fields.values()) {
-            field.addAsChildOf(fs);
-        }        
-        Element rs = root.addElement(ROLES);
-        for (Role role : roles.values()) {
-            role.addAsChildOf(rs);
-        }        
-        Element ss = root.addElement(STATES);
-        for (Map.Entry<Integer, String> entry : states.entrySet()) {
-            Element e = ss.addElement(STATE);
-            e.addAttribute(STATUS, entry.getKey() + "");
-            e.addAttribute(LABEL, entry.getValue());
-        }
-        Element fo = fs.addElement(FIELD_ORDER);
-        for (Field.Name f : fieldOrder) {
-            Element e = fo.addElement(FIELD);
-            e.addAttribute(NAME, f.toString());
-        }          
-        return d.asXML();
-    }
-    
-    public String getPrettyXml() {
-        return XmlUtils.getAsPrettyXml(getXmlString());
-    }
-    
-    //====================================================================
     
     public void initRoles() {
         // set up default simple workflow

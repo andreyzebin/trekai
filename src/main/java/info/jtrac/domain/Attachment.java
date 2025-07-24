@@ -16,22 +16,25 @@
 
 package info.jtrac.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.io.Serializable;
 
-/**
- * Represents a file attachment.  Files will be stored on the local
- * file system, not within the database.
- * When an Attachment is first uploaded and stored, it is prefixed
- * with the value of the id generated on the database insert.
- * This filePrefix property is stored separately to smoothly
- * handle database migrations.  So even if a database export-import 
- * changes the id column values, the files within the attachments 
- * folder can be used as is, without resorting to mass renaming.
- */
+@Entity
+@Table(name = "attachments")
 public class Attachment implements Serializable {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    
+    @ManyToOne
     private Attachment previous;
+    
     private long filePrefix;
     private String fileName;
     

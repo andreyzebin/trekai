@@ -16,17 +16,21 @@
 
 package info.jtrac.domain;
 
-import static info.jtrac.Constants.*;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.io.Serializable;
 
-/**
- * Represents a Tag as in an Item can be assigned multiple Tags
- * allows for categorization of Items web 2.0 style
- */
+@Entity
+@Table(name = "tags")
 public class Tag implements Serializable {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    
     private int type;
     private String name;
     private String description;

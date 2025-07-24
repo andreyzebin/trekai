@@ -16,27 +16,39 @@
 
 package info.jtrac.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * This object represents a generic item which can be an issue, defect, task etc.
- * some logic for field accessors and conversion of keys to display values 
- * is contained in the AbstractItem class
- */
+@Entity
+@Table(name = "items")
 public class Item extends AbstractItem {
 
     private Integer type;
+
+    @ManyToOne
     private Space space;
+
     private long sequenceNum;
-    
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<History> history;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Item> children;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Attachment> attachments;
-    
-    // should be ideally in form backing object but for convenience
+
+    @Transient
     private String editReason;
 
     @Override

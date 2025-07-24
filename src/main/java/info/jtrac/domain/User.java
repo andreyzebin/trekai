@@ -16,6 +16,16 @@
 
 package info.jtrac.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,37 +35,38 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-/**
- * Standard User entity with attributes such as name, password etc.
- * The parent relationship is used for easy grouping of users and
- * flexible inheritance of permission schemes TODO.  The user type
- * determines if this is a normal user or a user group.  Only
- * user groups can have child references.
- *
- * We also tie in to the Acegi security framework and implement
- * the Acegi UserDetails interface so that Acegi can take care
- * of Authentication and Authorization
- */
+@Entity
+@Table(name = "users")
 public class User implements UserDetails, Serializable, Comparable<User> {
     
     public static final int SEARCH_NAME = 0;
     public static final int SEARCH_LOGIN_NAME = 1;
     public static final int SEARCH_EMAIL = 2;
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    
     private Integer type;
+    
+    @ManyToOne
     private User parent;
+    
     private String loginName;
     private String name;
     private String password;
     private String email;
+    
+    @ManyToOne
     private Metadata metadata;
+    
     private String locale;
-    private boolean locked;    
+    private boolean locked;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<UserSpaceRole> userSpaceRoles = new HashSet<UserSpaceRole>();    
     
     //=============================================================

@@ -16,17 +16,19 @@
 
 package info.jtrac.domain;
 
-/**
- * Any updates to an Item (even a new insert) causes a snapshot of
- * the item to be stored in the History table.
- * In this way for each Item, a History view is available which
- * shows the diffs, who made changes and when, etc.
- */
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "history")
 public class History extends AbstractItem {
     
     private Integer type;
     private String comment;
     private Double actualEffort;
+    
+    @ManyToOne
     private Attachment attachment;
 
     public History() {

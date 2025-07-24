@@ -16,6 +16,15 @@
 
 package info.jtrac.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -25,15 +34,29 @@ import info.jtrac.util.DateUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+@MappedSuperclass
 public abstract class AbstractItem implements Serializable {    
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    
+    @Version
     private int version;
+    
+    @ManyToOne
     private Item parent; // slightly different meaning for Item and History
+    
     private String summary;
     private String detail;
+    
+    @ManyToOne
     private User loggedBy;
+    
+    @ManyToOne
     private User assignedTo;
+    
     private Date timeStamp;
     private Double plannedEffort;  
     //===========================
@@ -65,13 +88,19 @@ public abstract class AbstractItem implements Serializable {
     private String cusText02;
     private String cusText03;
     
-    // probably belong to Item not AbstractItem, but convenient for item_view_form binding
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private Set<ItemUser> itemUsers;
+    
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
     private Set<ItemItem> relatedItems;
+    
+    @OneToMany(mappedBy = "relatedItem", cascade = CascadeType.ALL)
     private Set<ItemItem> relatingItems;
+    
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private Set<ItemTag> itemTags;
     
-    // mvc form binding convenience not really domain, TODO refactor
+    @Transient
     private boolean sendNotifications = true;
     
     // we could have used reflection or a Map but doing this way for performance

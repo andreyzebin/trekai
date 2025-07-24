@@ -16,19 +16,28 @@
 
 package info.jtrac.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.io.Serializable;
 
-/**
- * Class that exists purely to hold a single Tag associated with an item
- * along with a integer "type" indicating the nature of the relationship
- * between Item --> Tag (one directional relationship)
- *
- * This is used for allowing an Item to have many Tags, web 2.0 style
- */
+@Entity
+@Table(name = "item_tags")
 public class ItemTag implements Serializable {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    
+    @ManyToOne
     private Tag tag;
+
+    @ManyToOne
+    private Item item;
+    
     private int type;
     
     public ItemTag() {

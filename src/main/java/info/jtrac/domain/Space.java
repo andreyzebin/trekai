@@ -16,25 +16,34 @@
 
 package info.jtrac.domain;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.io.Serializable;
 
-
-/**
- * A JTrac installation can be divided into different project
- * areas or workspaces.  The Space entity represents this concept.
- * The Metdata of a Space determines the type of
- * Items contained within the space.  Users can be mapped to a
- * space with different access permissions.
- */
+@Entity
+@Table(name = "spaces")
 public class Space implements Serializable, Comparable<Space> {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    
+    @Version
     private int version;
+    
     private Integer type;
     private String prefixCode;
     private String name;
     private String description;
-    private boolean guestAllowed;    
+    private boolean guestAllowed;
+    
+    @ManyToOne(cascade = CascadeType.ALL)
     private Metadata metadata;
     
     public Space() {
