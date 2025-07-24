@@ -21,8 +21,7 @@ import info.jtrac.domain.*;
 import java.util.List;
 import java.util.Map;
 
-import org.acegisecurity.userdetails.UserDetailsService;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
  * Jtrac main business interface (Service Layer)
@@ -30,14 +29,11 @@ import org.apache.wicket.markup.html.form.upload.FileUpload;
 public interface Jtrac extends UserDetailsService {
     
     // TODO remove Wicket dep with FileUpload
-    void storeItem(Item item, FileUpload fileUpload);
     void storeItems(List<Item> items);
     void updateItem(Item item, User user);
-    void storeHistoryForItem(long itemId, History history, FileUpload fileUpload);
     Item loadItem(long id);
     Item loadItemByRefId(String refId);
     History loadHistory(long id);
-    List<Item> findItems(ItemSearch itemSearch);  
     int loadCountOfAllItems();
     List<Item> findAllItems(int firstResult, int batchSize);
     void removeItem(Item item);

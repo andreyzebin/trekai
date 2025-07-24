@@ -33,7 +33,6 @@ public interface JtracDao {
     History loadHistory(long id);
     void storeHistory(History history);
     List<Item> findItems(long sequenceNum, String prefixCode);
-    List<Item> findItems(ItemSearch itemSearch);
     int loadCountOfAllItems();
     List<Item> findAllItems(int firstResult, int batchSize);
     void removeItem(Item item);

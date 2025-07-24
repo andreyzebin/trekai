@@ -17,9 +17,6 @@
 package info.jtrac;
 
 import info.jtrac.domain.*;
-import info.jtrac.lucene.IndexSearcher;
-import info.jtrac.lucene.Indexer;
-import info.jtrac.mail.MailSender;
 import info.jtrac.util.AttachmentUtils;
 import java.io.File;
 import java.util.ArrayList;
@@ -37,12 +34,11 @@ import java.util.Random;
 import java.util.Set;
 
 
-import org.acegisecurity.providers.encoding.PasswordEncoder;
-import org.acegisecurity.userdetails.UserDetails;
-import org.acegisecurity.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.context.MessageSource;
 import org.springframework.util.StringUtils;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,9 +54,6 @@ public class JtracImpl implements Jtrac {
     
     private JtracDao dao;
     private PasswordEncoder passwordEncoder;
-    private MailSender mailSender;
-    private Indexer indexer;
-    private IndexSearcher indexSearcher;
     private MessageSource messageSource;
 
     private Map<String, String> locales;
@@ -86,14 +79,6 @@ public class JtracImpl implements Jtrac {
 
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
-    }
-
-    public void setIndexSearcher(IndexSearcher indexSearcher) {
-        this.indexSearcher = indexSearcher;
-    }
-
-    public void setIndexer(Indexer indexer) {
-        this.indexer = indexer;
     }
 
     public void setMessageSource(MessageSource messageSource) {
@@ -132,7 +117,7 @@ public class JtracImpl implements Jtrac {
         byte[] ab = new byte[1];
         Random r = new Random();
         r.nextBytes(ab);
-        return passwordEncoder.encodePassword(new String(ab), null).substring(24);
+        return passwordEncoder.encode(new String(ab));
     }
 
     /**
@@ -140,7 +125,7 @@ public class JtracImpl implements Jtrac {
      * because it depends on the PasswordEncoder configured
      */
     public String encodeClearText(String clearText) {
-        return passwordEncoder.encodePassword(clearText, null);
+        return passwordEncoder.encode(clearText);
     }
 
     public Map<String, String> getLocales() {
@@ -159,14 +144,9 @@ public class JtracImpl implements Jtrac {
     public void init() {
         Map<String, String> config = loadAllConfig();
         initDefaultLocale(config.get("locale.default"));
-        initMailSender(config);        
         initAttachmentMaxSize(config.get("attachment.maxsize"));
         initSessionTimeout(config.get("session.timeout"));
     }
-    
-    private void initMailSender(Map<String, String> config) {
-        this.mailSender = new MailSender(config, messageSource, defaultLocale);
-    }    
     
     private void initDefaultLocale(String localeString) {
         if (localeString == null || !locales.containsKey(localeString)) {
@@ -197,62 +177,6 @@ public class JtracImpl implements Jtrac {
     
     //==========================================================================
 
-    private Attachment getAttachment(FileUpload fileUpload) {
-        if(fileUpload == null) {
-            return null;
-        }
-        logger.debug("fileUpload not null");
-        String fileName = AttachmentUtils.cleanFileName(fileUpload.getClientFileName());
-        Attachment attachment = new Attachment();
-        attachment.setFileName(fileName);
-        dao.storeAttachment(attachment);
-        attachment.setFilePrefix(attachment.getId());
-        return attachment;
-    }
-
-    private void writeToFile(FileUpload fileUpload, Attachment attachment) {
-        if(fileUpload == null) {
-            return;
-        }
-        File file = AttachmentUtils.getFile(attachment, jtracHome);
-        try {
-            fileUpload.writeTo(file);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    public synchronized void storeItem(Item item, FileUpload fileUpload) {
-        History history = new History(item);
-        Attachment attachment = getAttachment(fileUpload);
-        if(attachment != null) {
-            item.add(attachment);
-            history.setAttachment(attachment);
-        }
-        // timestamp can be set by import, then retain
-        Date now = item.getTimeStamp();
-        if(now == null) {
-            now = new Date();
-        }
-        item.setTimeStamp(now);
-        history.setTimeStamp(now);
-        item.add(history);
-        item.setSequenceNum(dao.loadNextSequenceNum(item.getSpace().getId()));
-        // this will at the moment execute unnecessary updates (bug in Hibernate handling of "version" property)
-        // se http://opensource.atlassian.com/projects/hibernate/browse/HHH-1401
-        // TODO confirm if above does not happen anymore
-        dao.storeItem(item);        
-        writeToFile(fileUpload, attachment);
-        if(indexer != null) {
-            indexer.index(item);
-            indexer.index(history);
-        }
-        if (item.isSendNotifications()) {
-            mailSender.send(item);
-        }
-    }
-
     public synchronized void storeItems(List<Item> items) {
         for(Item item : items) {
             item.setSendNotifications(false);
@@ -269,10 +193,10 @@ public class JtracImpl implements Jtrac {
                 history.setComment("-");
                 history.setStatus(State.CLOSED); 
                 history.setSendNotifications(false);
-                storeItem(item, null);
-                storeHistoryForItem(item.getId(), history, null);
+                // storeItem(item, null);
+                // storeHistoryForItem(item.getId(), history, null);
             } else {
-                storeItem(item, null);
+                // storeItem(item, null);
             }
         }
     }
@@ -289,42 +213,7 @@ public class JtracImpl implements Jtrac {
         dao.storeItem(item);  // merge edits + history        
         // TODO index?
         if (item.isSendNotifications()) {
-            mailSender.send(item);
-        }
-    }
-
-    public synchronized void storeHistoryForItem(long itemId, History history, FileUpload fileUpload) {
-        Item item = dao.loadItem(itemId);
-        // first apply edits onto item record before we change the item status
-        // the item.getEditableFieldList routine depends on the current State of the item
-        for(Field field : item.getEditableFieldList(history.getLoggedBy())) {
-            Object value = history.getValue(field.getName());
-            if (value != null) {
-                item.setValue(field.getName(), value);
-            }
-        }
-        if (history.getStatus() != null) {
-            item.setStatus(history.getStatus());
-            item.setAssignedTo(history.getAssignedTo()); // this may be null, when closing
-        }
-        item.setItemUsers(history.getItemUsers());
-        // may have been set if this is an import
-        if(history.getTimeStamp() == null) {
-            history.setTimeStamp(new Date());
-        }
-        Attachment attachment = getAttachment(fileUpload);
-        if(attachment != null) {
-            item.add(attachment);
-            history.setAttachment(attachment);
-        }
-        item.add(history);
-        dao.storeItem(item);        
-        writeToFile(fileUpload, attachment);
-        if(indexer != null) {
-            indexer.index(history);
-        }        
-        if (history.isSendNotifications()) {
-            mailSender.send(item);
+            // mailSender.send(item);
         }
     }
 
@@ -345,19 +234,6 @@ public class JtracImpl implements Jtrac {
         return dao.loadHistory(id);
     }
 
-    public List<Item> findItems(ItemSearch itemSearch) {
-        String searchText = itemSearch.getSearchText();
-        if (searchText != null) {
-            List<Long> hits = indexSearcher.findItemIdsContainingText(searchText);
-            if (hits.size() == 0) {
-                itemSearch.setResultCount(0);
-                return Collections.<Item>emptyList();
-            }
-            itemSearch.setItemIds(hits);
-        }
-        return dao.findItems(itemSearch);
-    }
-    
     public int loadCountOfAllItems() {
         return dao.loadCountOfAllItems();
     }
@@ -475,7 +351,7 @@ public class JtracImpl implements Jtrac {
         user.setPassword(encodeClearText(password));
         storeUser(user);
         if(sendNotifications) {
-            mailSender.sendUserPassword(user, password);
+            // mailSender.sendUserPassword(user, password);
         }
     }
 
@@ -722,9 +598,7 @@ public class JtracImpl implements Jtrac {
     // TODO must be some nice generic way to do this
     public void storeConfig(Config config) {        
         dao.storeConfig(config);
-        if(config.isMailConfig()) {
-            initMailSender(loadAllConfig());
-        } else if(config.isLocaleConfig()) {
+        if(config.isLocaleConfig()) {
             initDefaultLocale(config.getValue());
         } else if(config.isAttachmentConfig()) {
             initAttachmentMaxSize(config.getValue());
@@ -748,58 +622,11 @@ public class JtracImpl implements Jtrac {
     //========================================================
 
     public void rebuildIndexes(BatchInfo batchInfo) {
-        File file = new File(jtracHome + "/indexes");
-        for (File f : file.listFiles()) {
-            logger.debug("deleting file: " + f);
-            f.delete();
-        }        
-        logger.info("existing index files deleted successfully");
-        int totalSize = dao.loadCountOfAllItems();
-        batchInfo.setTotalSize(totalSize);
-        logger.info("total items to index: " + totalSize);                
-        int firstResult = 0;
-        long lastFetchedId = 0;
-        while(true) {
-            logger.info("processing batch starting from: " + firstResult + ", current: " + batchInfo.getCurrentPosition());
-            List<Item> items = dao.findAllItems(firstResult, batchInfo.getBatchSize());
-            for (Item item : items) {                                    
-                
-            	indexer.index(item);  
-                
-                // currently history is indexed separately from item
-                // not sure if this is a good thing, maybe it gives
-                // more flexibility e.g. fine-grained search results
-            	
-                int historyCount = 0;
-                for(History history : item.getHistory()) {
-                    indexer.index(history);
-                    historyCount++;
-                }
-                if(logger.isDebugEnabled()) {
-                    logger.debug("indexed item: " + item.getId() 
-                            + " : " + item.getRefId() + ", history: " + historyCount);
-                }
-                batchInfo.incrementPosition();
-                lastFetchedId = item.getId();
-            }                        
-            if(logger.isDebugEnabled()) {
-              logger.debug("size of current batch: " + items.size());
-              logger.debug("last fetched Id: " + lastFetchedId);
-            }  
-            firstResult += batchInfo.getBatchSize();
-            if(logger.isDebugEnabled()) {
-                logger.debug("setting firstResult to: " + firstResult);
-            }
-            if(batchInfo.isComplete()) {
-                logger.info("batch completed at position: " + batchInfo.getCurrentPosition());
-                break;
-            }
-        }        
         
     }
 
     public boolean validateTextSearchQuery(String text) {
-        return indexSearcher.validateQuery(text);
+        return true;
     }
 
     //==========================================================================

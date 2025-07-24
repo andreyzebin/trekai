@@ -20,9 +20,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field.Index;
-import org.apache.lucene.document.Field.Store;
 
 /**
  * This object represents a generic item which can be an issue, defect, task etc.
@@ -76,27 +73,6 @@ public class Item extends AbstractItem {
         }
         ItemItem itemItem = new ItemItem(this, relatedItem, relationType);        
         getRelatedItems().add(itemItem);
-    }    
-    
-    /**
-     * Lucene DocumentCreator implementation
-     */
-    public Document createDocument() {
-        Document d = new Document();        
-        d.add(new org.apache.lucene.document.Field("id", getId() + "", Store.YES, Index.NO));            
-        d.add(new org.apache.lucene.document.Field("type", "item", Store.YES, Index.NO));        
-        StringBuffer sb = new StringBuffer();
-        if (getSummary() != null) {
-            sb.append(getSummary());
-        }        
-        if (getDetail() != null) {
-            if (sb.length() > 0) {
-                sb.append(" | ");
-            }
-            sb.append(getDetail());
-        }
-        d.add(new org.apache.lucene.document.Field("text", sb.toString(), Store.NO, Index.TOKENIZED));
-        return d;
     }    
     
     public History getLatestHistory() {

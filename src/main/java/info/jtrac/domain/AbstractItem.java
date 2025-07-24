@@ -25,13 +25,7 @@ import info.jtrac.util.DateUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.springmodules.lucene.index.core.DocumentCreator;
-
-/**
- * Abstract class that serves as base for both Item and History
- * this contains the fields that are common to both and persisted
- */
-public abstract class AbstractItem implements Serializable, DocumentCreator {    
+public abstract class AbstractItem implements Serializable {    
 
     private long id;
     private int version;
