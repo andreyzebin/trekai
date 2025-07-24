@@ -32,6 +32,7 @@ public class ItemUser implements Serializable {
     
     private long id;
     private User user;
+    private Item item;
     private int type;
     
     public ItemUser() {

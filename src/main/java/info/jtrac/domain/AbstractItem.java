@@ -97,7 +97,7 @@ public abstract class AbstractItem implements Serializable {
     @OneToMany(mappedBy = "relatedItem", cascade = CascadeType.ALL)
     private Set<ItemItem> relatingItems;
     
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
     private Set<ItemTag> itemTags;
     
     @Transient

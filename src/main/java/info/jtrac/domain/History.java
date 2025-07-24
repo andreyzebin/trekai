@@ -22,7 +22,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "history")
-public class History extends AbstractItem {
+public class History extends Item {
     
     private Integer type;
     private String comment;
