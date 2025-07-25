@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthenticationController.class)
-@Import({SecurityFilters.class, SecurityConfig.class})
+@Import({SecurityConfig.class, SecurityFilters.class})
 @ActiveProfiles("test")
 public class AuthenticationControllerTest {
 

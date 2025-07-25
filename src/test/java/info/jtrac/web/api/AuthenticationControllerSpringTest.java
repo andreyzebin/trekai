@@ -3,6 +3,10 @@ package info.jtrac.web.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.jtrac.config.jwt.TokenProvider;
 import info.jtrac.web.api.dto.AuthenticationRequest;
+import info.jtrac.repository.ItemRepository;
+import info.jtrac.repository.SpaceRepository;
+import info.jtrac.repository.UserRepository;
+import info.jtrac.repository.UserSpaceRoleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -38,12 +42,24 @@ public class AuthenticationControllerSpringTest {
 
     @MockBean
     private TokenProvider tokenProvider;
-    
+
     @MockBean
     private UserDetailsService userDetailsService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @MockBean
+    private UserRepository userRepository;
+
+    @MockBean
+    private ItemRepository itemRepository;
+
+    @MockBean
+    private SpaceRepository spaceRepository;
+
+    @MockBean
+    private UserSpaceRoleRepository userSpaceRoleRepository;
 
     @Test
     public void whenAuthenticateWithValidCredentials_thenReturnsJwtToken() throws Exception {

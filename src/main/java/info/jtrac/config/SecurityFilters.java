@@ -3,9 +3,11 @@ package info.jtrac.config;
 
 import info.jtrac.config.jwt.JwtAuthenticationFilter;
 import info.jtrac.config.jwt.JwtTokenProvider;
+import info.jtrac.config.jwt.TokenProvider;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,9 +21,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityFilters {
 
     private final UserDetailsService userDetailsService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final TokenProvider jwtTokenProvider;
 
-    public SecurityFilters(UserDetailsService userDetailsService, JwtTokenProvider jwtTokenProvider) {
+    public SecurityFilters(UserDetailsService userDetailsService, TokenProvider jwtTokenProvider) {
         this.userDetailsService = userDetailsService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
