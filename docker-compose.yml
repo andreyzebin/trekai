@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  jtrac-backend:
+    build: .
+    ports:
+      - "8082:8082"
+    environment:
+      # Example environment variables for a real database
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/jtrac
+      - SPRING_DATASOURCE_USERNAME=jtrac
+      - SPRING_DATASOURCE_PASSWORD=password
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      # Check that Swagger UI is available before marking the service as healthy
+      test: ["CMD", "curl", "-f", "http://localhost:8082/swagger"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  seeder:
+    build:
+      context: .
+      dockerfile: seeder.Dockerfile
+    environment:
+      - BACKEND_URL=http://jtrac-backend:8082
+      # You can override the admin credentials if needed
+      # - ADMIN_USER=admin
+      # - ADMIN_PASSWORD=secret
+    # depends_on:
+    #   jtrac-backend:
+    #     condition: service_healthy # <-- This is the key! It starts the seeder only after the backend passes its healthcheck.
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=jtrac
+      - POSTGRES_USER=jtrac
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jtrac -d jtrac"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

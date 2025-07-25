@@ -8,11 +8,22 @@ target/jetty/work/
 target/jetty/home/db/
 target/jetty/home/indexes/
 
+# IDE files
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Build output
+build/
+out/
+
 # Gradle
-.gradle
-build
-logs
-out
+.gradle/
+gradle-app.setting
+
+# Local environment
+.venv/
 *.log
 *.jar
 *.war

@@ -24,6 +24,7 @@ dependencies {
 
     // Database (using H2 as a modern replacement for HSQLDB)
     runtimeOnly("com.h2database:h2")
+    runtimeOnly("org.postgresql:postgresql")
 
     // Other legacy dependencies - modern replacements
     implementation("org.jfree:jfreechart:1.5.3")
