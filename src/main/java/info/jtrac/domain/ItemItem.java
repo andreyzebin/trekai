@@ -33,7 +33,7 @@ public class ItemItem implements Serializable {
     private long id;
     
     @ManyToOne
-    private Item item;
+    private AbstractItem item;
     
     @ManyToOne
     private Item relatedItem;
@@ -81,7 +81,7 @@ public class ItemItem implements Serializable {
         this.id = id;
     }
 
-    public Item getItem() {
+    public AbstractItem getItem() {
         return item;
     }
 

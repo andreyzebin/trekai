@@ -8,7 +8,6 @@ import info.jtrac.web.api.dto.AuthenticationRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -37,13 +37,13 @@ public class AuthenticationControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private AuthenticationManager authenticationManager;
 
-    @MockBean
+    @MockitoBean
     private TokenProvider tokenProvider;
-    
-    @MockBean
+
+    @MockitoBean
     private UserDetailsService userDetailsService;
 
     @Test
@@ -54,7 +54,7 @@ public class AuthenticationControllerTest {
         User user = new User("admin", "password", new ArrayList<>());
 
         given(userDetailsService.loadUserByUsername("admin")).willReturn(user);
-        
+
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 
@@ -63,8 +63,8 @@ public class AuthenticationControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/auth")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(authRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value(dummyToken));
     }

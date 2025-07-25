@@ -16,8 +16,6 @@
 
 package info.jtrac.domain;
 
-import info.jtrac.util.XmlUtils;
-
 import java.util.HashSet;
 
 import static info.jtrac.Constants.*;
@@ -28,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.dom4j.Element;
 
 /**
  * <p>
@@ -103,71 +100,8 @@ public class State implements Serializable {
     public State(int status) {
         this.status = status;
     }
-    
-    /**
-     * This constructor will read the status of the state from the given 
-     * {@link Element} attribute. Then all Transitions elements are read
-     * to add them to the map of {@link #transitions}. Finally all Field
-     * elements are read to add them to the map of {@link #fields}.
-     * 
-     * @param element The {@link Element} to read and process.
-     */
-    public State(Element element) {
-        this.status = Integer.parseInt(element.attributeValue(STATUS));
-        
-        for (Object o : element.elements(TRANSITION)) {
-            Element t = (Element) o;
-            transitions.add(new Integer(t.attributeValue(STATUS)));
-        } // end for each
-        
-        for (Object o : element.elements(FIELD)) {
-            Element f = (Element) o;
-            String fieldName = f.attributeValue(NAME);
-            fields.put(Field.convertToName(fieldName), new Integer(f.attributeValue(MASK)));
-        } // end for each
-    }
-    
-    /**
-     * This method will append this object to an existing XML document.
-     * 
-     * @param parent The parent to apply this state to.
-     */
-    public void addAsChildOf(Element parent) {
-        Element e = parent.addElement(STATE);
-        copyTo(e);
-    }    
-    
-    /**
-     * This method will marshal this object into a fresh new XML element.
-     * 
-     * @return Returns the state as XML {@link Element}.
-     */
-    public Element getAsElement() {
-        Element e = XmlUtils.getNewElement(STATE);
-        copyTo(e);
-        return e;
-    }
-    
-    /**
-     * Copy object values into an existing XML element.
-     * 
-     * @param element The {@link Element} object to append.
-     */
-    private void copyTo(Element element) {
-        // Appending empty strings to create new objects for "clone" support
-        element.addAttribute(STATUS, status + "");
-        
-        for (Integer toStatus : transitions) {
-            Element t = element.addElement(TRANSITION);
-            t.addAttribute(STATUS, toStatus + "");
-        } // end for each
-        
-        for (Map.Entry<Field.Name, Integer> entry : fields.entrySet()) {
-            Element f = element.addElement(FIELD);
-            f.addAttribute(NAME, entry.getKey() + "");
-            f.addAttribute(MASK, entry.getValue() + "");
-        } // end for each
-    }
+
+
     
     /**
      * This method allows to add a {@link State} to the map of {@link #fields}.

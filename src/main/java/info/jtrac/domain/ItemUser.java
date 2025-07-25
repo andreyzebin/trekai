@@ -36,7 +36,7 @@ public class ItemUser implements Serializable {
     private User user;
     
     @ManyToOne
-    private Item item;
+    private AbstractItem item;
     
     private int type;
     

@@ -15,7 +15,7 @@ import java.util.List;
 @Controller
 public class DashboardController {
 
-    @GetMapping("/dashboard")
+    @GetMapping("/web/dashboard")
     public String getDashboard(Model model) {
         // Mock data for now, will be replaced with service calls
         User user = new User();

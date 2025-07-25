@@ -14,11 +14,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -27,7 +27,10 @@ import java.util.ArrayList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,7 +59,7 @@ public class ApiItemControllerTest {
     private User admin;
     private Space testSpace;
 
-    @MockBean
+    @MockitoBean
     private UserDetailsService userDetailsService;
 
     @Autowired
@@ -114,6 +117,7 @@ public class ApiItemControllerTest {
                         .content(objectMapper.writeValueAsString(createDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.summary", is("Test Summary")))
+                .andDo(print())
                 .andReturn();
 
         long itemId = objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asLong();
@@ -124,7 +128,8 @@ public class ApiItemControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is((int) itemId)))
-                .andExpect(jsonPath("$.summary", is("Test Summary")));
+                .andExpect(jsonPath("$.summary", is("Test Summary")))
+                .andDo(print());
 
         // 3. Update Item (edit, change assignee, change status, add comment)
         ItemUpdateDto updateDto = new ItemUpdateDto();
@@ -139,7 +144,8 @@ public class ApiItemControllerTest {
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.summary", is("Updated Summary")))
-                .andExpect(jsonPath("$.status", is(1)));
+                .andExpect(jsonPath("$.status", is(1)))
+                .andDo(print());
 
         // 4. Get list of items with filter
         mockMvc.perform(get("/api/items")
@@ -149,6 +155,7 @@ public class ApiItemControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].summary", is("Updated Summary")));
+                .andExpect(jsonPath("$[0].summary", is("Updated Summary")))
+                .andDo(print());
     }
 }

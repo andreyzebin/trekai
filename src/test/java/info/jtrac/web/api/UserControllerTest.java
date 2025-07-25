@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -42,7 +43,7 @@ public class UserControllerTest {
 
     private String jwtToken;
 
-    @MockBean
+    @MockitoBean
     private UserDetailsService userDetailsService;
 
     @Autowired

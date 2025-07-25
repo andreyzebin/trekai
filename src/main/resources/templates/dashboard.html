@@ -31,9 +31,9 @@
         <tr th:each="usr : ${spaceRoles}">
             <td th:text="${usr.space.name}">Test Space</td>
             <td>
-                <a th:href="@{/item/form(spaceId=${usr.space.id})}">New</a>
+                <a th:href="@{/web/item/form(spaceId=${usr.space.id})}">New</a>
                 &nbsp;
-                <a th:href="@{/item/search(spaceId=${usr.space.id})}">
+                <a th:href="@{/web/item/search(spaceId=${usr.space.id})}">
                     <img th:src="@{/resources/search.gif}" title="Search" style="border: 0"/>
                 </a>
             </td>

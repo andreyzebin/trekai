@@ -2,22 +2,22 @@ package info.jtrac.web.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.jtrac.config.jwt.TokenProvider;
-import info.jtrac.web.api.dto.AuthenticationRequest;
 import info.jtrac.repository.ItemRepository;
 import info.jtrac.repository.SpaceRepository;
 import info.jtrac.repository.UserRepository;
 import info.jtrac.repository.UserSpaceRoleRepository;
+import info.jtrac.web.api.dto.AuthenticationRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -40,25 +40,25 @@ public class AuthenticationControllerSpringTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private TokenProvider tokenProvider;
 
-    @MockBean
+    @MockitoBean
     private UserDetailsService userDetailsService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @MockBean
+    @MockitoBean
     private UserRepository userRepository;
 
-    @MockBean
+    @MockitoBean
     private ItemRepository itemRepository;
 
-    @MockBean
+    @MockitoBean
     private SpaceRepository spaceRepository;
 
-    @MockBean
+    @MockitoBean
     private UserSpaceRoleRepository userSpaceRoleRepository;
 
     @Test
@@ -73,8 +73,8 @@ public class AuthenticationControllerSpringTest {
 
         // Act & Assert
         mockMvc.perform(post("/api/auth")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(authRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value(dummyToken));
     }

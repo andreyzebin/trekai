@@ -1,5 +1,5 @@
 plugins {
-    id("org.springframework.boot") version "3.1.0"
+    id("org.springframework.boot") version "3.5.3"
     id("io.spring.dependency-management") version "1.1.0"
     id("java")
 }
@@ -36,16 +36,20 @@ dependencies {
     implementation("org.ehcache:ehcache:3.10.8")
 
     // SVNKit (replacement for javasvn)
-    implementation("org.tmatesoft.svnkit:svnkit:1.10.10")
+    //implementation("org.tmatesoft.svnkit:svnkit:1.10.10")
 
     // XML parsing
-    implementation("dom4j:dom4j:1.6.1")
+    //implementation("dom4j:dom4j:1.6.1")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation("org.springframework.security:spring-security-test")
+
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.15.3")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.15.3")
 
     
 
@@ -59,7 +63,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
     // Swagger / OpenAPI 3
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 }
 
 tasks.withType<Test> {

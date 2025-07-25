@@ -24,8 +24,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.io.Serializable;
+
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 
+@Data
 @Entity
 @Table(name = "user_space_roles")
 public class UserSpaceRole implements GrantedAuthority, Serializable {
@@ -87,38 +90,8 @@ public class UserSpaceRole implements GrantedAuthority, Serializable {
     }
     
     //=============================================================      
-    
-    public User getUser() {
-        return user;
-    }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
-    
-    public String getRoleKey() {
-        return roleKey;
-    }
 
-    public void setRoleKey(String roleKey) {
-        this.roleKey = roleKey;
-    }        
-    
-    public Space getSpace() {
-        return space;
-    }
-    
-    public void setSpace(Space space) {
-        this.space = space;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }    
     
     @Override
     public boolean equals(Object o) {
@@ -135,15 +108,7 @@ public class UserSpaceRole implements GrantedAuthority, Serializable {
             && roleKey.equals(usr.getRoleKey())
         );
     }
-    
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = hash * 31 + user.hashCode();
-        hash = hash * 31 + (space == null ? 0 : space.hashCode());        
-        hash = hash * 31 + roleKey.hashCode();
-        return hash;
-    } 
+
     
     @Override
     public String toString() {

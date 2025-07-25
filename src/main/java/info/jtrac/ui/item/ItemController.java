@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 @Controller
-@RequestMapping("/item")
+@RequestMapping("/web/item")
 public class ItemController {
 
     @GetMapping("/search")

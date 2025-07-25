@@ -36,7 +36,7 @@ public class ItemTag implements Serializable {
     private Tag tag;
 
     @ManyToOne
-    private Item item;
+    private AbstractItem item;
     
     private int type;
     
