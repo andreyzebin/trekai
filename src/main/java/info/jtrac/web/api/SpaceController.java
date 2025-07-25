@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -29,6 +30,12 @@ public class SpaceController {
 
     public SpaceController(JtracService jtracService) {
         this.jtracService = jtracService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Space>> findSpaces(@RequestParam(required = false) Long userId) {
+        List<Space> spaces = jtracService.findSpaces(userId);
+        return new ResponseEntity<>(spaces, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

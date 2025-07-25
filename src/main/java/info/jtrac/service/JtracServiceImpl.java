@@ -168,6 +168,18 @@ public class JtracServiceImpl implements JtracService {
     }
 
     @Override
+    public List<Space> findSpaces(Long userId) {
+        return spaceRepository.findAll((Specification<Space>) (root, query, cb) -> {
+            if (userId == null) {
+                return cb.conjunction(); // No criteria, return all
+            }
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.join("userSpaceRoles").get("user").get("id"), userId));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        });
+    }
+
+    @Override
     public UserSpaceRole loadUserSpaceRole(long id) {
         return userSpaceRoleRepository.findById(id).orElse(null);
     }

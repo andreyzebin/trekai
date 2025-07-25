@@ -41,6 +41,8 @@ public interface JtracService {
 
     List<Item> findItems(long spaceId, String summary, Long assignedToId, Integer status);
 
+    List<Space> findSpaces(Long userId);
+
     UserSpaceRole loadUserSpaceRole(long id);
 
     void storeUserSpaceRole(UserSpaceRole userSpaceRole);
