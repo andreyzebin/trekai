@@ -16,6 +16,7 @@
 
 package info.jtrac.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,9 +35,11 @@ public class UserSpaceRole implements GrantedAuthority, Serializable {
     private long id;
     
     @ManyToOne
+    @JsonBackReference
     private User user;
     
     @ManyToOne
+    @JsonBackReference
     private Space space;
     
     private String roleKey;    

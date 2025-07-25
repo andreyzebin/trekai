@@ -38,4 +38,6 @@ public interface JtracService {
 
     UserSpaceRole findUserSpaceRoleByUserIdAndSpaceId(long userId, long spaceId);
 
+    List<UserSpaceRole> findUserRolesForSpace(long spaceId);
+
 }

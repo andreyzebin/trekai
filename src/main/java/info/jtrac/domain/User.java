@@ -16,6 +16,7 @@
 
 package info.jtrac.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -68,6 +69,7 @@ public class User implements UserDetails, Serializable, Comparable<User> {
     private boolean locked;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private Set<UserSpaceRole> userSpaceRoles = new HashSet<UserSpaceRole>();    
     
     //=============================================================

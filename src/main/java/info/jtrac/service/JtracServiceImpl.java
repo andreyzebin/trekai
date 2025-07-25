@@ -104,4 +104,9 @@ public class JtracServiceImpl implements JtracService {
     public UserSpaceRole findUserSpaceRoleByUserIdAndSpaceId(long userId, long spaceId) {
         return userSpaceRoleRepository.findByUserIdAndSpaceId(userId, spaceId);
     }
+
+    @Override
+    public List<UserSpaceRole> findUserRolesForSpace(long spaceId) {
+        return userSpaceRoleRepository.findBySpaceId(spaceId);
+    }
 }
