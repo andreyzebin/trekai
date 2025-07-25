@@ -68,6 +68,16 @@ public class SecurityFilters {
                 .logout(logout -> logout.permitAll());
         return http.build();
     }
+
+    @Bean
+    @Order(1)
+    public SecurityFilterChain docSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**")
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .csrf(csrf -> csrf.disable());
+        return http.build();
+    }
 }
 
 
