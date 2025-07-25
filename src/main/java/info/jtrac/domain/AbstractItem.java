@@ -16,6 +16,7 @@
 
 package info.jtrac.domain;
 
+import info.jtrac.util.DateUtils;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,23 +24,20 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-
-import static info.jtrac.domain.Field.Name.*;
-import static jakarta.persistence.InheritanceType.TABLE_PER_CLASS;
-
-import info.jtrac.util.DateUtils;
-
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import static jakarta.persistence.InheritanceType.TABLE_PER_CLASS;
+
+@Data
 @Entity
 @Inheritance(strategy = TABLE_PER_CLASS)
 public abstract class AbstractItem implements Serializable {
@@ -262,7 +260,11 @@ public abstract class AbstractItem implements Serializable {
     public String getCustomValue(Field.Name fieldName) {
         // using accessor for space, getSpace() is overridden in subclass History
         if (fieldName.getType() <= 3) {
-            return getSpace().getMetadata().getCustomValue(fieldName, (Integer) getValue(fieldName));
+            return Optional.ofNullable(getSpace())
+                    .map(Space::getMetadata)
+                    .map(meta -> meta.getCustomValue(fieldName, (Integer) getValue(fieldName)))
+                    .orElse(null); // или значение по умолчанию
+
         } else {
             Object o = getValue(fieldName);
             if (o == null) {
@@ -277,386 +279,13 @@ public abstract class AbstractItem implements Serializable {
 
     public String getStatusValue() {
         // using accessor for space, getSpace() is overridden in subclass History
-        return getSpace().getMetadata().getStatusValue(status);
-    }
-
-    //===================================================
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public Integer getSeverity() {
-        return severity;
-    }
-
-    public Integer getPriority() {
-        return priority;
-    }
-
-    public Integer getCusInt01() {
-        return cusInt01;
-    }
-
-    public Integer getCusInt02() {
-        return cusInt02;
-    }
-
-    public Integer getCusInt03() {
-        return cusInt03;
-    }
-
-    public Integer getCusInt04() {
-        return cusInt04;
-    }
-
-    public Integer getCusInt05() {
-        return cusInt05;
-    }
-
-    public Integer getCusInt06() {
-        return cusInt06;
-    }
-
-    public Integer getCusInt07() {
-        return cusInt07;
-    }
-
-    public Integer getCusInt08() {
-        return cusInt08;
-    }
-
-    public Integer getCusInt09() {
-        return cusInt09;
-    }
-
-    public Integer getCusInt10() {
-        return cusInt10;
-    }
-
-    public Double getCusDbl01() {
-        return cusDbl01;
-    }
-
-    public Double getCusDbl02() {
-        return cusDbl02;
-    }
-
-    public Double getCusDbl03() {
-        return cusDbl03;
-    }
-
-    public String getCusStr01() {
-        return cusStr01;
-    }
-
-    public String getCusStr02() {
-        return cusStr02;
-    }
-
-    public String getCusStr03() {
-        return cusStr03;
-    }
-
-    public String getCusStr04() {
-        return cusStr04;
-    }
-
-    public String getCusStr05() {
-        return cusStr05;
-    }
-
-    public Date getCusTim01() {
-        return cusTim01;
-    }
-
-    public Date getCusTim02() {
-        return cusTim02;
-    }
-
-
-    public Date getCusTim03() {
-        return cusTim03;
-    }
-
-
-    public String getCusText01() {
-        return cusText01;
-    }
-
-    public String getCusText02() {
-        return cusText02;
-    }
-
-    public String getCusText03() {
-        return cusText03;
-    }
-
-    //===============================================================
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public void setSeverity(Integer severity) {
-        this.severity = severity;
-    }
-
-    public void setPriority(Integer priority) {
-        this.priority = priority;
-    }
-
-    public void setCusInt01(Integer cusInt01) {
-        this.cusInt01 = cusInt01;
-    }
-
-    public void setCusInt02(Integer cusInt02) {
-        this.cusInt02 = cusInt02;
-    }
-
-    public void setCusInt03(Integer cusInt03) {
-        this.cusInt03 = cusInt03;
-    }
-
-    public void setCusInt04(Integer cusInt04) {
-        this.cusInt04 = cusInt04;
-    }
-
-    public void setCusInt05(Integer cusInt05) {
-        this.cusInt05 = cusInt05;
-    }
-
-    public void setCusInt06(Integer cusInt06) {
-        this.cusInt06 = cusInt06;
-    }
-
-    public void setCusInt07(Integer cusInt07) {
-        this.cusInt07 = cusInt07;
-    }
-
-    public void setCusInt08(Integer cusInt08) {
-        this.cusInt08 = cusInt08;
-    }
-
-    public void setCusInt09(Integer cusInt09) {
-        this.cusInt09 = cusInt09;
-    }
-
-    public void setCusInt10(Integer cusInt10) {
-        this.cusInt10 = cusInt10;
-    }
+        return Optional.ofNullable(getSpace())
+                .map(Space::getMetadata)
+                .map(meta -> meta.getStatusValue(status))
+                .orElse(null); // или значение по умолчанию
 
-    public void setCusDbl01(Double cusDbl01) {
-        this.cusDbl01 = cusDbl01;
     }
 
-    public void setCusDbl02(Double cusDbl02) {
-        this.cusDbl02 = cusDbl02;
-    }
-
-    public void setCusDbl03(Double cusDbl03) {
-        this.cusDbl03 = cusDbl03;
-    }
-
-    public void setCusStr01(String cusStr01) {
-        this.cusStr01 = cusStr01;
-    }
-
-    public void setCusStr02(String cusStr02) {
-        this.cusStr02 = cusStr02;
-    }
-
-    public void setCusStr03(String cusStr03) {
-        this.cusStr03 = cusStr03;
-    }
-
-    public void setCusStr04(String cusStr04) {
-        this.cusStr04 = cusStr04;
-    }
-
-    public void setCusStr05(String cusStr05) {
-        this.cusStr05 = cusStr05;
-    }
-
-    public void setCusTim01(Date cusTim01) {
-        this.cusTim01 = cusTim01;
-    }
-
-    public void setCusTim02(Date cusTim02) {
-        this.cusTim02 = cusTim02;
-    }
-
-    public void setCusTim03(Date cusTim03) {
-        this.cusTim03 = cusTim03;
-    }
-
-    public void setCusText01(String cusText01) {
-        this.cusText01 = cusText01;
-    }
-
-    public void setCusText02(String cusText02) {
-        this.cusText02 = cusText02;
-    }
-
-    public void setCusText03(String cusText03) {
-        this.cusText03 = cusText03;
-    }
-
-    //=======================================================================
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
-    }
-
-    public Item getParent() {
-        return parent;
-    }
-
-    public void setParent(Item parent) {
-        this.parent = parent;
-    }
-
-    public String getSummary() {
-        return summary;
-    }
-
-    public void setSummary(String summary) {
-        this.summary = summary;
-    }
-
-    public String getDetail() {
-        return detail;
-    }
-
-    public void setDetail(String detail) {
-        this.detail = detail;
-    }
-
-    public User getLoggedBy() {
-        return loggedBy;
-    }
-
-    public void setLoggedBy(User loggedBy) {
-        this.loggedBy = loggedBy;
-    }
-
-    public User getAssignedTo() {
-        return assignedTo;
-    }
-
-    public void setAssignedTo(User assignedTo) {
-        this.assignedTo = assignedTo;
-    }
-
-    public Date getTimeStamp() {
-        return timeStamp;
-    }
-
-    public void setTimeStamp(Date timeStamp) {
-        this.timeStamp = timeStamp;
-    }
-
-    public Double getPlannedEffort() {
-        return plannedEffort;
-    }
-
-    public void setPlannedEffort(Double plannedEffort) {
-        this.plannedEffort = plannedEffort;
-    }
-
-    public boolean isSendNotifications() {
-        return sendNotifications;
-    }
-
-    public void setSendNotifications(boolean sendNotifications) {
-        this.sendNotifications = sendNotifications;
-    }
-
-    public Set<ItemUser> getItemUsers() {
-        return itemUsers;
-    }
-
-    public void setItemUsers(Set<ItemUser> itemUsers) {
-        this.itemUsers = itemUsers;
-    }
-
-    public Set<ItemItem> getRelatedItems() {
-        return relatedItems;
-    }
-
-    public void setRelatedItems(Set<ItemItem> relatedItems) {
-        this.relatedItems = relatedItems;
-    }
-
-    public Set<ItemItem> getRelatingItems() {
-        return relatingItems;
-    }
-
-    public void setRelatingItems(Set<ItemItem> relatingItems) {
-        this.relatingItems = relatingItems;
-    }
-
-    public Set<ItemTag> getItemTags() {
-        return itemTags;
-    }
-
-    public void setItemTags(Set<ItemTag> itemTags) {
-        this.itemTags = itemTags;
-    }
-
-    @Override
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("id [").append(id);
-        sb.append("]; parent [").append(parent == null ? "" : parent.getId());
-        sb.append("]; summary [").append(summary);
-        sb.append("]; detail [").append(detail);
-        sb.append("]; loggedBy [").append(loggedBy);
-        sb.append("]; status [").append(status);
-        sb.append("]; assignedTo [").append(assignedTo);
-        sb.append("]; timeStamp [").append(timeStamp);
-        sb.append("]; severity [").append(severity);
-        sb.append("]; priority [").append(priority);
-        sb.append("]; cusInt01 [").append(cusInt01);
-        sb.append("]; cusInt02 [").append(cusInt02);
-        sb.append("]; cusInt03 [").append(cusInt03);
-        sb.append("]; cusInt04 [").append(cusInt04);
-        sb.append("]; cusInt05 [").append(cusInt05);
-        sb.append("]; cusInt06 [").append(cusInt06);
-        sb.append("]; cusInt07 [").append(cusInt07);
-        sb.append("]; cusInt08 [").append(cusInt08);
-        sb.append("]; cusInt09 [").append(cusInt09);
-        sb.append("]; cusInt10 [").append(cusInt10);
-        sb.append("]; cusDbl01 [").append(cusDbl01);
-        sb.append("]; cusDbl02 [").append(cusDbl02);
-        sb.append("]; cusDbl03 [").append(cusDbl03);
-        sb.append("]; cusStr01 [").append(cusStr01);
-        sb.append("]; cusStr02 [").append(cusStr02);
-        sb.append("]; cusStr03 [").append(cusStr03);
-        sb.append("]; cusStr04 [").append(cusStr04);
-        sb.append("]; cusStr05 [").append(cusStr05);
-        sb.append("]; cusTim01 [").append(cusTim01);
-        sb.append("]; cusTim02 [").append(cusTim02);
-        sb.append("]; cusText01 [").append(cusText01);
-        sb.append("]; cusText02 [").append(cusText02);
-        sb.append("]; cusText03 [").append(cusText03);
-
-
-        sb.append("]");
-        return sb.toString();
-    }
 
     public void fetchDefaultValue(Item item) {
         Map<Field.Name, Field> fieldsValue = item.getSpace().getMetadata().getFields();
