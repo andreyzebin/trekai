@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE">Jtrac</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/jtrac.css}" />
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}">
+        <!-- Header will be inserted here -->
+    </div>
+    <div class="content" layout:fragment="content">
+        <!-- Page specific content will be inserted here -->
+    </div>
+</body>
+</html>

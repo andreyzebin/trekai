@@ -29,6 +29,7 @@ import jakarta.persistence.Transient;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Entity
@@ -56,7 +57,10 @@ public class Item extends AbstractItem {
 
     @Override
     public String getRefId() {
-        return getSpace().getPrefixCode() + "-" + sequenceNum;
+        return Optional.ofNullable(getSpace())
+                .map(Space::getPrefixCode)
+                .map(prefix -> prefix + "-" + sequenceNum)
+                .orElse("UNKNOWN-" + sequenceNum);
     }    
     
     public Map<Integer, String> getPermittedTransitions(User user) {

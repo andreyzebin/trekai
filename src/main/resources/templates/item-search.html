@@ -10,7 +10,8 @@
     <div class="heading">
         <span>Refine Search</span>
     </div>
-    <form th:action="@{/item/search}" th:object="${itemSearchForm}" method="post">
+    <form th:action="@{/web/item/search}" th:object="${itemSearchForm}" method="get">
+        <input type="hidden" name="search" value="true" />
         <table class="jtrac">
             <tr>
                 <td class="label">Summary</td>
@@ -25,11 +26,41 @@
                 <td></td>
                 <td>
                     <input type="submit" value="Search"/>
-                    <input type="button" value="Cancel" onclick="history.back()"/>
+                    <input type="button" value="Cancel" onclick="location.href='/web/dashboard'"/>
                 </td>
             </tr>
         </table>
     </form>
+
+    <br/>
+
+    <div class="heading" th:if="${items != null}">
+        <span>Search Results</span>
+    </div>
+
+    <table class="jtrac" th:if="${items != null}">
+        <thead>
+        <tr>
+            <th>Ref ID</th>
+            <th>Summary</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Logged By</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${items.isEmpty()}">
+            <td colspan="5">No items found matching your criteria.</td>
+        </tr>
+        <tr th:each="item : ${items}">
+            <td><a href="#" th:href="@{'/web/item/' + ${item.id}}" th:text="${item.refId}">ITEM-1</a></td>
+            <td th:text="${item.summary}">Summary of the item</td>
+            <td th:text="${item.statusValue}">Open</td>
+            <td th:text="${item.assignedTo?.name}">Another User</td>
+            <td th:text="${item.loggedBy?.name}">Some User</td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 </body>
 </html>

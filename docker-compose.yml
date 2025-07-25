@@ -7,6 +7,7 @@ services:
       - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - LOGGING_LEVEL_ROOT=INFO
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/jtrac
       - SPRING_DATASOURCE_USERNAME=jtrac
       - SPRING_DATASOURCE_PASSWORD=password

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>Create New Item</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="heading">
+        <span>Create New Item</span>
+    </div>
+    <form th:action="@{/web/item/new}" th:object="${itemCreateForm}" method="post">
+        <table class="jtrac">
+            <tr>
+                <td class="label">Space</td>
+                <td>
+                    <select th:field="*{spaceId}">
+                        <option th:each="space : ${userSpaces}" th:value="${space.id}" th:text="${space.name}">Space Name</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Summary</td>
+                <td><input type="text" th:field="*{summary}" size="80"/></td>
+            </tr>
+            <tr>
+                <td class="label">Detail</td>
+                <td><textarea rows="10" cols="80" th:field="*{detail}"></textarea></td>
+            </tr>
+            <tr>
+                <td class="label">Assigned To</td>
+                <td>
+                    <select th:field="*{assignedToId}">
+                        <option th:each="user : ${assignableUsers}" th:value="${user.id}" th:text="${user.name}">User Name</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <input type="submit" value="Submit"/>
+                    <input type="button" value="Cancel" onclick="history.back()"/>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+</body>
+</html>

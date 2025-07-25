@@ -1,27 +1,20 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-
-<div th:fragment="header" id="header">
-    <div id="logo">
-        <a th:href="@{/dashboard}">
-            <img th:src="@{/resources/jtrac-logo.gif}" style="border: 0"/>
-        </a>
+<div th:fragment="header" class="header">
+    <div class="logo">
+        <a th:href="@{/web/dashboard}">Jtrac</a>
     </div>
-    <div id="nav">
-        <a th:href="@{/dashboard}">DASHBOARD</a>
-        <span class="pipe"> | </span>
-        <a th:href="@{/item/search}">SEARCH</a>
-        <span class="pipe"> | </span>
-        <a href="#">OPTIONS</a>
-        <span class="pipe"> | </span>
-        <a th:href="@{/logout}">LOGOUT</a>
-        <span class="pipe"> | </span>
-        <a href="#" th:if="${#authentication != null and #authentication.principal != null}">
-            (<span th:text="${#authentication.principal.username}">admin</span>)
-        </a>
+    <div class="nav">
+        <a th:href="@{/web/dashboard}">Dashboard</a>
+        <a th:href="@{/web/item/search}">Search</a>
+        <a th:href="@{/web/item/new}">New Item</a>
+    </div>
+    <div class="user-nav">
+        <form th:action="@{/logout}" method="post">
+            <input type="submit" value="Logout"/>
+        </form>
     </div>
 </div>
-
 </body>
 </html>
