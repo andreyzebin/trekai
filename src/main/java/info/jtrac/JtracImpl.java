@@ -16,20 +16,55 @@
 
 package info.jtrac;
 
-import info.jtrac.domain.*;
-import info.jtrac.repository.*;
-import info.jtrac.util.AttachmentUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.context.MessageSource;
-import org.springframework.util.StringUtils;
+import info.jtrac.domain.BatchInfo;
+import info.jtrac.domain.Config;
+import info.jtrac.domain.Counts;
+import info.jtrac.domain.CountsHolder;
+import info.jtrac.domain.Field;
+import info.jtrac.domain.History;
+import info.jtrac.domain.Item;
+import info.jtrac.domain.ItemItem;
+import info.jtrac.domain.ItemRefId;
+import info.jtrac.domain.Metadata;
+import info.jtrac.domain.Role;
+import info.jtrac.domain.Space;
+import info.jtrac.domain.SpaceSequence;
+import info.jtrac.domain.State;
+import info.jtrac.domain.StoredSearch;
+import info.jtrac.domain.User;
+import info.jtrac.domain.UserSpaceRole;
+import info.jtrac.repository.AttachmentRepository;
+import info.jtrac.repository.ConfigRepository;
+import info.jtrac.repository.HistoryRepository;
+import info.jtrac.repository.ItemItemRepository;
+import info.jtrac.repository.ItemRepository;
+import info.jtrac.repository.ItemUserRepository;
+import info.jtrac.repository.MetadataRepository;
+import info.jtrac.repository.SpaceRepository;
+import info.jtrac.repository.SpaceSequenceRepository;
+import info.jtrac.repository.StoredSearchRepository;
+import info.jtrac.repository.UserRepository;
+import info.jtrac.repository.UserSpaceRoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 
-import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class JtracImpl implements Jtrac {
@@ -76,7 +111,7 @@ public class JtracImpl implements Jtrac {
 
     public void setLocaleList(String[] array) {
         locales = new LinkedHashMap<String, String>();
-        for(String localeString : array) {
+        for (String localeString : array) {
             Locale locale = StringUtils.parseLocaleString(localeString);
             locales.put(localeString, localeString + " - " + locale.getDisplayName());
         }
@@ -105,11 +140,11 @@ public class JtracImpl implements Jtrac {
 
     public String getJtracHome() {
         return jtracHome;
-    }    
+    }
 
     public int getAttachmentMaxSizeInMb() {
         return attachmentMaxSizeInMb;
-    }    
+    }
 
     public int getSessionTimeoutInMinutes() {
         return sessionTimeoutInMinutes;
@@ -144,37 +179,37 @@ public class JtracImpl implements Jtrac {
 
     private void initDefaultLocale(String localeString) {
         if (localeString == null || !locales.containsKey(localeString)) {
-            logger.warn("invalid default locale configured = '" + localeString + "', using " + this.defaultLocale);            
+            logger.warn("invalid default locale configured = '" + localeString + "', using " + this.defaultLocale);
         } else {
             this.defaultLocale = localeString;
         }
-        logger.info("default locale set to '" + this.defaultLocale + "'");       
-    }    
+        logger.info("default locale set to '" + this.defaultLocale + "'");
+    }
 
     private void initAttachmentMaxSize(String s) {
         try {
             this.attachmentMaxSizeInMb = Integer.parseInt(s);
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.warn("invalid attachment max size '" + s + "', using " + attachmentMaxSizeInMb);
         }
         logger.info("attachment max size set to " + this.attachmentMaxSizeInMb + " MB");
     }
-    
+
     private void initSessionTimeout(String s) {
         try {
             this.sessionTimeoutInMinutes = Integer.parseInt(s);
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.warn("invalid session timeout '" + s + "', using " + this.sessionTimeoutInMinutes);
         }
         logger.info("session timeout set to " + this.sessionTimeoutInMinutes + " minutes");
     }
-    
+
     //==========================================================================
 
     public synchronized void storeItems(List<Item> items) {
-        for(Item item : items) {
+        for (Item item : items) {
             item.setSendNotifications(false);
-            if(item.getStatus() == State.CLOSED) {
+            if (item.getStatus() == State.CLOSED) {
                 // we support CLOSED items for import also but for consistency
                 // simulate the item first created OPEN and then being CLOSED
                 item.setStatus(State.OPEN);
@@ -185,29 +220,13 @@ public class JtracImpl implements Jtrac {
                 history.setLoggedBy(loadUser(item.getLoggedBy().getId()));
                 history.setAssignedTo(item.getAssignedTo());
                 history.setComment("-");
-                history.setStatus(State.CLOSED); 
+                history.setStatus(State.CLOSED);
                 history.setSendNotifications(false);
                 // storeItem(item, null);
                 // storeHistoryForItem(item.getId(), history, null);
             } else {
                 // storeItem(item, null);
             }
-        }
-    }
-    
-    public synchronized void updateItem(Item item, User user) {
-        logger.debug("update item called");
-        History history = new History(item);
-        history.setAssignedTo(null);
-        history.setStatus(null);
-        history.setLoggedBy(user);
-        history.setComment(item.getEditReason());
-        history.setTimeStamp(new Date());
-        item.add(history);
-        itemRepository.save(item);  // merge edits + history        
-        // TODO index?
-        if (item.isSendNotifications()) {
-            // mailSender.send(item);
         }
     }
 
@@ -231,19 +250,19 @@ public class JtracImpl implements Jtrac {
     public int loadCountOfAllItems() {
         return (int) itemRepository.count();
     }
-    
+
     public List<Item> findAllItems(int firstResult, int batchSize) {
         return itemRepository.findAll().subList(firstResult, firstResult + batchSize);
     }
 
     public void removeItem(Item item) {
-        if(item.getRelatingItems() != null) {
-            for(ItemItem itemItem : item.getRelatingItems()) {
+        if (item.getRelatingItems() != null) {
+            for (ItemItem itemItem : item.getRelatingItems()) {
                 removeItemItem(itemItem);
             }
         }
-        if(item.getRelatedItems() != null) {
-            for(ItemItem itemItem : item.getRelatedItems()) {
+        if (item.getRelatedItems() != null) {
+            for (ItemItem itemItem : item.getRelatedItems()) {
                 removeItemItem(itemItem);
             }
         }
@@ -302,13 +321,13 @@ public class JtracImpl implements Jtrac {
         // if some spaces have guest access enabled, allocate these spaces as well
         Set<Space> userSpaces = user.getSpaces();
         logger.debug("user spaces: " + userSpaces);
-        for(Space s : findSpacesWhereGuestAllowed()) {
-            if(!userSpaces.contains(s)) {
+        for (Space s : findSpacesWhereGuestAllowed()) {
+            if (!userSpaces.contains(s)) {
                 user.addSpaceWithRole(s, Role.ROLE_GUEST);
-                
+
             }
         }
-        for(UserSpaceRole usr : user.getSpaceRoles()) {
+        for (UserSpaceRole usr : user.getSpaceRoles()) {
             logger.debug("UserSpaceRole: " + usr);
             // this is a hack, the effect of the next line would be to
             // override hibernate lazy loading and get the space and associated metadata.
@@ -317,7 +336,7 @@ public class JtracImpl implements Jtrac {
             // this is hopefully pardonable.  The downside is that there may be as many extra db hits
             // as there are spaces allocated for the user.  Hibernate caching should alleviate this
             usr.isAbleToCreateNewItem();
-        }        
+        }
         return user;
     }
 
@@ -344,7 +363,7 @@ public class JtracImpl implements Jtrac {
         }
         user.setPassword(encodeClearText(password));
         storeUser(user);
-        if(sendNotifications) {
+        if (sendNotifications) {
             // mailSender.sendUserPassword(user, password);
         }
     }
@@ -357,7 +376,7 @@ public class JtracImpl implements Jtrac {
     public List<User> findAllUsers() {
         return userRepository.findAll();
     }
-    
+
     public List<User> findUsersWhereIdIn(List<Long> ids) {
         return userRepository.findAllById(ids);
     }
@@ -365,7 +384,7 @@ public class JtracImpl implements Jtrac {
     public List<User> findUsersMatching(String searchText, String searchOn) {
         return null;
     }
-    
+
     public List<User> findUsersForSpace(long spaceId) {
         return userSpaceRoleRepository.findBySpaceId(spaceId).stream().map(UserSpaceRole::getUser).collect(Collectors.toList());
     }
@@ -373,14 +392,14 @@ public class JtracImpl implements Jtrac {
     public List<UserSpaceRole> findUserRolesForSpace(long spaceId) {
         return userSpaceRoleRepository.findBySpaceId(spaceId);
     }
-    
+
     public Map<Long, List<UserSpaceRole>> loadUserRolesMapForSpace(long spaceId) {
         List<UserSpaceRole> list = userSpaceRoleRepository.findBySpaceId(spaceId);
         Map<Long, List<UserSpaceRole>> map = new LinkedHashMap<Long, List<UserSpaceRole>>();
-        for(UserSpaceRole usr : list) {
+        for (UserSpaceRole usr : list) {
             long userId = usr.getUser().getId();
             List<UserSpaceRole> value = map.get(userId);
-            if(value == null) {
+            if (value == null) {
                 value = new ArrayList<UserSpaceRole>();
                 map.put(userId, value);
             }
@@ -388,21 +407,21 @@ public class JtracImpl implements Jtrac {
         }
         return map;
     }
-    
+
     public Map<Long, List<UserSpaceRole>> loadSpaceRolesMapForUser(long userId) {
         List<UserSpaceRole> list = userSpaceRoleRepository.findByUserId(userId);
         Map<Long, List<UserSpaceRole>> map = new LinkedHashMap<Long, List<UserSpaceRole>>();
-        for(UserSpaceRole usr : list) {
+        for (UserSpaceRole usr : list) {
             long spaceId = usr.getSpace() == null ? 0 : usr.getSpace().getId();
             List<UserSpaceRole> value = map.get(spaceId);
-            if(value == null) {
+            if (value == null) {
                 value = new ArrayList<UserSpaceRole>();
                 map.put(spaceId, value);
             }
             value.add(usr);
         }
         return map;
-    }    
+    }
 
     public List<User> findUsersWithRoleForSpace(long spaceId, String roleKey) {
         return null;
@@ -410,7 +429,7 @@ public class JtracImpl implements Jtrac {
 
     public List<User> findUsersForUser(User user) {
         Set<Space> spaces = user.getSpaces();
-        if(spaces.size() == 0) {
+        if (spaces.size() == 0) {
             // this will happen when a user has no spaces allocated
             return Collections.emptyList();
         }
@@ -475,7 +494,7 @@ public class JtracImpl implements Jtrac {
     public void storeSpace(Space space) {
         boolean newSpace = space.getId() == 0;
         spaceRepository.save(space);
-        if(newSpace) {
+        if (newSpace) {
             SpaceSequence ss = new SpaceSequence();
             ss.setNextSeqNum(1);
             ss.setId(space.getId());
@@ -490,12 +509,12 @@ public class JtracImpl implements Jtrac {
     public List<Space> findSpacesWhereIdIn(List<Long> ids) {
         return spaceRepository.findAllById(ids);
     }
-    
+
     public List<Space> findSpacesWhereGuestAllowed() {
         return spaceRepository.findByGuestAllowed(true);
     }
 
-    public List<Space> findSpacesNotFullyAllocatedToUser(long userId) {     
+    public List<Space> findSpacesNotFullyAllocatedToUser(long userId) {
         return null;
     }
 
@@ -529,13 +548,13 @@ public class JtracImpl implements Jtrac {
     }
 
     // TODO must be some nice generic way to do this
-    public void storeConfig(Config config) {        
+    public void storeConfig(Config config) {
         configRepository.save(config);
-        if(config.isLocaleConfig()) {
+        if (config.isLocaleConfig()) {
             initDefaultLocale(config.getValue());
-        } else if(config.isAttachmentConfig()) {
+        } else if (config.isAttachmentConfig()) {
             initAttachmentMaxSize(config.getValue());
-        } else if(config.isSessionTimeoutConfig()) {
+        } else if (config.isSessionTimeoutConfig()) {
             initSessionTimeout(config.getValue());
         }
     }
@@ -555,7 +574,7 @@ public class JtracImpl implements Jtrac {
     //========================================================
 
     public void rebuildIndexes(BatchInfo batchInfo) {
-        
+
     }
 
     public boolean validateTextSearchQuery(String text) {
@@ -563,16 +582,16 @@ public class JtracImpl implements Jtrac {
     }
 
     //==========================================================================
-    
+
     public void executeHourlyTask() {
         logger.debug("hourly task called");
     }
-    
+
     /* configured to be called every five minutes */
     public void executePollingTask() {
         logger.debug("polling task called");
     }
-    
+
     //==========================================================================
 
     public String getReleaseVersion() {
@@ -584,7 +603,7 @@ public class JtracImpl implements Jtrac {
     }
 
     @Override
-    public List<StoredSearch>  loadAllStoredSearch() {
+    public List<StoredSearch> loadAllStoredSearch() {
 
         return storedSearchRepository.findAll();
     }
@@ -601,4 +620,15 @@ public class JtracImpl implements Jtrac {
         storedSearchRepository.deleteById(id);
     }
 
+    @Override
+    public void updateItem(Item item, User user) {
+        History history = new History();
+        history.setLoggedBy(user);
+        history.setAssignedTo(item.getAssignedTo());
+        history.setComment(item.getEditReason());
+        history.setTimeStamp(new Date());
+        history.setStatus(item.getStatus());
+        item.add(history);
+        itemRepository.save(item);
+    }
 }
