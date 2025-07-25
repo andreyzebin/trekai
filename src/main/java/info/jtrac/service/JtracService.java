@@ -5,6 +5,7 @@ import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
 import info.jtrac.domain.UserSpaceRole;
 import info.jtrac.domain.Attachment;
+import info.jtrac.domain.CountsHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
@@ -40,6 +41,12 @@ public interface JtracService {
     void updateItem(Item item, User user);
 
     List<Item> findItems(long spaceId, String summary, Long assignedToId, Integer status);
+
+    List<Item> findItemsByAssignedTo(Long userId);
+
+    List<Item> findItemsByLoggedBy(Long userId);
+
+    CountsHolder loadCountsForUser(User user);
 
     List<Space> findSpaces(Long userId);
 

@@ -1,6 +1,8 @@
 package info.jtrac.service;
 
 import info.jtrac.domain.Attachment;
+import info.jtrac.domain.Counts;
+import info.jtrac.domain.CountsHolder;
 import info.jtrac.domain.History;
 import info.jtrac.domain.Item;
 import info.jtrac.domain.Space;
@@ -165,6 +167,30 @@ public class JtracServiceImpl implements JtracService {
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         });
+    }
+
+    @Override
+    public List<Item> findItemsByAssignedTo(Long userId) {
+        return itemRepository.findByAssignedToId(userId);
+    }
+
+    @Override
+    public List<Item> findItemsByLoggedBy(Long userId) {
+        return itemRepository.findByLoggedById(userId);
+    }
+
+    @Override
+    public CountsHolder loadCountsForUser(User user) {
+        CountsHolder ch = new CountsHolder();
+        if (user.getSpaceRoles().isEmpty()) {
+            return ch;
+        }
+        for (UserSpaceRole usr : user.getSpaceRoles()) {
+            Space space = usr.getSpace();
+            ch.addLoggedByMe(space.getId(), itemRepository.countBySpaceAndLoggedBy(space, user));
+            ch.addAssignedToMe(space.getId(), itemRepository.countBySpaceAndAssignedTo(space, user));
+        }
+        return ch;
     }
 
     @Override

@@ -59,7 +59,7 @@ public class SecurityFilters {
                 )
                 .formLogin(form -> form
                         .loginPage("/web/login")
-                        .defaultSuccessUrl("/dashboard", true)
+                        .defaultSuccessUrl("/web/dashboard", true)
                         .permitAll()
                 )
                 .logout(logout -> logout.permitAll());
