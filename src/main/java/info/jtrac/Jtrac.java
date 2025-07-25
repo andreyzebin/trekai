@@ -26,7 +26,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 /**
  * Jtrac main business interface (Service Layer)
  */
-public interface Jtrac extends UserDetailsService {
+public interface Jtrac {
     
     // TODO remove Wicket dep with FileUpload
     void storeItems(List<Item> items);

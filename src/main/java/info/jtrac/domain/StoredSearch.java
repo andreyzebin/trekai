@@ -1,12 +1,19 @@
 package info.jtrac.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.io.Serializable;
 
 /**
  * Created by ncrappe on 8/09/2015.
  */
+@Entity
 public class StoredSearch implements Serializable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String query;

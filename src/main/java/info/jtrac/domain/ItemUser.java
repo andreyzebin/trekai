@@ -16,23 +16,28 @@
 
 package info.jtrac.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.io.Serializable;
 
-/**
- * Class that exists purely to hold a single user associated with an item
- * along with a integer "type" indicating the nature of the relationship
- * between Item --> User (one directional relationship)
- *
- * This is used in the following cases
- * - users "watching" an Item and need to be notified on Status changes
- *
- * and can be used for other kinds of relationships in the future
- */
+@Entity
+@Table(name = "item_users")
 public class ItemUser implements Serializable {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    
+    @ManyToOne
     private User user;
+    
+    @ManyToOne
     private Item item;
+    
     private int type;
     
     public ItemUser() {

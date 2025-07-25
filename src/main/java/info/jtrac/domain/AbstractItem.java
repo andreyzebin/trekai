@@ -88,7 +88,7 @@ public abstract class AbstractItem implements Serializable {
     private String cusText02;
     private String cusText03;
     
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
     private Set<ItemUser> itemUsers;
     
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)

@@ -1,0 +1,18 @@
+# Use a slim base image with Java 17
+FROM openjdk:17-jdk-slim
+
+# Set the working directory
+WORKDIR /app
+
+# The JAR file is expected to be built locally and present in the build/libs directory
+# This name is derived from the build.gradle.kts settings
+ARG JAR_FILE=build/libs/jtrac-3.0.0-SNAPSHOT.jar
+
+# Copy the pre-built JAR file from the host into the container
+COPY ${JAR_FILE} app.jar
+
+# Expose the port the application runs on
+EXPOSE 8082
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -57,6 +57,7 @@ public class User implements UserDetails, Serializable, Comparable<User> {
     
     private String loginName;
     private String name;
+    @jakarta.persistence.Column(length = 60)
     private String password;
     private String email;
     

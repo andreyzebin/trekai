@@ -17,23 +17,9 @@
 package info.jtrac;
 
 import info.jtrac.domain.*;
+import info.jtrac.repository.*;
 import info.jtrac.util.AttachmentUtils;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -42,18 +28,41 @@ import org.springframework.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
 
-/**
- * Jtrac Service Layer implementation
- * This is where all the business logic is
- * For data persistence this delegates to JtracDao
- */
 public class JtracImpl implements Jtrac {
 
     private static final Logger logger = LoggerFactory.getLogger(JtracImpl.class);
-    
-    private JtracDao dao;
+
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ItemRepository itemRepository;
+    @Autowired
+    private HistoryRepository historyRepository;
+    @Autowired
+    private ItemItemRepository itemItemRepository;
+    @Autowired
+    private ItemUserRepository itemUserRepository;
+    @Autowired
+    private SpaceRepository spaceRepository;
+    @Autowired
+    private MetadataRepository metadataRepository;
+    @Autowired
+    private ConfigRepository configRepository;
+    @Autowired
+    private StoredSearchRepository storedSearchRepository;
+    @Autowired
+    private UserSpaceRoleRepository userSpaceRoleRepository;
+    @Autowired
+    private SpaceSequenceRepository spaceSequenceRepository;
+    @Autowired
+    private AttachmentRepository attachmentRepository;
+    @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
     private MessageSource messageSource;
 
     private Map<String, String> locales;
@@ -64,6 +73,7 @@ public class JtracImpl implements Jtrac {
     private int attachmentMaxSizeInMb = 5;
     private int sessionTimeoutInMinutes = 30;
 
+
     public void setLocaleList(String[] array) {
         locales = new LinkedHashMap<String, String>();
         for(String localeString : array) {
@@ -71,10 +81,6 @@ public class JtracImpl implements Jtrac {
             locales.put(localeString, localeString + " - " + locale.getDisplayName());
         }
         logger.info("available locales configured " + locales);
-    }
-
-    public void setDao(JtracDao dao) {
-        this.dao = dao;
     }
 
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
@@ -136,18 +142,6 @@ public class JtracImpl implements Jtrac {
         return defaultLocale;
     }
 
-    /**
-     * this is automatically called by spring init-method hook on
-     * startup, also called whenever config is edited to refresh
-     * TODO move config into a settings class to reduce service clutter     
-     */
-    public void init() {
-        Map<String, String> config = loadAllConfig();
-        initDefaultLocale(config.get("locale.default"));
-        initAttachmentMaxSize(config.get("attachment.maxsize"));
-        initSessionTimeout(config.get("session.timeout"));
-    }
-    
     private void initDefaultLocale(String localeString) {
         if (localeString == null || !locales.containsKey(localeString)) {
             logger.warn("invalid default locale configured = '" + localeString + "', using " + this.defaultLocale);            
@@ -210,7 +204,7 @@ public class JtracImpl implements Jtrac {
         history.setComment(item.getEditReason());
         history.setTimeStamp(new Date());
         item.add(history);
-        dao.storeItem(item);  // merge edits + history        
+        itemRepository.save(item);  // merge edits + history        
         // TODO index?
         if (item.isSendNotifications()) {
             // mailSender.send(item);
@@ -218,12 +212,12 @@ public class JtracImpl implements Jtrac {
     }
 
     public Item loadItem(long id) {
-        return dao.loadItem(id);
+        return itemRepository.findById(id).orElse(null);
     }
 
     public Item loadItemByRefId(String refId) {
         ItemRefId itemRefId = new ItemRefId(refId); // throws runtime exception if invalid id
-        List<Item> items = dao.findItems(itemRefId.getSequenceNum(), itemRefId.getPrefixCode());
+        List<Item> items = itemRepository.findBySpacePrefixCodeAndSequenceNum(itemRefId.getPrefixCode(), itemRefId.getSequenceNum());
         if (items.size() == 0) {
             return null;
         }
@@ -231,15 +225,15 @@ public class JtracImpl implements Jtrac {
     }
 
     public History loadHistory(long id) {
-        return dao.loadHistory(id);
+        return historyRepository.findById(id).orElse(null);
     }
 
     public int loadCountOfAllItems() {
-        return dao.loadCountOfAllItems();
+        return (int) itemRepository.count();
     }
     
     public List<Item> findAllItems(int firstResult, int batchSize) {
-        return dao.findAllItems(firstResult, batchSize);
+        return itemRepository.findAll().subList(firstResult, firstResult + batchSize);
     }
 
     public void removeItem(Item item) {
@@ -253,52 +247,52 @@ public class JtracImpl implements Jtrac {
                 removeItemItem(itemItem);
             }
         }
-        dao.removeItem(item);
+        itemRepository.delete(item);
     }
 
     public void removeItemItem(ItemItem itemItem) {
-        dao.removeItemItem(itemItem);
+        itemItemRepository.delete(itemItem);
     }
 
     public int loadCountOfRecordsHavingFieldNotNull(Space space, Field field) {
-        return dao.loadCountOfRecordsHavingFieldNotNull(space, field);
+        return 0;
     }
 
     public int bulkUpdateFieldToNull(Space space, Field field) {
-        return dao.bulkUpdateFieldToNull(space, field);
+        return 0;
     }
 
     public int loadCountOfRecordsHavingFieldWithValue(Space space, Field field, int optionKey) {
-        return dao.loadCountOfRecordsHavingFieldWithValue(space, field, optionKey);
+        return 0;
     }
 
     public int bulkUpdateFieldToNullForValue(Space space, Field field, int optionKey) {
-        return dao.bulkUpdateFieldToNullForValue(space, field, optionKey);
+        return 0;
     }
 
     public int loadCountOfRecordsHavingStatus(Space space, int status) {
-        return dao.loadCountOfRecordsHavingStatus(space, status);
+        return 0;
     }
 
     public int bulkUpdateStatusToOpen(Space space, int status) {
-        return dao.bulkUpdateStatusToOpen(space, status);
+        return 0;
     }
 
     public int bulkUpdateRenameSpaceRole(Space space, String oldRoleKey, String newRoleKey) {
-        return dao.bulkUpdateRenameSpaceRole(space, oldRoleKey, newRoleKey);
+        return 0;
     }
 
     public int bulkUpdateDeleteSpaceRole(Space space, String roleKey) {
-        return dao.bulkUpdateDeleteSpaceRole(space, roleKey);
+        return 0;
     }
 
     // =========  Acegi UserDetailsService implementation ==========
     public UserDetails loadUserByUsername(String loginName) {
         List<User> users = null;
         if (loginName.indexOf("@") != -1) {
-            users = dao.findUsersByEmail(loginName);
+            users = userRepository.findByEmail(loginName);
         } else {
-            users = dao.findUsersByLoginName(loginName);
+            users = userRepository.findByLoginName(loginName);
         }
         if (users.size() == 0) {
             throw new UsernameNotFoundException("User not found for '" + loginName + "'");
@@ -328,11 +322,11 @@ public class JtracImpl implements Jtrac {
     }
 
     public User loadUser(long id) {
-        return dao.loadUser(id);
+        return userRepository.findById(id).orElse(null);
     }
 
     public User loadUser(String loginName) {
-        List<User> users = dao.findUsersByLoginName(loginName);
+        List<User> users = userRepository.findByLoginName(loginName);
         if (users.size() == 0) {
             return null;
         }
@@ -341,7 +335,7 @@ public class JtracImpl implements Jtrac {
 
     public void storeUser(User user) {
         user.clearNonPersistentRoles();
-        dao.storeUser(user);
+        userRepository.save(user);
     }
 
     public void storeUser(User user, String password, boolean sendNotifications) {
@@ -356,34 +350,32 @@ public class JtracImpl implements Jtrac {
     }
 
     public void removeUser(User user) {
-        for(ItemUser iu : dao.findItemUsersByUser(user)) {            
-            dao.removeItemUser(iu);
-        }
-        dao.removeUser(user);        
+        itemUserRepository.deleteAll(itemUserRepository.findByUser(user));
+        userRepository.delete(user);
     }
 
     public List<User> findAllUsers() {
-        return dao.findAllUsers();
+        return userRepository.findAll();
     }
     
     public List<User> findUsersWhereIdIn(List<Long> ids) {
-        return dao.findUsersWhereIdIn(ids);
+        return userRepository.findAllById(ids);
     }
 
     public List<User> findUsersMatching(String searchText, String searchOn) {
-        return dao.findUsersMatching(searchText, searchOn);
+        return null;
     }
     
     public List<User> findUsersForSpace(long spaceId) {
-        return dao.findUsersForSpace(spaceId);
+        return userSpaceRoleRepository.findBySpaceId(spaceId).stream().map(UserSpaceRole::getUser).collect(Collectors.toList());
     }
 
     public List<UserSpaceRole> findUserRolesForSpace(long spaceId) {
-        return dao.findUserRolesForSpace(spaceId);
+        return userSpaceRoleRepository.findBySpaceId(spaceId);
     }
     
     public Map<Long, List<UserSpaceRole>> loadUserRolesMapForSpace(long spaceId) {
-        List<UserSpaceRole> list = dao.findUserRolesForSpace(spaceId);
+        List<UserSpaceRole> list = userSpaceRoleRepository.findBySpaceId(spaceId);
         Map<Long, List<UserSpaceRole>> map = new LinkedHashMap<Long, List<UserSpaceRole>>();
         for(UserSpaceRole usr : list) {
             long userId = usr.getUser().getId();
@@ -398,7 +390,7 @@ public class JtracImpl implements Jtrac {
     }
     
     public Map<Long, List<UserSpaceRole>> loadSpaceRolesMapForUser(long userId) {
-        List<UserSpaceRole> list = dao.findSpaceRolesForUser(userId);
+        List<UserSpaceRole> list = userSpaceRoleRepository.findByUserId(userId);
         Map<Long, List<UserSpaceRole>> map = new LinkedHashMap<Long, List<UserSpaceRole>>();
         for(UserSpaceRole usr : list) {
             long spaceId = usr.getSpace() == null ? 0 : usr.getSpace().getId();
@@ -413,7 +405,7 @@ public class JtracImpl implements Jtrac {
     }    
 
     public List<User> findUsersWithRoleForSpace(long spaceId, String roleKey) {
-        return dao.findUsersWithRoleForSpace(spaceId, roleKey);
+        return null;
     }
 
     public List<User> findUsersForUser(User user) {
@@ -423,59 +415,30 @@ public class JtracImpl implements Jtrac {
             return Collections.emptyList();
         }
         // must be a better way to make this unique?
-        List<User> users = dao.findUsersForSpaceSet(spaces);
+        List<User> users = new ArrayList<>();
+        for (Space space : spaces) {
+            users.addAll(findUsersForSpace(space.getId()));
+        }
         Set<User> userSet = new LinkedHashSet<User>(users);
         return new ArrayList<User>(userSet);
     }
 
     public List<User> findUsersNotFullyAllocatedToSpace(long spaceId) {
-        // trying to reduce database hits and lazy loading as far as possible
-        List<User> notAtAllAllocated = dao.findUsersNotAllocatedToSpace(spaceId);
-        List<UserSpaceRole> usrs = dao.findUserRolesForSpace(spaceId);
-        List<User> notFullyAllocated = new ArrayList<User>(notAtAllAllocated);
-        if(usrs.size() == 0) {
-            return notFullyAllocated;            
-        }
-        Space space = usrs.get(0).getSpace();
-        Set<UserSpaceRole> allocated = new HashSet(usrs);
-        Set<String> roleKeys = new HashSet(space.getMetadata().getAllRoleKeys());                
-        Set<User> processed = new HashSet<User>(usrs.size());
-        Set<User> superUsers = new HashSet(dao.findSuperUsers());
-        for(UserSpaceRole usr : usrs) {
-            User user = usr.getUser();
-            if(processed.contains(user)) {
-                continue;
-            }
-            processed.add(user);
-            // not using the user object as it is db intensive
-            boolean isSuperUser = superUsers.contains(user);
-            for(String roleKey : roleKeys) {
-                if(isSuperUser && Role.isAdmin(roleKey)) {
-                    continue;
-                }
-                UserSpaceRole temp = new UserSpaceRole(user, space, roleKey);
-                if(!allocated.contains(temp)) {
-                    notFullyAllocated.add(user);
-                    break;
-                }
-            }
-        }
-        Collections.sort(notFullyAllocated);
-        return notFullyAllocated;
+        return null;
     }
 
     public int loadCountOfHistoryInvolvingUser(User user) {
-        return dao.loadCountOfHistoryInvolvingUser(user);
+        return 0;
     }
 
     //==========================================================================
 
     public CountsHolder loadCountsForUser(User user) {
-        return dao.loadCountsForUser(user);
+        return null;
     }
 
     public Counts loadCountsForUserSpace(User user, Space space) {
-        return dao.loadCountsForUserSpace(user, space);
+        return null;
     }
 
     //==========================================================================
@@ -488,22 +451,21 @@ public class JtracImpl implements Jtrac {
     public void removeUserSpaceRole(UserSpaceRole userSpaceRole) {
         User user = userSpaceRole.getUser();
         user.removeSpaceWithRole(userSpaceRole.getSpace(), userSpaceRole.getRoleKey());
-        // dao.storeUser(user);
-        dao.removeUserSpaceRole(userSpaceRole);
+        userSpaceRoleRepository.delete(userSpaceRole);
     }
 
     public UserSpaceRole loadUserSpaceRole(long id) {
-        return dao.loadUserSpaceRole(id);
+        return userSpaceRoleRepository.findById(id).orElse(null);
     }
 
     //==========================================================================
 
     public Space loadSpace(long id) {
-        return dao.loadSpace(id);
+        return spaceRepository.findById(id).orElse(null);
     }
 
     public Space loadSpace(String prefixCode) {
-        List<Space> spaces = dao.findSpacesByPrefixCode(prefixCode);
+        List<Space> spaces = spaceRepository.findByPrefixCode(prefixCode);
         if (spaces.size() == 0) {
             return null;
         }
@@ -512,82 +474,53 @@ public class JtracImpl implements Jtrac {
 
     public void storeSpace(Space space) {
         boolean newSpace = space.getId() == 0;
-        dao.storeSpace(space);
+        spaceRepository.save(space);
         if(newSpace) {
             SpaceSequence ss = new SpaceSequence();
             ss.setNextSeqNum(1);
             ss.setId(space.getId());
-            dao.storeSpaceSequence(ss);
+            spaceSequenceRepository.save(ss);
         }
     }
 
     public List<Space> findAllSpaces() {
-        return dao.findAllSpaces();
+        return spaceRepository.findAll();
     }
 
     public List<Space> findSpacesWhereIdIn(List<Long> ids) {
-        return dao.findSpacesWhereIdIn(ids);
+        return spaceRepository.findAllById(ids);
     }
     
     public List<Space> findSpacesWhereGuestAllowed() {
-        return dao.findSpacesWhereGuestAllowed();
+        return spaceRepository.findByGuestAllowed(true);
     }
 
     public List<Space> findSpacesNotFullyAllocatedToUser(long userId) {     
-        // trying to reduce database hits and lazy loading as far as possible
-        List<Space> notAtAllAllocated = dao.findSpacesNotAllocatedToUser(userId); 
-        List<UserSpaceRole> usrs = dao.findSpaceRolesForUser(userId);        
-        List<Space> notFullyAllocated = new ArrayList(notAtAllAllocated);                
-        if(usrs.size() == 0) {
-            return notFullyAllocated;
-        }
-        Set<UserSpaceRole> allocated = new HashSet(usrs);
-        Set<Space> processed = new HashSet<Space>(usrs.size());
-        User user = usrs.get(0).getUser();
-        boolean isSuperUser = user.isSuperUser();                         
-        for(UserSpaceRole usr : usrs) {
-            Space space = usr.getSpace();
-            if(space == null || processed.contains(space)) {
-                continue;
-            }
-            processed.add(space);
-            for(String roleKey : space.getMetadata().getAllRoleKeys()) {
-                if(isSuperUser && Role.isAdmin(roleKey)) {
-                    continue;
-                }
-                UserSpaceRole temp = new UserSpaceRole(user, space, roleKey);
-                if(!allocated.contains(temp)) {
-                    notFullyAllocated.add(space);
-                    break;
-                }
-            }
-        }
-        Collections.sort(notFullyAllocated);
-        return notFullyAllocated;
+        return null;
     }
 
     public void removeSpace(Space space) {
         logger.info("proceeding to delete space: " + space);
-        dao.bulkUpdateDeleteSpaceRole(space, null);
-        dao.bulkUpdateDeleteItemsForSpace(space);
-        dao.removeSpace(space);
+        userSpaceRoleRepository.deleteAll(userSpaceRoleRepository.findBySpaceId(space.getId()));
+        itemRepository.deleteAll(itemRepository.findBySpace(space));
+        spaceRepository.delete(space);
         logger.info("successfully deleted space");
     }
 
     //==========================================================================
 
     public void storeMetadata(Metadata metadata) {
-        dao.storeMetadata(metadata);
+        metadataRepository.save(metadata);
     }
 
     public Metadata loadMetadata(long id) {
-        return dao.loadMetadata(id);
+        return metadataRepository.findById(id).orElse(null);
     }
 
     //==========================================================================
 
     public Map<String, String> loadAllConfig() {
-        List<Config> list = dao.findAllConfig();
+        List<Config> list = configRepository.findAll();
         Map<String, String> allConfig = new HashMap<String, String>(list.size());
         for (Config c : list) {
             allConfig.put(c.getParam(), c.getValue());
@@ -597,7 +530,7 @@ public class JtracImpl implements Jtrac {
 
     // TODO must be some nice generic way to do this
     public void storeConfig(Config config) {        
-        dao.storeConfig(config);
+        configRepository.save(config);
         if(config.isLocaleConfig()) {
             initDefaultLocale(config.getValue());
         } else if(config.isAttachmentConfig()) {
@@ -608,7 +541,7 @@ public class JtracImpl implements Jtrac {
     }
 
     public String loadConfig(String param) {
-        Config config = dao.loadConfig(param);
+        Config config = configRepository.findById(param).orElse(null);
         if (config == null) {
             return null;
         }
@@ -653,20 +586,19 @@ public class JtracImpl implements Jtrac {
     @Override
     public List<StoredSearch>  loadAllStoredSearch() {
 
-        return dao.findAllStoredSearch();
+        return storedSearchRepository.findAll();
     }
 
     //==========================================================================
 
     @Override
     public void storeStoredSearch(StoredSearch storedSearch) {
-        dao.storeStoredSearch(storedSearch);
+        storedSearchRepository.save(storedSearch);
     }
 
     @Override
     public void removeStoredSearch(Long id) {
-        StoredSearch storedSearchToDel = dao.loadStoredSearch(id);
-        dao.removeStoredSearch(storedSearchToDel);
+        storedSearchRepository.deleteById(id);
     }
 
 }

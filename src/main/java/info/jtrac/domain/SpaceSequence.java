@@ -16,6 +16,8 @@
 
 package info.jtrac.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import java.io.Serializable;
 
 /**
@@ -25,8 +27,10 @@ import java.io.Serializable;
  * Item insert, this is kept in a separate "sequence" kind of table to 
  * reduce the number of updates that happen for the Space object / table
  */
+@Entity
 public class SpaceSequence implements Serializable {
     
+    @Id
     private long id;
     private long nextSeqNum;    
     

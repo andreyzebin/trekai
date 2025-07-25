@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
-public interface JtracService extends UserDetailsService {
+public interface JtracService {
 
     User findUserByLoginName(String loginName);
 

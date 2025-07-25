@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>Search Items</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="heading">
+        <span>Refine Search</span>
+    </div>
+    <form th:action="@{/item/search}" th:object="${itemSearchForm}" method="post">
+        <table class="jtrac">
+            <tr>
+                <td class="label">Summary</td>
+                <td><input type="text" th:field="*{summary}" /></td>
+            </tr>
+            <tr>
+                <td class="label">Detail</td>
+                <td><input type="text" th:field="*{detail}" /></td>
+            </tr>
+            <!-- Other search fields will be added here -->
+            <tr>
+                <td></td>
+                <td>
+                    <input type="submit" value="Search"/>
+                    <input type="button" value="Cancel" onclick="history.back()"/>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+</body>
+</html>

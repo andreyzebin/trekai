@@ -24,15 +24,6 @@ public class JtracServiceImpl implements JtracService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        List<User> users = userRepository.findByLoginName(username);
-        if (users.isEmpty()) {
-            throw new UsernameNotFoundException("User not found: " + username);
-        }
-        return users.get(0);
-    }
-
-    @Override
     public User findUserByLoginName(String loginName) {
         List<User> users = userRepository.findByLoginName(loginName);
         return users.isEmpty() ? null : users.get(0);

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:text="${item.refId}">Item View</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="heading" th:text="${item.summary}">
+        <span>Item Summary</span>
+    </div>
+    <table width="100%">
+        <tr>
+            <td class="content" valign="top" width="50%">
+                <form th:action="@{'/item/view/' + ${item.id}}" th:object="${itemCommand}" method="post">
+                    <table class="jtrac">
+                        <tr>
+                            <td class="label">ID</td>
+                            <td class="data" th:text="${item.refId}"></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Status</td>
+                            <td class="data" th:text="${item.status.description}"></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Logged By</td>
+                            <td class="data" th:text="${item.loggedBy.name}"></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Assigned To</td>
+                            <td class="data" th:text="${item.assignedTo.name}"></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Summary</td>
+                            <td class="data" th:text="${item.summary}"></td>
+                        </tr>
+                        <tr>
+                            <td class="label">Detail</td>
+                            <td class="data" th:utext="${@HtmlUtils.htmlUnescape(item.detail)}"></td>
+                        </tr>
+                        <tr th:each="fv : ${item.fieldValues}">
+                            <td class.label th:text="${fv.fieldName}"></td>
+                            <td class.data th:text="${fv.value}"></td>
+                        </tr>
+                    </table>
+                    <br/>
+                    <table class="jtrac">
+                        <tr>
+                            <td class.label>Comment</td>
+                            <td><textarea rows="5" cols="60" th:field="*{comment}"></textarea></td>
+                        </tr>
+                        <tr>
+                            <td class="label"></td>
+                            <td>
+                                <input type="submit" value="Submit"/>
+                                <input type="button" value="Cancel" onclick="history.back()"/>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </td>
+            <td class="content" valign="top" width="50%">
+                <div th:if="${item.history != null and !item.history.isEmpty()}">
+                    <div class="heading">
+                        <span>History</span>
+                    </div>
+                    <table class="jtrac">
+                        <tr th:each="h : ${item.history}">
+                            <td valign="top">
+                                <b th:text="${h.loggedBy.name}"></b>
+                                <span class.sub th:text="' (' + ${#dates.format(h.timeStamp, 'yyyy-MM-dd HH:mm')} + ')'"></span>
+                                <p th:utext="${@HtmlUtils.htmlUnescape(h.comment)}"></p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

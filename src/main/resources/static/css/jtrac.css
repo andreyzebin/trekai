@@ -1,0 +1,59 @@
+/* Basic styles for Jtrac */
+body {
+    font-family: Arial, sans-serif;
+    font-size: 0.8em;
+    margin: 0;
+    padding: 0;
+}
+
+.heading {
+    background-color: #336699;
+    color: white;
+    padding: 5px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+table.jtrac {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+}
+
+table.jtrac th, table.jtrac td {
+    border: 1px solid #ccc;
+    padding: 4px;
+    text-align: left;
+}
+
+table.jtrac th {
+    background-color: #f0f0f0;
+}
+
+table.jtrac .nav-table td, table.jtrac .nav-table th {
+    background-color: #e0e0e0;
+    font-weight: bold;
+}
+
+table.jtrac .selected {
+    background-color: #ffffcc;
+}
+
+a {
+    color: #336699;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#header {
+    background-color: #eee;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+#body {
+    padding: 10px;
+}

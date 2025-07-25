@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/jtrac.css}"/>
+</head>
+<body>
+<div th:insert="~{fragments/header :: header}"></div>
+
+<div id="body">
+    <div class="heading">
+        <span>Dashboard</span>
+    </div>
+
+    <div th:if="${#lists.isEmpty(spaceRoles)}">
+        <p>No spaces assigned to you.</p>
+    </div>
+
+    <table class="jtrac" th:unless="${#lists.isEmpty(spaceRoles)}">
+        <thead>
+        <tr>
+            <th>Space</th>
+            <th>Action</th>
+            <th>Status</th>
+            <th>Logged By Me</th>
+            <th>Assigned To Me</th>
+            <th>All</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="usr : ${spaceRoles}">
+            <td th:text="${usr.space.name}">Test Space</td>
+            <td>
+                <a th:href="@{/item/form(spaceId=${usr.space.id})}">New</a>
+                &nbsp;
+                <a th:href="@{/item/search(spaceId=${usr.space.id})}">
+                    <img th:src="@{/resources/search.gif}" title="Search" style="border: 0"/>
+                </a>
+            </td>
+            <td>
+                <!-- Status links would go here -->
+            </td>
+            <td th:text="${countsHolder.counts.get(usr.space.id)?.loggedByMe ?: 0}">5</td>
+            <td th:text="${countsHolder.counts.get(usr.space.id)?.assignedToMe ?: 0}">2</td>
+            <td th:text="${countsHolder.counts.get(usr.space.id)?.total ?: 0}">7</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="heading">
+        <span>Bookmarks</span>
+    </div>
+    <p>(Stored search functionality not yet implemented)</p>
+
+</div>
+
+</body>
+</html>

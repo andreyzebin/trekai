@@ -16,23 +16,29 @@
 
 package info.jtrac.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.io.Serializable;
 import org.springframework.security.core.GrantedAuthority;
 
-/**
- * Class that exists purely to hold a "ternary" mapping of 
- * user <--> space <--> role and is also persisted
- * the JTrac authorization (access control) scheme works as follows:
- * if space is null, that means that this is a "global" JTrac role
- * if space is not null, this role applies for the user to that
- * space, and the getAuthority() method used by Acegi returns the 
- * role key appended with ":" + spacePrefixCode
- */
+@Entity
+@Table(name = "user_space_roles")
 public class UserSpaceRole implements GrantedAuthority, Serializable {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    
+    @ManyToOne
     private User user;
+    
+    @ManyToOne
     private Space space;
+    
     private String roleKey;    
     
     public UserSpaceRole() {

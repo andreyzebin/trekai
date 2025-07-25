@@ -1,30 +1,33 @@
-# Этап 1: Сборка
-FROM gradle:8.1-jdk8 AS builder
+# Stage 1: Build the application
+FROM gradle:8.5-jdk17-jammy AS builder
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем исходный код
-COPY . .
+# Copy gradle wrapper files
+COPY gradlew ./
+COPY gradle ./gradle
 
-# Собираем проект
-RUN ./gradlew build
+# Copy build configuration files
+COPY build.gradle.kts ./
+COPY settings.gradle.kts ./
 
-# Этап 2: Запуск
-FROM jetty:9-jre8
+# Download dependencies
+RUN ./gradlew dependencies
 
-# Устанавливаем рабочую директорию
-WORKDIR /var/lib/jetty
+# Copy source code
+COPY src ./src
 
-# Копируем собранный .war файл из этапа сборки
-COPY --from=builder /app/build/libs/jtrac.war /var/lib/jetty/webapps/jtrac.war
+# Build the application
+RUN ./gradlew bootJar
 
-# Устанавливаем JTRAC_HOME для хранения данных
-ENV JTRAC_HOME /var/lib/jetty/jtrac-data
-RUN mkdir -p $JTRAC_HOME
+# Stage 2: Run the application
+FROM eclipse-temurin:17-jre-jammy
 
-# Открываем порт
-EXPOSE 8080
+WORKDIR /app
 
-# Запускаем Jetty
-CMD ["java", "-jar", "/usr/local/jetty/start.jar"]
+# Copy the executable jar from the build stage
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+EXPOSE 8082
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

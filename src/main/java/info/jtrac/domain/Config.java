@@ -16,18 +16,21 @@
 
 package info.jtrac.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-/**
- * Simple name value pair to hold configuration parameters
- * in the database for JTrac, e.g. SMTP e-mail server, etc.
- * TODO better validation, type-safety, masking of mail server password
- */
+@Entity
+@Table(name = "config")
 public class Config implements Serializable {
     
+    @Id
     private String param;  // someone reported that "key" is a reserved word in MySQL
+    @Column(name = "config_value")
     private String value;
 
     private static final Set<String> PARAMS;
