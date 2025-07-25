@@ -6,7 +6,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      # Example environment variables for a real database
+      - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/jtrac
       - SPRING_DATASOURCE_USERNAME=jtrac
       - SPRING_DATASOURCE_PASSWORD=password
@@ -41,6 +41,8 @@ services:
       - POSTGRES_PASSWORD=password
     ports:
       - "5432:5432"
+    volumes:
+      - ./tmp/db:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U jtrac -d jtrac"]
       interval: 5s

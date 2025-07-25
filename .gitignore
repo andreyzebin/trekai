@@ -24,6 +24,7 @@ gradle-app.setting
 
 # Local environment
 .venv/
+tmp/
 *.log
 *.jar
 *.war
