@@ -1,15 +1,19 @@
 package info.jtrac.web.api.dto;
 
 import info.jtrac.domain.History;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+@Data
+@NoArgsConstructor
 public class HistoryDto {
-    private long id;
+    private Long id;
     private String loggedBy;
     private String assignedTo;
     private String comment;
-    private int status;
+    private Integer status;
     private Date timeStamp;
 
     public HistoryDto(History history) {

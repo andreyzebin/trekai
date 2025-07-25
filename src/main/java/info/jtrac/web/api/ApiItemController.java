@@ -7,6 +7,8 @@ import info.jtrac.service.JtracService;
 import info.jtrac.web.api.dto.ItemCreateDto;
 import info.jtrac.web.api.dto.ItemResponseDto;
 import info.jtrac.web.api.dto.ItemUpdateDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -27,6 +29,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/items")
 public class ApiItemController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ApiItemController.class);
+
     private final JtracService jtracService;
 
     public ApiItemController(JtracService jtracService) {
@@ -35,6 +39,7 @@ public class ApiItemController {
 
     @PostMapping
     public ResponseEntity<ItemResponseDto> createItem(@RequestBody ItemCreateDto itemDto) {
+        logger.info("Creating item with summary: {}", itemDto.getSummary());
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User loggedInUser = jtracService.findUserByLoginName(auth.getName());
 
@@ -55,9 +60,9 @@ public class ApiItemController {
         item.setAssignedTo(assignedTo);
         item.setLoggedBy(loggedInUser);
         
-        jtracService.storeItem(item, null);
+        Item savedItem = jtracService.storeItem(item, null);
 
-        return new ResponseEntity<>(new ItemResponseDto(item), HttpStatus.CREATED);
+        return new ResponseEntity<>(new ItemResponseDto(savedItem), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")

@@ -35,7 +35,7 @@ public interface JtracService {
 
     User loadUser(long id);
 
-    void storeItem(Item item, Attachment attachment);
+    Item storeItem(Item item, Attachment attachment);
 
     void updateItem(Item item, User user);
 

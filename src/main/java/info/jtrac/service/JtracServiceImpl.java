@@ -112,7 +112,7 @@ public class JtracServiceImpl implements JtracService {
     }
 
     @Override
-    public void storeItem(Item item, Attachment attachment) {
+    public Item storeItem(Item item, Attachment attachment) {
         History history = new History();
         history.setLoggedBy(item.getLoggedBy());
         history.setAssignedTo(item.getAssignedTo());
@@ -134,7 +134,7 @@ public class JtracServiceImpl implements JtracService {
             item.add(attachment);
         }
         
-        itemRepository.save(item);
+        return itemRepository.save(item);
     }
 
     @Override

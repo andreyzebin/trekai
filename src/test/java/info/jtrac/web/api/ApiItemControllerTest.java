@@ -3,6 +3,8 @@ package info.jtrac.web.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
+import info.jtrac.repository.SpaceRepository;
+import info.jtrac.repository.UserRepository;
 import info.jtrac.service.JtracService;
 import info.jtrac.web.api.dto.AuthenticationRequest;
 import info.jtrac.web.api.dto.ItemCreateDto;
@@ -41,10 +43,17 @@ public class ApiItemControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private SpaceRepository spaceRepository;
+
+    @Autowired
     private JtracService jtracService;
 
     private String jwtToken;
     private User testUser;
+    private User admin;
     private Space testSpace;
 
     @MockBean
@@ -73,13 +82,20 @@ public class ApiItemControllerTest {
         testUser.setLoginName("testuser");
         testUser.setName("Test User");
         testUser.setEmail("test@jtrac.info");
-        jtracService.saveUser(testUser);
+        userRepository.save(testUser);
+
+        // Admin user
+        admin = new User();
+        admin.setLoginName("admin");
+        admin.setName("Admin");
+        admin.setEmail("admin@jtrac.info");
+        userRepository.save(admin);
 
         // Test space
         testSpace = new Space();
         testSpace.setPrefixCode("TEST");
         testSpace.setName("Test Space");
-        jtracService.storeSpace(testSpace);
+        jtracService.storeSpace(testSpace); // storeSpace handles sequence creation
     }
 
     @Test
@@ -94,6 +110,7 @@ public class ApiItemControllerTest {
         MvcResult createResult = mockMvc.perform(post("/api/items")
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.summary", is("Test Summary")))
@@ -103,7 +120,8 @@ public class ApiItemControllerTest {
 
         // 2. Get Item
         mockMvc.perform(get("/api/items/" + itemId)
-                        .header("Authorization", "Bearer " + jwtToken))
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is((int) itemId)))
                 .andExpect(jsonPath("$.summary", is("Test Summary")));
@@ -117,6 +135,7 @@ public class ApiItemControllerTest {
         mockMvc.perform(put("/api/items/" + itemId)
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.summary", is("Updated Summary")))
@@ -126,7 +145,8 @@ public class ApiItemControllerTest {
         mockMvc.perform(get("/api/items")
                         .header("Authorization", "Bearer " + jwtToken)
                         .param("spaceId", String.valueOf(testSpace.getId()))
-                        .param("summary", "Updated"))
+                        .param("summary", "Updated")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].summary", is("Updated Summary")));
