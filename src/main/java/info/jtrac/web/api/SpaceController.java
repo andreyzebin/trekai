@@ -7,6 +7,7 @@ import info.jtrac.service.JtracService;
 import info.jtrac.web.api.dto.SpaceDto;
 import info.jtrac.web.api.dto.UserSpaceRoleDto;
 import info.jtrac.web.api.dto.UserSpaceRoleResponseDto;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/spaces")
 public class SpaceController {
