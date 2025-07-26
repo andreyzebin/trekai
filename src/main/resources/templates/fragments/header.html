@@ -6,9 +6,15 @@
         <a th:href="@{/web/dashboard}">Jtrac</a>
     </div>
     <div class="nav">
-        <a th:href="@{/web/dashboard}">Dashboard</a>
-        <a th:href="@{/web/item/search}">Search</a>
-        <a th:href="@{/web/item/new}">New Item</a>
+        <a th:href="@{/web/dashboard}" class="nav-link">
+            <img th:src="@{/resources/dashboard.gif}" alt="Dashboard"/> Dashboard
+        </a>
+        <a th:href="@{/web/item/search}" class="nav-link">
+            <img th:src="@{/resources/search.gif}" alt="Search"/> Search
+        </a>
+        <a th:href="@{/web/item/new}" class="nav-link">
+            <img th:src="@{/resources/add.gif}" alt="New Item"/> New Item
+        </a>
     </div>
     <div class="user-nav">
         <form th:action="@{/logout}" method="post">

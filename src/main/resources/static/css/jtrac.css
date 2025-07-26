@@ -57,3 +57,49 @@ a:hover {
 #body {
     padding: 10px;
 }
+
+/* Header Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+}
+
+.header .logo a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+.header .nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+}
+
+.header .nav-link {
+    display: inline-flex;
+    align-items: center;
+}
+
+.header .nav-link img {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.header .user-nav form {
+    margin: 0;
+}
+
+.header .user-nav input[type=submit] {
+    background-color: #555;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 1em;
+}

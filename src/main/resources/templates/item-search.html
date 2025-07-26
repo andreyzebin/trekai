@@ -5,6 +5,7 @@
 <head>
     <title>Search Items</title>
 </head>
+<div th:insert="~{fragments/header :: header}"></div>
 <body>
 <div layout:fragment="content">
     <div class="heading">
@@ -22,7 +23,26 @@
                 <td class="label">Detail</td>
                 <td><input type="text" th:field="*{detail}" /></td>
             </tr>
-            <!-- Other search fields will be added here -->
+            <tr>
+                <td class="label">Assigned To</td>
+                <td>
+                    <select th:field="*{assignedToId}">
+                        <option value="">-- Any --</option>
+                        <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name}">User Name</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Status</td>
+                <td>
+                    <select th:field="*{status}">
+                        <option value="">-- Any --</option>
+                        <option value="1">Open</option>
+                        <option value="2">Closed</option>
+                        <!-- This should be made dynamic based on space metadata in a future step -->
+                    </select>
+                </td>
+            </tr>
             <tr>
                 <td></td>
                 <td>

@@ -1,7 +1,6 @@
 package info.jtrac.service;
 
 import info.jtrac.domain.Attachment;
-import info.jtrac.domain.Counts;
 import info.jtrac.domain.CountsHolder;
 import info.jtrac.domain.History;
 import info.jtrac.domain.Item;
@@ -14,12 +13,12 @@ import info.jtrac.repository.SpaceRepository;
 import info.jtrac.repository.SpaceSequenceRepository;
 import info.jtrac.repository.UserRepository;
 import info.jtrac.repository.UserSpaceRoleRepository;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -121,7 +120,7 @@ public class JtracServiceImpl implements JtracService {
         history.setComment(item.getDetail());
         history.setTimeStamp(new Date());
         history.setStatus(item.getStatus());
-        
+
         if (item.getId() == 0) { // new item
             SpaceSequence ss = spaceSequenceRepository.findById(item.getSpace().getId()).orElseThrow();
             long seqNum = ss.getNextSeqNum();
@@ -129,13 +128,13 @@ public class JtracServiceImpl implements JtracService {
             spaceSequenceRepository.save(ss);
             item.setSequenceNum(seqNum);
         }
-        
+
         item.add(history);
-        
+
         if (attachment != null) {
             item.add(attachment);
         }
-        
+
         return itemRepository.save(item);
     }
 
@@ -152,10 +151,13 @@ public class JtracServiceImpl implements JtracService {
     }
 
     @Override
-    public List<Item> findItems(long spaceId, String summary, Long assignedToId, Integer status) {
+    public List<Item> findItems(Long spaceId, String summary, Long assignedToId, Integer status) {
         return itemRepository.findAll((Specification<Item>) (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get("space").get("id"), spaceId));
+
+            if (spaceId != null) {
+                predicates.add(cb.equal(root.get("space").get("id"), spaceId));
+            }
             if (summary != null && !summary.isEmpty()) {
                 predicates.add(cb.like(root.get("summary"), "%" + summary + "%"));
             }
@@ -165,7 +167,7 @@ public class JtracServiceImpl implements JtracService {
             if (status != null) {
                 predicates.add(cb.equal(root.get("status"), status));
             }
-            return cb.and(predicates.toArray(new Predicate[0]));
+            return cb.and(predicates.toArray(Predicate[]::new));
         });
     }
 

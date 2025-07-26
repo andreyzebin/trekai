@@ -40,7 +40,7 @@ public interface JtracService {
 
     void updateItem(Item item, User user);
 
-    List<Item> findItems(long spaceId, String summary, Long assignedToId, Integer status);
+    List<Item> findItems(Long spaceId, String summary, Long assignedToId, Integer status);
 
     List<Item> findItemsByAssignedTo(Long userId);
 
