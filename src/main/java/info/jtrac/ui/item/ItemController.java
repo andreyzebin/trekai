@@ -6,6 +6,8 @@ import info.jtrac.domain.User;
 import info.jtrac.service.JtracService;
 import info.jtrac.web.api.dto.ItemCreateDto;
 import info.jtrac.web.api.dto.ItemUpdateDto;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -84,7 +86,7 @@ public class ItemController {
             return "redirect:/web/dashboard";
         }
         model.addAttribute("item", item);
-        model.addAttribute("customFields", item.getSpace().getMetadata().getFields());
+        model.addAttribute("customFields", item.getSpace().getMetadata().getOrderedFields());
         model.addAttribute("itemUpdateForm", new ItemUpdateDto());
         return "item-view";
     }
@@ -93,7 +95,7 @@ public class ItemController {
     public String showCreateForm(@RequestParam(required = false) String spacePrefix, Model model, Principal principal) {
         User user = jtracService.findUserByLoginName(principal.getName());
         ItemCreateDto itemCreateDto = new ItemCreateDto();
-        
+
         List<Space> userSpaces = new ArrayList<>(user.getSpaces());
         model.addAttribute("userSpaces", userSpaces);
 
@@ -106,21 +108,23 @@ public class ItemController {
 
         if (space != null) {
             itemCreateDto.setSpacePrefix(space.getPrefixCode());
+            itemCreateDto.setSpaceId(space.getId());
             model.addAttribute("space", space);
+            model.addAttribute("spaceId", space.getId());
             model.addAttribute("customFields", space.getMetadata().getOrderedFields());
         } else {
             model.addAttribute("customFields", Collections.emptyList());
         }
-        
+
         model.addAttribute("itemCreateForm", itemCreateDto);
         model.addAttribute("assignableUsers", jtracService.findAllUsers());
         return "item-form";
     }
 
     @PostMapping("/new")
-    public String createItem(@ModelAttribute("itemCreateForm") ItemCreateDto itemCreateDto, Principal principal) {
+    public String createItem(@RequestParam(required = false) Long spaceId, @ModelAttribute("itemCreateForm") ItemCreateDto itemCreateDto, Principal principal) {
         User user = jtracService.findUserByLoginName(principal.getName());
-        Space space = jtracService.loadSpace(itemCreateDto.getSpaceId());
+        Space space = jtracService.findSpaceByPrefixCode(itemCreateDto.getSpacePrefix());
         Item item = new Item();
         if (itemCreateDto.getAssignedToId() != null) {
             User assignedTo = jtracService.loadUser(itemCreateDto.getAssignedToId());
@@ -130,6 +134,16 @@ public class ItemController {
         item.setSummary(itemCreateDto.getSummary());
         item.setDetail(itemCreateDto.getDetail());
         item.setLoggedBy(user);
+
+        if (itemCreateDto.getCustomFields() != null) {
+            itemCreateDto.getCustomFields().keySet()
+                    .forEach((code) -> {
+                        if (!space.getMetadata().getFields().containsKey(code)) {
+                            throw new IllegalArgumentException("Unknown field: " + code);
+                        }
+                    });
+            itemCreateDto.getCustomFields().forEach(item::setValue);
+        }
 
         Item savedItem = jtracService.storeItem(item, null);
 

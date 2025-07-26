@@ -24,7 +24,11 @@ public class FieldsConverter implements AttributeConverter<Map<String, Field>, S
     @Override
     public Map<String, Field> convertToEntityAttribute(String dbData) {
         try {
-            return objectMapper.readValue(dbData, new TypeReference<>() {});
+            if (dbData == null) {
+                return null;
+            }
+            return objectMapper.readValue(dbData, new TypeReference<>() {
+            });
         } catch (Exception e) {
             throw new IllegalArgumentException("Error converting JSON to map", e);
         }

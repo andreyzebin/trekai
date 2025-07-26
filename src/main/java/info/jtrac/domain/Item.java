@@ -79,6 +79,13 @@ public class Item extends AbstractItem {
         this.fieldValues.put(code, Optional.ofNullable(field).map(Objects::toString).orElse(null));
     }
 
+    public String getValue(String code) {
+        if (this.fieldValues == null) {
+            this.fieldValues = new HashMap<>();
+        }
+        return this.fieldValues.get(code);
+    }
+
 
     public void add(History h) {
         if (this.history == null) {

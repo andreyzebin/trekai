@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 
 
 @Data
@@ -70,11 +72,15 @@ public class Metadata implements Serializable {
 
     @Transient
     private Map<String, Role> roles;
+    @Transient
+    private Map<Integer, String> states;
 
 
     public Metadata() {
         init();
     }
+
+
 
     @Transient
     public List<Field> getOrderedFields() {
@@ -93,6 +99,7 @@ public class Metadata implements Serializable {
         fields = new HashMap<>();
         roles = new HashMap<>();
         fieldOrder = new LinkedList<>();
+        states = new HashMap<>();
     }
 
     public void add(Field field) {
@@ -130,6 +137,17 @@ public class Metadata implements Serializable {
 
     public int getFieldCount() {
         return getFields().size();
+    }
+
+    public String getStatusValue(Integer key) {
+        if (key == null) {
+            return "";
+        }
+        String s = states.get(key);
+        if (s == null) {
+            return "";
+        }
+        return s;
     }
 
 

@@ -10,6 +10,7 @@
     <h2 class="mb-4">Create New Item</h2>
     <form th:action="@{/web/item/new}" th:object="${itemCreateForm}" method="post">
         <input type="hidden" th:field="*{spacePrefix}" />
+        <input type="hidden" th:field="*{spaceId}" />
         <div class="mb-3">
             <label for="spaceId" class="form-label">Space</label>
             <select id="spaceId" class="form-select" th:field="*{spaceId}" disabled="true">
@@ -33,13 +34,13 @@
 
         <!-- Custom Fields -->
         <div th:each="field : ${customFields}" class="mb-3">
-            <label th:for="${'cus_' + field.name.name()}" class="form-label" th:text="${field.label}">Custom Field Label</label>
-            <div th:switch="${field.name.type}">
-                <select th:case="1" class="form-select" th:id="${'cus_' + field.name.name()}" th:name="${'customFields[' + field.name.name() + ']'}">
+            <label th:for="${'cus_' + field.code}" class="form-label" th:text="${field.label}">Custom Field Label</label>
+            <div th:switch="${field.fieldType.type}">
+                <select th:case="1" class="form-select" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}">
                     <option th:each="opt : ${field.options}" th:value="${opt.key}" th:text="${opt.value}"></option>
                 </select>
-                <input th:case="2" type="text" class="form-control" th:id="${'cus_' + field.name.name()}" th:name="${'customFields[' + field.name.name() + ']'}"/>
-                <input th:case="3" type="number" class="form-control" th:id="${'cus_' + field.name.name()}" th:name="${'customFields[' + field.name.name() + ']'}"/>
+                <input th:case="2" type="text" class="form-control" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}"/>
+                <input th:case="3" type="number" class="form-control" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}"/>
             </div>
         </div>
 

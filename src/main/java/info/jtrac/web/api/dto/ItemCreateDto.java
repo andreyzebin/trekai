@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Data
 @NoArgsConstructor
 @Schema(description = "DTO for creating a new item. Use either spaceId or spacePrefix.")
@@ -18,4 +21,7 @@ public class ItemCreateDto {
     private String detail;
     @Schema(description = "ID of the user this item is assigned to", example = "2")
     private Long assignedToId;
+
+    @Schema(description = "Custom field values, mapped by field code", example = "{\"priority\":\"high\",\"dueDate\":\"2025-08-01\"}")
+    private Map<String, String> customFields = new HashMap<>();
 }

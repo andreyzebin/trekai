@@ -30,6 +30,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Set;
 
 import static jakarta.persistence.InheritanceType.TABLE_PER_CLASS;
@@ -83,6 +84,15 @@ public abstract class AbstractItem implements Serializable {
     public abstract Space getSpace();
 
     public abstract String getRefId();
+
+    public String getStatusValue() {
+        // using accessor for space, getSpace() is overridden in subclass History
+        return Optional.ofNullable(getSpace())
+                .map(Space::getMetadata)
+                .map(meta -> meta.getStatusValue(status))
+                .orElse(null); // или значение по умолчанию
+
+    }
 
 
 }
