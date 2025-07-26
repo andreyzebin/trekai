@@ -54,6 +54,7 @@ public class ItemController {
         attributeValue.setDetail(detail);
         attributeValue.setSummary(summary);
 
+        model.addAttribute("spaceId", spaceId);
         model.addAttribute("itemSearchForm", attributeValue);
         return "item-search";
     }

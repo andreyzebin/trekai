@@ -12,6 +12,7 @@
     </div>
     <form th:action="@{/web/item/search}" th:object="${itemSearchForm}" method="get">
         <input type="hidden" name="search" value="true" />
+        <input type="hidden" name="spaceId" th:value="${spaceId}" />
         <table class="jtrac">
             <tr>
                 <td class="label">Summary</td>
