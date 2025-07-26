@@ -19,10 +19,12 @@ public class SecurityFilters {
 
     private final UserDetailsService userDetailsService;
     private final TokenProvider jwtTokenProvider;
+    private final CustomAuthenticationSuccessHandler successHandler;
 
-    public SecurityFilters(UserDetailsService userDetailsService, TokenProvider jwtTokenProvider) {
+    public SecurityFilters(UserDetailsService userDetailsService, TokenProvider jwtTokenProvider, CustomAuthenticationSuccessHandler successHandler) {
         this.userDetailsService = userDetailsService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.successHandler = successHandler;
     }
 
 
@@ -59,10 +61,13 @@ public class SecurityFilters {
                 )
                 .formLogin(form -> form
                         .loginPage("/web/login")
-                        .defaultSuccessUrl("/web/dashboard", true)
+                        .successHandler(successHandler)
                         .permitAll()
                 )
-                .logout(logout -> logout.permitAll());
+                .logout(logout -> logout
+                        .logoutUrl("/web/logout")
+                        .logoutSuccessUrl("/web/login?logout")
+                );
         return http.build();
     }
 

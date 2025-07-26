@@ -21,6 +21,7 @@ public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
 
+
     public SecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
@@ -28,6 +29,11 @@ public class SecurityConfig {
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public  CustomAuthenticationSuccessHandler successHandler() {
+        return new CustomAuthenticationSuccessHandler();
     }
 
     @Bean
