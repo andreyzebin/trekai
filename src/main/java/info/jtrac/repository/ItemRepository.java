@@ -15,6 +15,7 @@ public interface ItemRepository extends JpaRepository<Item, Long>, JpaSpecificat
     List<Item> findByLoggedById(Long loggedById);
     long countBySpaceAndLoggedBy(Space space, User user);
     long countBySpaceAndAssignedTo(Space space, User user);
+    void deleteBySpaceId(long spaceId);
 }
 
 

@@ -77,15 +77,15 @@ def seed_data(auth_header):
     # 3. Assign roles
     print("\nAssigning roles...")
     roles_to_assign = [
-        {"space_id": space_ids["PROJ1"], "loginName": "dev1", "roleKey": "ROLE_DEVELOPER"},
-        {"space_id": space_ids["PROJ1"], "loginName": "manager1", "roleKey": "ROLE_MANAGER"},
-        {"space_id": space_ids["PROJ2"], "loginName": "dev1", "roleKey": "ROLE_GUEST"}
+        {"prefixCode": "PROJ1", "loginName": "dev1", "roleKey": "ROLE_DEVELOPER"},
+        {"prefixCode": "PROJ1", "loginName": "manager1", "roleKey": "ROLE_MANAGER"},
+        {"prefixCode": "PROJ2", "loginName": "dev1", "roleKey": "ROLE_GUEST"}
     ]
     for role_data in roles_to_assign:
         payload = {"loginName": role_data["loginName"], "roleKey": role_data["roleKey"]}
-        res = requests.post(f"{BACKEND_URL}/api/spaces/{role_data['space_id']}/users", json=payload, headers=headers)
+        res = requests.post(f"{BACKEND_URL}/api/spaces/{role_data['prefixCode']}/users", json=payload, headers=headers)
         res.raise_for_status()
-        print(f"  - Assigned '{role_data['roleKey']}' to '{role_data['loginName']}' in space ID {role_data['space_id']}")
+        print(f"  - Assigned '{role_data['roleKey']}' to '{role_data['loginName']}' in space '{role_data['prefixCode']}'")
 
     # 4. Create items
     print("\nCreating items...")

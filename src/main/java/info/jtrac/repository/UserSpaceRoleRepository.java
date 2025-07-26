@@ -11,4 +11,5 @@ public interface UserSpaceRoleRepository extends JpaRepository<UserSpaceRole, Lo
     UserSpaceRole findByUserIdAndSpaceId(long userId, long spaceId);
     List<UserSpaceRole> findBySpaceId(long spaceId);
     List<UserSpaceRole> findByUserId(long userId);
+    void deleteBySpaceId(long spaceId);
 }

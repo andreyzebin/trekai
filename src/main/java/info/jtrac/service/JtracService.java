@@ -50,6 +50,10 @@ public interface JtracService {
 
     List<Space> findSpaces(Long userId);
 
+    Space findSpaceByPrefixCode(String prefixCode);
+
+    void removeSpaceByPrefixCode(String prefixCode);
+
     UserSpaceRole loadUserSpaceRole(long id);
 
     void storeUserSpaceRole(UserSpaceRole userSpaceRole);

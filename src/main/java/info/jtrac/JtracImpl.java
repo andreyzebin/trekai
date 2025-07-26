@@ -484,11 +484,7 @@ public class JtracImpl implements Jtrac {
     }
 
     public Space loadSpace(String prefixCode) {
-        List<Space> spaces = spaceRepository.findByPrefixCode(prefixCode);
-        if (spaces.size() == 0) {
-            return null;
-        }
-        return spaces.get(0);
+        return spaceRepository.findByPrefixCode(prefixCode).orElse(null);
     }
 
     public void storeSpace(Space space) {

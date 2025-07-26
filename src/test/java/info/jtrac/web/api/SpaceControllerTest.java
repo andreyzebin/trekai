@@ -96,7 +96,7 @@ public class SpaceControllerTest {
 
         String spaceResponse = spaceResult.getResponse().getContentAsString();
         JsonNode spaceNode = objectMapper.readTree(spaceResponse);
-        long spaceId = spaceNode.get("id").asLong();
+        String spaceId = spaceNode.get("prefixCode").textValue();
 
         // 3. Add user to space with a role
         UserSpaceRoleDto userSpaceRoleDto = new UserSpaceRoleDto();

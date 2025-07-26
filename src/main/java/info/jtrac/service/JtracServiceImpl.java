@@ -208,6 +208,22 @@ public class JtracServiceImpl implements JtracService {
     }
 
     @Override
+    public Space findSpaceByPrefixCode(String prefixCode) {
+        return spaceRepository.findByPrefixCode(prefixCode).orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public void removeSpaceByPrefixCode(String prefixCode) {
+        spaceRepository.findByPrefixCode(prefixCode).ifPresent(space -> {
+            userSpaceRoleRepository.deleteBySpaceId(space.getId());
+            itemRepository.deleteBySpaceId(space.getId());
+            spaceSequenceRepository.deleteById(space.getId());
+            spaceRepository.delete(space);
+        });
+    }
+
+    @Override
     public UserSpaceRole loadUserSpaceRole(long id) {
         return userSpaceRoleRepository.findById(id).orElse(null);
     }
