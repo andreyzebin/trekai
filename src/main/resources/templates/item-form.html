@@ -36,11 +36,12 @@
         <div th:each="field : ${customFields}" class="mb-3">
             <label th:for="${'cus_' + field.code}" class="form-label" th:text="${field.label}">Custom Field Label</label>
             <div th:switch="${field.fieldType.type}">
-                <select th:case="1" class="form-select" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}">
+                <select th:case="3" class="form-select" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}">
                     <option th:each="opt : ${field.options}" th:value="${opt.key}" th:text="${opt.value}"></option>
                 </select>
-                <input th:case="2" type="text" class="form-control" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}"/>
-                <input th:case="3" type="number" class="form-control" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}"/>
+                <input th:case="5" type="text" class="form-control" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}"/>
+                <input th:case="7" type="text" class="form-control" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}"/>
+                <input th:case="4" type="number" class="form-control" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}"/>
             </div>
         </div>
 

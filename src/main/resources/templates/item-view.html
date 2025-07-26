@@ -4,6 +4,40 @@
       layout:decorate="~{fragments/layout}">
 <head>
     <title th:text="${'Item ' + item.refId}">Item Details</title>
+    <script>
+        function patchField(input) {
+            const currentValue = input.value;
+            const originalValue = input.dataset.originalValue;
+
+            if (currentValue === originalValue) {
+                return; // Не изменилось — не отправляем
+            }
+
+            const itemId = input.dataset.itemId;
+            const fieldCode = input.dataset.fieldCode;
+
+            // Получаем токен из meta-тегов
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+            fetch(`/web/item/${itemId}/field?fieldCode=${encodeURIComponent(fieldCode)}&fieldValue=${encodeURIComponent(currentValue)}`, {
+                method: 'PATCH',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    [csrfHeader]: csrfToken
+                }
+            }).then(res => {
+                if (res.ok) {
+                    input.dataset.originalValue = currentValue;
+                } else {
+                    res.text().then(text => alert("Ошибка: " + text));
+                }
+            });
+        }
+    </script>
+
+
+
 </head>
 <body>
 <div class="container mt-4"   layout:fragment="content">
@@ -32,7 +66,18 @@
             <h5 class="card-title">Custom Fields</h5>
             <div th:each="field : ${customFields}" class="row mb-2">
                 <div class="col-md-4 fw-bold" th:text="${field.label}">Custom Field Label</div>
-                <div class="col-md-8" th:text="${item.getValue(field.code)}">Custom Field Value</div>
+                <div class="col-md-8">
+                    <input type="text"
+                           class="form-control"
+                           th:name="${field.code}"
+                           th:value="${item.getRender(field.code)}"
+                           th:data-item-id="${item.id}"
+                           th:data-field-code="${field.code}"
+                           th:attr="data-original-value=${item.getRender(field.code)}"
+                           onchange="patchField(this)"
+                           onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }" />
+
+                </div>
             </div>
         </div>
     </div>

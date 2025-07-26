@@ -86,6 +86,15 @@ public class Item extends AbstractItem {
         return this.fieldValues.get(code);
     }
 
+    public String getRender(String code) {
+        String value = getValue(code);
+        if (value == null) {
+            return null;
+        }
+
+        return space.getMetadata().getFields().get(code).getRenderValue(value);
+    }
+
 
     public void add(History h) {
         if (this.history == null) {

@@ -1,5 +1,6 @@
 package info.jtrac.ui.item;
 
+import info.jtrac.domain.Field;
 import info.jtrac.domain.Item;
 import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
@@ -12,15 +13,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -149,6 +153,38 @@ public class ItemController {
 
         return "redirect:/web/item/" + savedItem.getId();
     }
+
+    @PatchMapping("/{id}/field")
+    @ResponseBody
+    public ResponseEntity<?> updateCustomField(
+            @PathVariable Long id,
+            @RequestParam String fieldCode,
+            @RequestParam String fieldValue,
+            Principal principal
+    ) {
+        User user = jtracService.findUserByLoginName(principal.getName());
+        Item item =jtracService.findItemById(id);
+
+        // Проверка, что пользователь имеет доступ
+        if (!user.getSpaces().contains(item.getSpace())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied to this item");
+        }
+
+        // Проверка, что поле допустимое
+        Map<String, Field> fieldMap = item.getSpace().getMetadata().getFields();
+        if (!fieldMap.containsKey(fieldCode)) {
+            return ResponseEntity.badRequest().body("Unknown field: " + fieldCode);
+        }
+
+        // Установка значения в нужное поле
+        item.setValue(fieldCode, fieldValue);  // сохранится как строка; преобразование — отдельно при необходимости
+
+        // Сохраняем как новый History (если логируется)
+        jtracService.updateItem(item, user);
+
+        return ResponseEntity.ok("Field updated");
+    }
+
 
     @PostMapping("/{id}")
     public String updateItem(@PathVariable long id, @ModelAttribute("itemUpdateForm") ItemUpdateDto itemUpdateDto, Principal principal) {
