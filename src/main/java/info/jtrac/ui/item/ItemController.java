@@ -6,6 +6,7 @@ import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
 import info.jtrac.service.JtracService;
 import info.jtrac.web.api.dto.ItemCreateDto;
+import info.jtrac.web.api.dto.ItemPatchDto;
 import info.jtrac.web.api.dto.ItemUpdateDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -90,8 +93,10 @@ public class ItemController {
             return "redirect:/web/dashboard";
         }
         model.addAttribute("item", item);
+        model.addAttribute("statuses", Map.of(1,"Open", 2, "Closed"));
         model.addAttribute("customFields", item.getSpace().getMetadata().getOrderedFields());
         model.addAttribute("itemUpdateForm", new ItemUpdateDto());
+        model.addAttribute("users", jtracService.findAllUsers());
         return "item-view";
     }
 
@@ -154,6 +159,66 @@ public class ItemController {
         return "redirect:/web/item/" + savedItem.getId();
     }
 
+
+    @PatchMapping("/{id}")
+    @ResponseBody
+    public ResponseEntity<?> updateCustomField(
+            @PathVariable Long id,
+            @RequestBody ItemPatchDto itemDto,
+            Principal principal
+    ) {
+        User user = jtracService.findUserByLoginName(principal.getName());
+        Item item = jtracService.findItemById(id);
+
+        // Проверка, что пользователь имеет доступ
+        if (!user.getSpaces().contains(item.getSpace())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied to this item");
+        }
+
+
+        if (itemDto.getCustomFields() != null) {
+            Map<String, String> customFields = new HashMap<>(itemDto.getCustomFields());
+
+            // assignedToId
+            if (itemDto.getCustomFields().containsKey("assignedToId")) {
+                itemDto.setAssignedToId(Long.parseLong(itemDto.getCustomFields().get("assignedToId")));
+                customFields.remove("assignedToId");
+                itemDto.setCustomFields(customFields);
+            }
+
+            // status
+            if (itemDto.getCustomFields().containsKey("status")) {
+                itemDto.setStatus(Long.parseLong(itemDto.getCustomFields().get("status")));
+                customFields.remove("status");
+                itemDto.setCustomFields(customFields);
+            }
+
+
+            if (itemDto.getCustomFields().keySet().stream()
+                    .anyMatch((code) -> !item.getSpace().getMetadata().getFields().containsKey(code))) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            itemDto.getCustomFields().forEach(item::setValue);
+        }
+
+        if (itemDto.getAssignedToId() != null) {
+            User assignedTo = jtracService.loadUser(itemDto.getAssignedToId());
+            if (assignedTo == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            item.setAssignedTo(assignedTo);
+        }
+
+        if (itemDto.getStatus() != null) {
+            item.setStatus(Math.toIntExact(itemDto.getStatus()));
+        }
+        // Сохраняем как новый History (если логируется)
+        jtracService.updateItem(item, user);
+
+        return ResponseEntity.ok("Field updated");
+    }
+
     @PatchMapping("/{id}/field")
     @ResponseBody
     public ResponseEntity<?> updateCustomField(
@@ -163,7 +228,7 @@ public class ItemController {
             Principal principal
     ) {
         User user = jtracService.findUserByLoginName(principal.getName());
-        Item item =jtracService.findItemById(id);
+        Item item = jtracService.findItemById(id);
 
         // Проверка, что пользователь имеет доступ
         if (!user.getSpaces().contains(item.getSpace())) {

@@ -6,26 +6,38 @@
     <title th:text="${'Item ' + item.refId}">Item Details</title>
     <script>
         function patchField(input) {
+            console.log("Выбранное значение:", input.value);              // ID пользователя или ""
+            console.log("ID элемента:", input.dataset.itemId);            // Из data-item-id
+            console.log("Исходное значение:", input.dataset.originalValue); // Из data-original-value
+            console.log("input.name:", input.name);
+            console.log("input.id:", input.id);
+            console.log("input.dataset.fieldCode:", input.dataset.fieldCode);
+
+
             const currentValue = input.value;
             const originalValue = input.dataset.originalValue;
 
-            if (currentValue === originalValue) {
-                return; // Не изменилось — не отправляем
-            }
+            if (currentValue === originalValue) return;
 
             const itemId = input.dataset.itemId;
-            const fieldCode = input.dataset.fieldCode;
+            const fieldCode = input.dataset.fieldCode || input.id;
 
-            // Получаем токен из meta-тегов
-            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
-            fetch(`/web/item/${itemId}/field?fieldCode=${encodeURIComponent(fieldCode)}&fieldValue=${encodeURIComponent(currentValue)}`, {
+            const payload = {
+                customFields: {
+                    [fieldCode]: currentValue
+                }
+            };
+
+            fetch(`/web/item/${itemId}`, {
                 method: 'PATCH',
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
                     [csrfHeader]: csrfToken
-                }
+                },
+                body: JSON.stringify(payload)
             }).then(res => {
                 if (res.ok) {
                     input.dataset.originalValue = currentValue;
@@ -38,6 +50,7 @@
 
 
 
+
 </head>
 <body>
 <div class="container mt-4"   layout:fragment="content">
@@ -47,11 +60,37 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <p><strong>Status:</strong> <span th:text="${item.statusValue}">Open</span></p>
+                    <p><strong>Status:</strong>
+                        <select id="status"
+                                class="form-select d-inline w-auto"
+                                th:data-item-id="${item.id}"
+                                th:data-original-value="${item.status}"
+                                onchange="patchField(this)">
+                            <option value="">-- Unassigned --</option>
+                            <option th:each="status : ${statuses.entrySet()}"
+                                    th:value="${status.key}"
+                                    th:text="${status.value}"
+                                    th:selected="${status.key == item.status}">
+                            </option>
+                        </select>
+                    </p>
                     <p><strong>Logged By:</strong> <span th:text="${item.loggedBy?.name}">Some User</span></p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>Assigned To:</strong> <span th:text="${item.assignedTo?.name}">Another User</span></p>
+                    <p><strong>Assigned To:</strong>
+                        <select id="assignedToId"
+                                class="form-select d-inline w-auto"
+                                th:data-item-id="${item.id}"
+                                th:data-original-value="${item.assignedTo?.id}"
+                                onchange="patchField(this)">
+                            <option value="">-- Unassigned --</option>
+                            <option th:each="user : ${users}"
+                                    th:value="${user.id}"
+                                    th:text="${user.name}"
+                                    th:selected="${user.id == item.assignedTo?.id}">
+                            </option>
+                        </select>
+                    </p>
                     <p><strong>Date Submitted:</strong> <span th:text="${#dates.format(item.timeStamp, 'yyyy-MM-dd HH:mm')}">2025-07-25 10:00</span></p>
                 </div>
             </div>
