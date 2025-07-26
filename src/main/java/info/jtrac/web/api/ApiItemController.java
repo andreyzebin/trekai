@@ -56,16 +56,18 @@ public class ApiItemController {
             return ResponseEntity.badRequest().body(null); // Or a proper error DTO
         }
 
-        User assignedTo = jtracService.loadUser(itemDto.getAssignedToId());
-        if (assignedTo == null) {
-            return ResponseEntity.badRequest().body(null);
+        Item item = new Item();
+        if (itemDto.getAssignedToId() != null) {
+            User assignedTo = jtracService.loadUser(itemDto.getAssignedToId());
+            if (assignedTo == null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            item.setAssignedTo(assignedTo);
         }
 
-        Item item = new Item();
         item.setSpace(space);
         item.setSummary(itemDto.getSummary());
         item.setDetail(itemDto.getDetail());
-        item.setAssignedTo(assignedTo);
         item.setLoggedBy(loggedInUser);
 
         Item savedItem = jtracService.storeItem(item, null);

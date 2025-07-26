@@ -158,8 +158,8 @@ public class JtracServiceImpl implements JtracService {
             if (spaceId != null) {
                 predicates.add(cb.equal(root.get("space").get("id"), spaceId));
             }
-            if (summary != null && !summary.isEmpty()) {
-                predicates.add(cb.like(root.get("summary"), "%" + summary + "%"));
+            if (summary != null && !summary.isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("summary")), "%" + summary.toLowerCase() + "%"));
             }
             if (assignedToId != null) {
                 predicates.add(cb.equal(root.get("assignedTo").get("id"), assignedToId));
@@ -167,7 +167,7 @@ public class JtracServiceImpl implements JtracService {
             if (status != null) {
                 predicates.add(cb.equal(root.get("status"), status));
             }
-            return cb.and(predicates.toArray(Predicate[]::new));
+            return cb.and(predicates.toArray(new Predicate[0]));
         });
     }
 

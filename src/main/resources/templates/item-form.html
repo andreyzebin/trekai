@@ -13,12 +13,13 @@
         <span>Create New Item</span>
     </div>
     <form th:action="@{/web/item/new}" th:object="${itemCreateForm}" method="post">
+        <input type="hidden" th:field="*{spacePrefix}" />
         <table class="jtrac">
             <tr>
                 <td class="label">Space</td>
                 <td>
                     <select th:field="*{spaceId}">
-                        <option th:each="space : ${userSpaces}" th:value="${space.id}" th:text="${space.name}">Space Name</option>
+                        <option th:each="space : ${userSpaces}" th:value="${space.id}" th:text="${space.name}" th:selected="${space.prefixCode == spacePrefix}">Space Name</option>
                     </select>
                 </td>
             </tr>
@@ -34,6 +35,7 @@
                 <td class="label">Assigned To</td>
                 <td>
                     <select th:field="*{assignedToId}">
+                        <option value="">-- Any --</option>
                         <option th:each="user : ${assignableUsers}" th:value="${user.id}" th:text="${user.name}">User Name</option>
                     </select>
                 </td>

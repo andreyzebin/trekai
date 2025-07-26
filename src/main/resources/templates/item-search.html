@@ -14,11 +14,11 @@
     </div>
     <form th:action="@{/web/item/search}" th:object="${itemSearchForm}" method="get">
         <input type="hidden" name="search" value="true" />
-        <input type="hidden" name="spaceId" th:value="${spaceId}" />
+        <input type="hidden" name="spacePrefix" th:value="${spacePrefix}" />
         <table class="jtrac">
             <tr>
                 <td class="label">Summary</td>
-                <td><input type="text" th="*{summary}" /></td>
+                <td><input type="text" th:field="*{summary}" /></td>
             </tr>
             <tr>
                 <td class="label">Assigned To</td>

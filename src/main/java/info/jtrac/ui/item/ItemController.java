@@ -56,14 +56,16 @@ public class ItemController {
     @GetMapping("/search")
     public String showSearchFormAndResults(@ModelAttribute ItemSearchForm itemSearchForm,
                                            @RequestParam(required = false) String search,
-                                           @RequestParam(required = false) String spaceId,
+                                           @RequestParam(required = false) String spacePrefix,
                                            Principal principal, Model model) {
 
         model.addAttribute("users", jtracService.findAllUsers());
+        model.addAttribute("spacePrefix", spacePrefix);
 
 
+        Space space = jtracService.findSpaceByPrefixCode(spacePrefix);
         List<Item> items = jtracService.findItems(
-                longOrNull(spaceId),
+                Optional.ofNullable(space).map(Space::getId).orElse(null),
                 itemSearchForm.getSummary(),
                 longOrNull(itemSearchForm.getAssignedToId()),
                 intOrNull(itemSearchForm.getStatus()));
@@ -86,11 +88,20 @@ public class ItemController {
     }
 
     @GetMapping("/new")
-    public String showCreateForm(Model model, Principal principal) {
+    public String showCreateForm(@RequestParam(required = false) String spacePrefix, Model model, Principal principal) {
         User user = jtracService.findUserByLoginName(principal.getName());
-        model.addAttribute("itemCreateForm", new ItemCreateDto());
+        ItemCreateDto itemCreateDto = new ItemCreateDto();
+        if (spacePrefix != null && !spacePrefix.trim().isBlank()) {
+            Space space = jtracService.findSpaceByPrefixCode(spacePrefix);
+            itemCreateDto.setSpaceId(space.getId());
+            itemCreateDto.setSpacePrefix(spacePrefix);
+        }
+        model.addAttribute("itemCreateForm", itemCreateDto);
+        if (spacePrefix != null) {
+            model.addAttribute("spacePrefix", spacePrefix);
+        }
         model.addAttribute("userSpaces", user.getSpaces());
-        model.addAttribute("assignableUsers", List.of(user));
+        model.addAttribute("assignableUsers", jtracService.findAllUsers());
         return "item-form";
     }
 
@@ -98,13 +109,14 @@ public class ItemController {
     public String createItem(@ModelAttribute("itemCreateForm") ItemCreateDto itemCreateDto, Principal principal) {
         User user = jtracService.findUserByLoginName(principal.getName());
         Space space = jtracService.loadSpace(itemCreateDto.getSpaceId());
-        User assignedTo = jtracService.loadUser(itemCreateDto.getAssignedToId());
-
         Item item = new Item();
+        if (itemCreateDto.getAssignedToId() != null) {
+            User assignedTo = jtracService.loadUser(itemCreateDto.getAssignedToId());
+            item.setAssignedTo(assignedTo);
+        }
         item.setSpace(space);
         item.setSummary(itemCreateDto.getSummary());
         item.setDetail(itemCreateDto.getDetail());
-        item.setAssignedTo(assignedTo);
         item.setLoggedBy(user);
 
         Item savedItem = jtracService.storeItem(item, null);
