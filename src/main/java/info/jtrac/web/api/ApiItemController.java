@@ -45,14 +45,20 @@ public class ApiItemController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User loggedInUser = jtracService.findUserByLoginName(auth.getName());
 
-        Space space = jtracService.loadSpace(itemDto.getSpaceId());
+        Space space = null;
+        if (itemDto.getSpacePrefix() != null) {
+            space = jtracService.findSpaceByPrefixCode(itemDto.getSpacePrefix());
+        } else if (itemDto.getSpaceId() != null) {
+            space = jtracService.loadSpace(itemDto.getSpaceId());
+        }
+
         if (space == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(null); // Or a proper error DTO
         }
 
         User assignedTo = jtracService.loadUser(itemDto.getAssignedToId());
         if (assignedTo == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(null);
         }
 
         Item item = new Item();
@@ -61,7 +67,7 @@ public class ApiItemController {
         item.setDetail(itemDto.getDetail());
         item.setAssignedTo(assignedTo);
         item.setLoggedBy(loggedInUser);
-        
+
         Item savedItem = jtracService.storeItem(item, null);
 
         return new ResponseEntity<>(new ItemResponseDto(savedItem), HttpStatus.CREATED);

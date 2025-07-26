@@ -105,7 +105,7 @@ public class ApiItemControllerTest {
     public void testItemApiWorkflow() throws Exception {
         // 1. Create Item
         ItemCreateDto createDto = new ItemCreateDto();
-        createDto.setSpaceId(testSpace.getId());
+        createDto.setSpacePrefix(testSpace.getPrefixCode());
         createDto.setSummary("Test Summary");
         createDto.setDetail("Test Detail");
         createDto.setAssignedToId(testUser.getId());

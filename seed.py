@@ -68,11 +68,19 @@ def seed_data(auth_header):
     ]
     space_ids = {}
     for space_data in spaces_to_create:
-        res = requests.post(f"{BACKEND_URL}/api/spaces", json=space_data, headers=headers)
-        res.raise_for_status()
-        space_id = res.json()["id"]
-        space_ids[space_data['prefixCode']] = space_id
-        print(f"  - Space '{space_data['prefixCode']}' created with ID: {space_id}")
+        prefix_code = space_data['prefixCode']
+        get_space_res = requests.get(f"{BACKEND_URL}/api/spaces/{prefix_code}", headers=headers)
+        if get_space_res.status_code == 404:
+            res = requests.post(f"{BACKEND_URL}/api/spaces", json=space_data, headers=headers)
+            res.raise_for_status()
+            space_id = res.json()["id"]
+            space_ids[prefix_code] = space_id
+            print(f"  - Space '{prefix_code}' created with ID: {space_id}")
+        else:
+            get_space_res.raise_for_status()
+            space_id = get_space_res.json()["id"]
+            space_ids[prefix_code] = space_id
+            print(f"  - Space '{prefix_code}' already exists with ID: {space_id}")
 
     # 3. Assign roles
     print("\nAssigning roles...")
@@ -90,7 +98,7 @@ def seed_data(auth_header):
     # 4. Create items
     print("\nCreating items...")
     item1_payload = {
-        "spaceId": space_ids["PROJ1"],
+        "spacePrefix": "PROJ1",
         "summary": "Fix login button alignment",
         "detail": "The login button on the main page is misaligned on Firefox.",
         "assignedToId": user_ids["dev1"]
@@ -101,7 +109,7 @@ def seed_data(auth_header):
     print(f"  - Created item 'Fix login button alignment' with ID: {item1_id}")
 
     item2_payload = {
-        "spaceId": space_ids["PROJ1"],
+        "spacePrefix": "PROJ1",
         "summary": "Implement password recovery feature",
         "detail": "Users need a way to recover their password if they forget it.",
         "assignedToId": user_ids["dev1"]

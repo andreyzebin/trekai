@@ -6,10 +6,12 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@Schema(description = "DTO for creating a new item")
+@Schema(description = "DTO for creating a new item. Use either spaceId or spacePrefix.")
 public class ItemCreateDto {
-    @Schema(description = "ID of the space this item belongs to", example = "1")
+    @Schema(description = "ID of the space this item belongs to (optional, use if spacePrefix is not provided)", example = "1")
     private Long spaceId;
+    @Schema(description = "Prefix code of the space this item belongs to (optional, use if spaceId is not provided)", example = "PROJ1")
+    private String spacePrefix;
     @Schema(description = "A brief summary of the item", example = "UI button is not aligned")
     private String summary;
     @Schema(description = "Detailed description of the item", example = "The 'Submit' button on the login page is misaligned on mobile devices.")
