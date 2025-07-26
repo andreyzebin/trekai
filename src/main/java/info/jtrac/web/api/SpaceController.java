@@ -1,6 +1,7 @@
 package info.jtrac.web.api;
 
 import info.jtrac.domain.Field;
+import info.jtrac.domain.FieldType;
 import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
 import info.jtrac.domain.UserSpaceRole;
@@ -157,10 +158,11 @@ public class SpaceController {
     @PostMapping("/{prefixCode}/fields")
     public ResponseEntity<Void> addCustomField(@PathVariable String prefixCode, @RequestBody CustomFieldDto customFieldDto) {
         Field field = new Field();
-        field.setName(Field.Name.valueOf(customFieldDto.getName()));
+        field.setCode(customFieldDto.getName());
         field.setLabel(customFieldDto.getLabel());
         // Type is determined by the Field.Name enum, so we don't set it directly.
         field.setOptions(customFieldDto.getOptions());
+        field.setFieldType(FieldType.ofInt(customFieldDto.getType()));
 
         jtracService.addCustomFieldToSpace(prefixCode, field);
 

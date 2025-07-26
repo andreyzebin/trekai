@@ -114,14 +114,7 @@ public class User implements UserDetails, Serializable, Comparable<User> {
         }
         return roleKeys;
     }        
-    
-    public Map<Integer, String> getPermittedTransitions(Space space, int status) {
-        return space.getMetadata().getPermittedTransitions(getRoleKeys(space), status);
-    }
-    
-    public List<Field> getEditableFieldList(Space space, int status) {
-        return space.getMetadata().getEditableFields(getRoleKeys(space), status);
-    }
+
     
     public Set<Space> getSpaces() {
         Set<Space> spaces = new HashSet<Space>(userSpaceRoles.size());

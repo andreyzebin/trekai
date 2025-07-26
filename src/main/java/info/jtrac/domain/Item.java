@@ -17,6 +17,8 @@
 package info.jtrac.domain;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
@@ -24,10 +26,13 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Data;
+import lombok.Value;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -42,6 +47,10 @@ public class Item extends AbstractItem {
     private Space space;
 
     private long sequenceNum;
+
+    @Column(columnDefinition = "TEXT")
+    @Convert(converter = MapToJsonConverter.class)
+    private Map<String, String> fieldValues;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<History> history;
@@ -63,13 +72,13 @@ public class Item extends AbstractItem {
                 .orElse("UNKNOWN-" + id);
     }
 
-    public Map<Integer, String> getPermittedTransitions(User user) {
-        return user.getPermittedTransitions(space, getStatus());
+    public void setValue(String code, Object field) {
+        if (this.fieldValues == null) {
+            this.fieldValues = new HashMap<>();
+        }
+        this.fieldValues.put(code, Optional.ofNullable(field).map(Objects::toString).orElse(null));
     }
 
-    public List<Field> getEditableFieldList(User user) {
-        return user.getEditableFieldList(space, getStatus());
-    }
 
     public void add(History h) {
         if (this.history == null) {

@@ -18,8 +18,6 @@ package info.jtrac.domain;
 
 import java.util.HashSet;
 
-import static info.jtrac.Constants.*;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,7 +59,7 @@ public class State implements Serializable {
     /**
      * The {@link Map} of {@link Field} objects.
      */
-    private Map<Field.Name, Integer> fields = new HashMap<Field.Name, Integer>();
+    private Map<FieldType, Integer> fields = new HashMap<FieldType, Integer>();
     
     /**
      * The predefined NEW state.
@@ -106,37 +104,37 @@ public class State implements Serializable {
     /**
      * This method allows to add a {@link State} to the map of {@link #fields}.
      * 
-     * @param fieldNames The {@link Collection} of {@link Field.Name} objects
+     * @param fieldFieldTypes The {@link Collection} of {@link FieldType} objects
      * to add to the map.
      */
-    public void add(Collection<Field.Name> fieldNames) {
-        for (Field.Name fieldName : fieldNames) {
-            add(fieldName);
+    public void add(Collection<FieldType> fieldFieldTypes) {
+        for (FieldType fieldFieldType : fieldFieldTypes) {
+            add(fieldFieldType);
         } // end for each
     }
     
     /**
      * This method allows to add a {@link State} to the map of {@link #fields}.
      * 
-     * @param fieldName The {@link Field.Name} to add to the map.
+     * @param fieldFieldType The {@link FieldType} to add to the map.
      */
-    public void add(Field.Name fieldName) {
+    public void add(FieldType fieldFieldType) {
         int mask = MASK_READONLY;
         // For NEW states, normally all Fields on the Item are editable
         if (status == NEW) {
             mask = MASK_MANDATORY;
         }
-        fields.put(fieldName, mask);
+        fields.put(fieldFieldType, mask);
     }
     
     /**
      * This method allows to remove the specified field name from the map of
      * {@link #fields}.
      * 
-     * @param fieldName The field name to remove from the map of {@link #fields}.
+     * @param fieldFieldType The field name to remove from the map of {@link #fields}.
      */
-    public void remove(Field.Name fieldName) {
-        fields.remove(fieldName);
+    public void remove(FieldType fieldFieldType) {
+        fields.remove(fieldFieldType);
     }
     
     /**
@@ -163,7 +161,7 @@ public class State implements Serializable {
      * 
      * @return Returns {@link #fields}.
      */
-    public Map<Field.Name, Integer> getFields() {
+    public Map<FieldType, Integer> getFields() {
         return fields;
     }
     
@@ -172,7 +170,7 @@ public class State implements Serializable {
      * 
      * @param fields The map of {@link #fields} to store.
      */
-    public void setFields(Map<Field.Name, Integer> fields) {
+    public void setFields(Map<FieldType, Integer> fields) {
         this.fields = fields;
     }
     

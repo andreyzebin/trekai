@@ -1,5 +1,12 @@
 package info.jtrac.domain;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+
+import java.util.Map;
+
 @Converter
 public class MapToJsonConverter implements AttributeConverter<Map<String, Object>, String> {
 

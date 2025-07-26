@@ -1,9 +1,9 @@
 package info.jtrac.service;
 
 import info.jtrac.domain.Attachment;
-import info.jtrac.domain.Counts;
 import info.jtrac.domain.CountsHolder;
 import info.jtrac.domain.Field;
+import info.jtrac.domain.FieldType;
 import info.jtrac.domain.History;
 import info.jtrac.domain.Item;
 import info.jtrac.domain.Metadata;
@@ -166,7 +166,7 @@ public class JtracServiceImpl implements JtracService {
         History history = new History();
         history.setLoggedBy(user);
         history.setTimeStamp(new Date());
-        
+
         if (patchDto.getAssignedToId() != null) {
             User assignedTo = userRepository.findById(patchDto.getAssignedToId()).orElse(null);
             if (assignedTo != null) {
@@ -177,11 +177,10 @@ public class JtracServiceImpl implements JtracService {
 
         if (patchDto.getCustomFields() != null) {
             for (Map.Entry<String, Object> entry : patchDto.getCustomFields().entrySet()) {
-                Field.Name fieldName = Field.Name.valueOf(entry.getKey());
-                item.setValue(fieldName, entry.getValue());
+                item.setValue(entry.getKey(), entry.getValue());
             }
         }
-        
+
         item.add(history);
         return itemRepository.save(item);
     }

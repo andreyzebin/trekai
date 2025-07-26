@@ -54,13 +54,7 @@ public class UserSpaceRole implements GrantedAuthority, Serializable {
         this.space = space;
         this.roleKey = roleKey;
     }
-    
-    public boolean isAbleToCreateNewItem() {
-        if (space == null) {
-            return false;
-        }
-        return user.getPermittedTransitions(space, State.NEW).size() > 0;
-    }
+
     
     public boolean isSuperUser() {
         return space == null && isAdmin();

@@ -8,12 +8,12 @@ import jakarta.persistence.Converter;
 import java.util.Map;
 
 @Converter
-public class FieldsConverter implements AttributeConverter<Map<String, Object>, String> {
+public class FieldsConverter implements AttributeConverter<Map<String, Field>, String> {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public String convertToDatabaseColumn(Map<String, Object> attribute) {
+    public String convertToDatabaseColumn(Map<String, Field> attribute) {
         try {
             return objectMapper.writeValueAsString(attribute);
         } catch (Exception e) {
@@ -22,7 +22,7 @@ public class FieldsConverter implements AttributeConverter<Map<String, Object>, 
     }
 
     @Override
-    public Map<String, Object> convertToEntityAttribute(String dbData) {
+    public Map<String, Field> convertToEntityAttribute(String dbData) {
         try {
             return objectMapper.readValue(dbData, new TypeReference<>() {});
         } catch (Exception e) {

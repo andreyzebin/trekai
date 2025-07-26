@@ -84,7 +84,7 @@ public class ItemController {
             return "redirect:/web/dashboard";
         }
         model.addAttribute("item", item);
-        model.addAttribute("customFields", item.getSpace().getMetadata().getFieldList());
+        model.addAttribute("customFields", item.getSpace().getMetadata().getFields());
         model.addAttribute("itemUpdateForm", new ItemUpdateDto());
         return "item-view";
     }
@@ -107,7 +107,7 @@ public class ItemController {
         if (space != null) {
             itemCreateDto.setSpacePrefix(space.getPrefixCode());
             model.addAttribute("space", space);
-            model.addAttribute("customFields", space.getMetadata().getFieldList());
+            model.addAttribute("customFields", space.getMetadata().getOrderedFields());
         } else {
             model.addAttribute("customFields", Collections.emptyList());
         }

@@ -51,9 +51,6 @@ public class History extends AbstractItem {
         // setTimeStamp(item.getTimeStamp());
         setPlannedEffort(item.getPlannedEffort());
         //==========================
-        for (Field.Name fieldName : Field.Name.values()) {
-            setValue(fieldName, item.getValue(fieldName));
-        }
     }
 
     @Override

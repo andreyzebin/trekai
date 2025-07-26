@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -94,6 +95,7 @@ public class SpaceControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(spaceDto)))
                 .andExpect(status().isCreated())
+                .andDo(print())
                 .andReturn();
 
         String spaceResponse = spaceResult.getResponse().getContentAsString();
@@ -109,7 +111,8 @@ public class SpaceControllerTest {
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userSpaceRoleDto)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andDo(print());
 
         // 4. Verify using API
         mockMvc.perform(get("/api/spaces/" + spaceId)
@@ -117,7 +120,8 @@ public class SpaceControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.prefixCode", is("TEST")))
-                .andExpect(jsonPath("$.name", is("Test Space")));
+                .andExpect(jsonPath("$.name", is("Test Space")))
+                .andDo(print());
 
         mockMvc.perform(get("/api/spaces/" + spaceId + "/users")
                         .header("Authorization", "Bearer " + jwtToken)
@@ -125,7 +129,8 @@ public class SpaceControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].roleKey", is("ROLE_USER")))
-                .andExpect(jsonPath("$[0].loginName", is("testuser")));
+                .andExpect(jsonPath("$[0].loginName", is("testuser")))
+                .andDo(print());
     }
 
     @Test
@@ -138,7 +143,8 @@ public class SpaceControllerTest {
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(spaceDto)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andDo(print());
 
         // 2. Add a custom field to it
         CustomFieldDto customFieldDto = new CustomFieldDto();
@@ -150,13 +156,15 @@ public class SpaceControllerTest {
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customFieldDto)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andDo(print());
 
         // 3. Verify the field was added
         mockMvc.perform(get("/api/spaces/CUSTOM")
                         .header("Authorization", "Bearer " + jwtToken)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.metadata.fields['CUS_STR_01'].label", is("Customer Name")));
+                .andExpect(jsonPath("$.metadata.fields['CUS_STR_01'].label", is("Customer Name")))
+                .andDo(print());
     }
 }
