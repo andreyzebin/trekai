@@ -49,11 +49,9 @@
     </script>
 
 
-
-
 </head>
 <body>
-<div class="container mt-4"   layout:fragment="content">
+<div class="container mt-4" layout:fragment="content">
     <h2 class="mb-4" th:text="${item.refId + ' - ' + item.summary}">ITEM-1 - Summary</h2>
 
     <div class="card mb-4">
@@ -91,7 +89,8 @@
                             </option>
                         </select>
                     </p>
-                    <p><strong>Date Submitted:</strong> <span th:text="${#dates.format(item.timeStamp, 'yyyy-MM-dd HH:mm')}">2025-07-25 10:00</span></p>
+                    <p><strong>Date Submitted:</strong> <span
+                            th:text="${#dates.format(item.timeStamp, 'yyyy-MM-dd HH:mm')}">2025-07-25 10:00</span></p>
                 </div>
             </div>
             <hr>
@@ -106,15 +105,64 @@
             <div th:each="field : ${customFields}" class="row mb-2">
                 <div class="col-md-4 fw-bold" th:text="${field.label}">Custom Field Label</div>
                 <div class="col-md-8">
-                    <input type="text"
-                           class="form-control"
-                           th:name="${field.code}"
-                           th:value="${item.getRender(field.code)}"
-                           th:data-item-id="${item.id}"
-                           th:data-field-code="${field.code}"
-                           th:attr="data-original-value=${item.getRender(field.code)}"
-                           onchange="patchField(this)"
-                           onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }" />
+                    <div th:switch="${field.fieldType.type}">
+                        <select th:case="3" th:id="${field.code}" id="${field.code}"
+                                class="form-select d-inline w-auto"
+                                th:data-item-id="${item.id}"
+                                th:data-original-value="${item.getValue(field.code)}"
+                                onchange="patchField(this)">
+                            <option value="">-- Unassigned --</option>
+                            <option th:each="opt : ${field.options}"
+                                    th:value="${opt.key}"
+                                    th:text="${opt.value}"
+                                    th:selected="${opt.key == item.getValue(field.code)}">
+                            </option>
+                        </select>
+
+                        <div th:case="5" class="input-group">
+                            <input type="text"
+                                   class="form-control"
+                                   th:name="${field.code}"
+                                   th:value="${item.getRender(field.code)}"
+                                   th:data-item-id="${item.id}"
+                                   th:data-field-code="${field.code}"
+                                   th:attr="data-original-value=${item.getRender(field.code)}"
+                                   onchange="patchField(this)"
+                                   onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
+                            <span class="input-group-text" title="Click to edit">
+                        🖉
+                        </span>
+                        </div>
+                        <div th:case="7" class="input-group">
+                            <input type="text"
+                                   class="form-control"
+                                   th:name="${field.code}"
+                                   th:value="${item.getRender(field.code)}"
+                                   th:data-item-id="${item.id}"
+                                   th:data-field-code="${field.code}"
+                                   th:attr="data-original-value=${item.getRender(field.code)}"
+                                   onchange="patchField(this)"
+                                   onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
+                            <span class="input-group-text" title="Click to edit">
+                        🖉
+                        </span>
+                        </div>
+                        <div th:case="4" class="input-group">
+                            <input type="number"
+                                   class="form-control"
+                                   th:name="${field.code}"
+                                   th:value="${item.getRender(field.code)}"
+                                   th:data-item-id="${item.id}"
+                                   th:data-field-code="${field.code}"
+                                   th:attr="data-original-value=${item.getRender(field.code)}"
+                                   onchange="patchField(this)"
+                                   onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
+                            <span class="input-group-text" title="Click to edit">
+                        🖉
+                        </span>
+                        </div>
+                    </div>
+
 
                 </div>
             </div>
