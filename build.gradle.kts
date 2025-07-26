@@ -65,6 +65,8 @@ dependencies {
 
     // Swagger / OpenAPI 3
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+
+    implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.2.1")
 }
 
 tasks.withType<Test> {

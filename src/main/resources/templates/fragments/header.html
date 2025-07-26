@@ -1,26 +1,37 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<div th:fragment="header" class="header">
-    <div class="logo">
-        <a th:href="@{/web/dashboard}">Jtrac</a>
+<nav th:fragment="header"
+     th:if="${loginPage != true}"
+     class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/web/dashboard}">Jtrac</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/web/dashboard}">
+                        <img th:src="@{/resources/dashboard.gif}" alt="Dashboard"/> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/web/item/search}">
+                        <img th:src="@{/resources/search.gif}" alt="Search"/> Search
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/web/item/new}">
+                        <img th:src="@{/resources/add.gif}" alt="New Item"/> New Item
+                    </a>
+                </li>
+            </ul>
+            <form class="d-flex" th:action="@{/logout}" method="post">
+                <button class="btn btn-outline-light" type="submit">Logout</button>
+            </form>
+        </div>
     </div>
-    <div class="nav">
-        <a th:href="@{/web/dashboard}" class="nav-link">
-            <img th:src="@{/resources/dashboard.gif}" alt="Dashboard"/> Dashboard
-        </a>
-        <a th:href="@{/web/item/search}" class="nav-link">
-            <img th:src="@{/resources/search.gif}" alt="Search"/> Search
-        </a>
-        <a th:href="@{/web/item/new}" class="nav-link">
-            <img th:src="@{/resources/add.gif}" alt="New Item"/> New Item
-        </a>
-    </div>
-    <div class="user-nav">
-        <form th:action="@{/logout}" method="post">
-            <input type="submit" value="Logout"/>
-        </form>
-    </div>
-</div>
+</nav>
 </body>
 </html>

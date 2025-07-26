@@ -1,23 +1,20 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
 <head>
     <title>Dashboard</title>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/jtrac.css}"/>
 </head>
 <body>
-<div th:insert="~{fragments/header :: header}"></div>
-
-<div id="body">
-    <div class="heading">
-        <span>Dashboard</span>
-    </div>
+<div class="container mt-4" layout:fragment="content">
+    <h2 class="mb-4">Dashboard</h2>
 
     <div th:if="${#lists.isEmpty(spaceRoles)}">
         <p>No spaces assigned to you.</p>
     </div>
 
-    <table class="jtrac" th:unless="${#lists.isEmpty(spaceRoles)}">
-        <thead>
+    <table class="table table-striped table-hover" th:unless="${#lists.isEmpty(spaceRoles)}">
+        <thead class="table-light">
         <tr>
             <th>Space</th>
             <th>Action</th>
@@ -49,11 +46,8 @@
         </tbody>
     </table>
 
-    <div class="heading">
-        <span>Bookmarks</span>
-    </div>
+    <h3 class="mt-5">Bookmarks</h3>
     <p>(Stored search functionality not yet implemented)</p>
-
 </div>
 
 </body>

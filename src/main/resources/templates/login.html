@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
 <head>
     <title>JTrac Login</title>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/jtrac.css}"/>
 </head>
 <body>
-<div id="body">
+<div class="container mt-4"  layout:fragment="content">
     <div class="heading">
         <span>Login</span>
     </div>

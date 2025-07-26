@@ -3,72 +3,50 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/layout}">
 <head>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/jtrac.css}"/>
     <title th:text="${'Item ' + item.refId}">Item Details</title>
 </head>
-<div th:insert="~{fragments/header :: header}"></div>
 <body>
-<div layout:fragment="content">
-    <div class="heading">
-        <span th:text="${item.refId + ' - ' + item.summary}">ITEM-1 - Summary</span>
+<div class="container mt-4"   layout:fragment="content">
+    <h2 class="mb-4" th:text="${item.refId + ' - ' + item.summary}">ITEM-1 - Summary</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Status:</strong> <span th:text="${item.statusValue}">Open</span></p>
+                    <p><strong>Logged By:</strong> <span th:text="${item.loggedBy?.name}">Some User</span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Assigned To:</strong> <span th:text="${item.assignedTo?.name}">Another User</span></p>
+                    <p><strong>Date Submitted:</strong> <span th:text="${#dates.format(item.timeStamp, 'yyyy-MM-dd HH:mm')}">2025-07-25 10:00</span></p>
+                </div>
+            </div>
+            <hr>
+            <p><strong>Detail:</strong></p>
+            <p th:text="${item.detail}">Detailed description of the item.</p>
+        </div>
     </div>
 
-    <table class="jtrac">
-        <tr>
-            <td class="label">Status</td>
-            <td th:text="${item.statusValue}">Open</td>
-            <td class="label">Logged By</td>
-            <td th:text="${item.loggedBy?.name}">Some User</td>
-        </tr>
-        <tr>
-            <td class="label">Assigned To</td>
-            <td th:text="${item.assignedTo?.name}">Another User</td>
-            <td class="label">Date Submitted</td>
-            <td th:text="${#dates.format(item.timeStamp, 'yyyy-MM-dd HH:mm')}">2025-07-25 10:00</td>
-        </tr>
-        <tr>
-            <td class="label" colspan="1">Detail</td>
-            <td colspan="3" th:text="${item.detail}">Detailed description of the item.</td>
-        </tr>
-    </table>
-
-    <br/>
-
-    <div class="heading">
-        <span>History</span>
+    <h3 class="mt-5">History</h3>
+    <div class="list-group">
+        <div class="list-group-item" th:each="history : ${item.history}">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1" th:text="${history.loggedBy?.name}">User Name</h5>
+                <small th:text="${#dates.format(history.timeStamp, 'yyyy-MM-dd HH:mm')}">2025-07-25 10:05</small>
+            </div>
+            <p class="mb-1" th:text="${history.comment}"></p>
+        </div>
     </div>
-    <table class="jtrac">
-        <tr th:each="history : ${item.history}">
-            <td th:text="${#dates.format(history.timeStamp, 'yyyy-MM-dd HH:mm')}">2025-07-25 10:05</td>
-            <td th:text="${history.loggedBy?.name}">User Name</td>
-            <td>
-                <p th:text="${history.comment}"></p>
-                <!-- More history details can be added here -->
-            </td>
-        </tr>
-    </table>
 
-    <br/>
-
-    <div class="heading">
-        <span>Update Item</span>
-    </div>
+    <h3 class="mt-5">Update Item</h3>
     <form th:action="@{'/web/item/' + ${item.id}}" th:object="${itemUpdateForm}" method="post">
-        <table class="jtrac">
-            <tr>
-                <td class="label">Comment</td>
-                <td><textarea rows="5" cols="80" th:field="*{comment}"></textarea></td>
-            </tr>
-            <!-- Fields for changing status, assignee etc. will go here -->
-            <tr>
-                <td></td>
-                <td>
-                    <input type="submit" value="Submit"/>
-                </td>
-            </tr>
-        </table>
+        <div class="mb-3">
+            <label for="comment" class="form-label">Comment</label>
+            <textarea id="comment" class="form-control" rows="5" th:field="*{comment}"></textarea>
+        </div>
+        <!-- Fields for changing status, assignee etc. will go here -->
+        <button type="submit" class="btn btn-primary">Submit</button>
     </form>
-
 </div>
 </body>
 </html>
