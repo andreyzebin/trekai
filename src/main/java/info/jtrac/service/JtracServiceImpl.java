@@ -16,6 +16,7 @@ import info.jtrac.repository.SpaceRepository;
 import info.jtrac.repository.SpaceSequenceRepository;
 import info.jtrac.repository.UserRepository;
 import info.jtrac.repository.UserSpaceRoleRepository;
+import info.jtrac.web.api.dto.ItemPatchDto;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -152,6 +154,36 @@ public class JtracServiceImpl implements JtracService {
         history.setStatus(item.getStatus());
         item.add(history);
         itemRepository.save(item);
+    }
+
+    @Override
+    public Item patchItem(long itemId, ItemPatchDto patchDto, User user) {
+        Item item = itemRepository.findById(itemId).orElse(null);
+        if (item == null) {
+            return null;
+        }
+
+        History history = new History();
+        history.setLoggedBy(user);
+        history.setTimeStamp(new Date());
+        
+        if (patchDto.getAssignedToId() != null) {
+            User assignedTo = userRepository.findById(patchDto.getAssignedToId()).orElse(null);
+            if (assignedTo != null) {
+                item.setAssignedTo(assignedTo);
+                history.setAssignedTo(assignedTo);
+            }
+        }
+
+        if (patchDto.getCustomFields() != null) {
+            for (Map.Entry<String, Object> entry : patchDto.getCustomFields().entrySet()) {
+                Field.Name fieldName = Field.Name.valueOf(entry.getKey());
+                item.setValue(fieldName, entry.getValue());
+            }
+        }
+        
+        item.add(history);
+        return itemRepository.save(item);
     }
 
     @Override

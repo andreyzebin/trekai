@@ -27,6 +27,16 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Custom Fields</h5>
+            <div th:each="field : ${customFields}" class="row mb-2">
+                <div class="col-md-4 fw-bold" th:text="${field.label}">Custom Field Label</div>
+                <div class="col-md-8" th:text="${item.getCustomValue(field.name)}">Custom Field Value</div>
+            </div>
+        </div>
+    </div>
+
     <h3 class="mt-5">History</h3>
     <div class="list-group">
         <div class="list-group-item" th:each="history : ${item.history}">

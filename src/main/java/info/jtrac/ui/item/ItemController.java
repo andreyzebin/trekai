@@ -84,6 +84,7 @@ public class ItemController {
             return "redirect:/web/dashboard";
         }
         model.addAttribute("item", item);
+        model.addAttribute("customFields", item.getSpace().getMetadata().getFieldList());
         model.addAttribute("itemUpdateForm", new ItemUpdateDto());
         return "item-view";
     }
