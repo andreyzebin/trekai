@@ -59,8 +59,8 @@ public class Item extends AbstractItem {
     public String getRefId() {
         return Optional.ofNullable(getSpace())
                 .map(Space::getPrefixCode)
-                .map(prefix -> prefix + "-" + sequenceNum)
-                .orElse("UNKNOWN-" + sequenceNum);
+                .map(prefix -> prefix + "-" + id)
+                .orElse("UNKNOWN-" + id);
     }
 
     public Map<Integer, String> getPermittedTransitions(User user) {

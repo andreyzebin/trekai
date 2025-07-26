@@ -3,8 +3,10 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/layout}">
 <head>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/jtrac.css}"/>
     <title th:text="${'Item ' + item.refId}">Item Details</title>
 </head>
+<div th:insert="~{fragments/header :: header}"></div>
 <body>
 <div layout:fragment="content">
     <div class="heading">

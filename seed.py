@@ -87,6 +87,40 @@ def seed_data(auth_header):
         res.raise_for_status()
         print(f"  - Assigned '{role_data['roleKey']}' to '{role_data['loginName']}' in space ID {role_data['space_id']}")
 
+    # 4. Create items
+    print("\nCreating items...")
+    item1_payload = {
+        "spaceId": space_ids["PROJ1"],
+        "summary": "Fix login button alignment",
+        "detail": "The login button on the main page is misaligned on Firefox.",
+        "assignedToId": user_ids["dev1"]
+    }
+    res = requests.post(f"{BACKEND_URL}/api/items", json=item1_payload, headers=headers)
+    res.raise_for_status()
+    item1_id = res.json()["id"]
+    print(f"  - Created item 'Fix login button alignment' with ID: {item1_id}")
+
+    item2_payload = {
+        "spaceId": space_ids["PROJ1"],
+        "summary": "Implement password recovery feature",
+        "detail": "Users need a way to recover their password if they forget it.",
+        "assignedToId": user_ids["dev1"]
+    }
+    res = requests.post(f"{BACKEND_URL}/api/items", json=item2_payload, headers=headers)
+    res.raise_for_status()
+    print(f"  - Created item 'Implement password recovery feature' with ID: {res.json()['id']}")
+
+    # 5. Add comments and updates to an item
+    print("\nAdding comments/updates to an item...")
+    update_payload = {
+        "comment": "I've investigated this. It seems to be a CSS float issue. I'll work on a fix.",
+        "assignedToId": user_ids["manager1"],
+        "status": 1 # Assuming 1 is some "In Progress" status
+    }
+    res = requests.put(f"{BACKEND_URL}/api/items/{item1_id}", json=update_payload, headers=headers)
+    res.raise_for_status()
+    print(f"  - Added comment and updated item ID: {item1_id}")
+
     print("\nData seeding complete!")
 
 if __name__ == "__main__":
