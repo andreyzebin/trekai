@@ -18,6 +18,7 @@ package info.jtrac.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -55,7 +56,8 @@ public class User implements UserDetails, Serializable, Comparable<User> {
     
     @ManyToOne
     private User parent;
-    
+
+    @Column(unique = true)
     private String loginName;
     private String name;
     @jakarta.persistence.Column(length = 60)

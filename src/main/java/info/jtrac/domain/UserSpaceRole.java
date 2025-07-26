@@ -26,8 +26,10 @@ import jakarta.persistence.Table;
 import java.io.Serializable;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
+@NoArgsConstructor
 @Data
 @Entity
 @Table(name = "user_space_roles")
@@ -46,11 +48,7 @@ public class UserSpaceRole implements GrantedAuthority, Serializable {
     private Space space;
     
     private String roleKey;    
-    
-    public UserSpaceRole() {
-        // zero arg constructor
-    }
-    
+
     public UserSpaceRole(User user, Space space, String roleKey) {
         this.user = user;
         this.space = space;
