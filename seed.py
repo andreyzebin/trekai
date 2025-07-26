@@ -82,7 +82,28 @@ def seed_data(auth_header):
             space_ids[prefix_code] = space_id
             print(f"  - Space '{prefix_code}' already exists with ID: {space_id}")
 
-    # 3. Assign roles
+    # 3. Add custom fields
+    print("\nAdding custom fields...")
+    priority_field = {
+        "name": "CUS_INT_01", "label": "Priority", "type": 1,
+        "options": {"1": "High", "2": "Medium", "3": "Low"}
+    }
+    requests.post(f"{BACKEND_URL}/api/spaces/PROJ1/fields", json=priority_field, headers=headers).raise_for_status()
+    print("  - Field 'Priority' added to PROJ1.")
+
+    severity_field = {
+        "name": "CUS_INT_02", "label": "Severity", "type": 1,
+        "options": {"1": "Critical", "2": "Major", "3": "Minor"}
+    }
+    requests.post(f"{BACKEND_URL}/api/spaces/PROJ1/fields", json=severity_field, headers=headers).raise_for_status()
+    print("  - Field 'Severity' added to PROJ1.")
+
+    customer_field = {"name": "CUS_STR_01", "label": "Customer Name", "type": 2}
+    requests.post(f"{BACKEND_URL}/api/spaces/PROJ2/fields", json=customer_field, headers=headers).raise_for_status()
+    print("  - Field 'Customer Name' added to PROJ2.")
+
+
+    # 4. Assign roles
     print("\nAssigning roles...")
     roles_to_assign = [
         {"prefixCode": "PROJ1", "loginName": "dev1", "roleKey": "ROLE_DEVELOPER"},
@@ -95,7 +116,7 @@ def seed_data(auth_header):
         res.raise_for_status()
         print(f"  - Assigned '{role_data['roleKey']}' to '{role_data['loginName']}' in space '{role_data['prefixCode']}'")
 
-    # 4. Create items
+    # 5. Create items
     print("\nCreating items...")
     item1_payload = {
         "spacePrefix": "PROJ1",
@@ -118,7 +139,7 @@ def seed_data(auth_header):
     res.raise_for_status()
     print(f"  - Created item 'Implement password recovery feature' with ID: {res.json()['id']}")
 
-    # 5. Add comments and updates to an item
+    # 6. Add comments and updates to an item
     print("\nAdding comments/updates to an item...")
     update_payload = {
         "comment": "I've investigated this. It seems to be a CSS float issue. I'll work on a fix.",

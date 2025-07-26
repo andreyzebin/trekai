@@ -1,9 +1,12 @@
 package info.jtrac.service;
 
 import info.jtrac.domain.Attachment;
+import info.jtrac.domain.Counts;
 import info.jtrac.domain.CountsHolder;
+import info.jtrac.domain.Field;
 import info.jtrac.domain.History;
 import info.jtrac.domain.Item;
+import info.jtrac.domain.Metadata;
 import info.jtrac.domain.Space;
 import info.jtrac.domain.SpaceSequence;
 import info.jtrac.domain.User;
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 
 @Service
 @Transactional
@@ -221,6 +225,20 @@ public class JtracServiceImpl implements JtracService {
             spaceSequenceRepository.deleteById(space.getId());
             spaceRepository.delete(space);
         });
+    }
+
+    @Override
+    public void addCustomFieldToSpace(String prefixCode, Field field) {
+        Space space = findSpaceByPrefixCode(prefixCode);
+        if (space != null) {
+            Metadata metadata = space.getMetadata();
+            if (metadata == null) {
+                metadata = new Metadata();
+                space.setMetadata(metadata);
+            }
+            metadata.add(field);
+            spaceRepository.save(space);
+        }
     }
 
     @Override

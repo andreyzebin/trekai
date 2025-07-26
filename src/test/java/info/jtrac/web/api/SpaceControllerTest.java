@@ -2,8 +2,10 @@ package info.jtrac.web.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import info.jtrac.domain.Space;
 import info.jtrac.service.JtracService;
 import info.jtrac.web.api.dto.AuthenticationRequest;
+import info.jtrac.web.api.dto.CustomFieldDto;
 import info.jtrac.web.api.dto.SpaceDto;
 import info.jtrac.web.api.dto.UserDto;
 import info.jtrac.web.api.dto.UserSpaceRoleDto;
@@ -124,5 +126,37 @@ public class SpaceControllerTest {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].roleKey", is("ROLE_USER")))
                 .andExpect(jsonPath("$[0].loginName", is("testuser")));
+    }
+
+    @Test
+    public void testAddCustomFieldToSpace() throws Exception {
+        // 1. Create a new space
+        SpaceDto spaceDto = new SpaceDto();
+        spaceDto.setPrefixCode("CUSTOM");
+        spaceDto.setName("Custom Field Space");
+        mockMvc.perform(post("/api/spaces")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(spaceDto)))
+                .andExpect(status().isCreated());
+
+        // 2. Add a custom field to it
+        CustomFieldDto customFieldDto = new CustomFieldDto();
+        customFieldDto.setName("CUS_STR_01");
+        customFieldDto.setLabel("Customer Name");
+        customFieldDto.setType(2); // Text
+
+        mockMvc.perform(post("/api/spaces/CUSTOM/fields")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customFieldDto)))
+                .andExpect(status().isCreated());
+
+        // 3. Verify the field was added
+        mockMvc.perform(get("/api/spaces/CUSTOM")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.metadata.fields['CUS_STR_01'].label", is("Customer Name")));
     }
 }

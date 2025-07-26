@@ -1,9 +1,11 @@
 package info.jtrac.web.api;
 
+import info.jtrac.domain.Field;
 import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
 import info.jtrac.domain.UserSpaceRole;
 import info.jtrac.service.JtracService;
+import info.jtrac.web.api.dto.CustomFieldDto;
 import info.jtrac.web.api.dto.SpaceDto;
 import info.jtrac.web.api.dto.UserSpaceRoleDto;
 import info.jtrac.web.api.dto.UserSpaceRoleResponseDto;
@@ -145,6 +147,24 @@ public class SpaceController {
         UserSpaceRole userSpaceRole = new UserSpaceRole(user, space, userSpaceRoleDto.getRoleKey());
         jtracService.storeUserSpaceRole(userSpaceRole);
         return new ResponseEntity<>(userSpaceRole, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Add a custom field to a space")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Custom field added successfully"),
+            @ApiResponse(responseCode = "404", description = "Space not found")
+    })
+    @PostMapping("/{prefixCode}/fields")
+    public ResponseEntity<Void> addCustomField(@PathVariable String prefixCode, @RequestBody CustomFieldDto customFieldDto) {
+        Field field = new Field();
+        field.setName(Field.Name.valueOf(customFieldDto.getName()));
+        field.setLabel(customFieldDto.getLabel());
+        // Type is determined by the Field.Name enum, so we don't set it directly.
+        field.setOptions(customFieldDto.getOptions());
+
+        jtracService.addCustomFieldToSpace(prefixCode, field);
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a user's role in a space")

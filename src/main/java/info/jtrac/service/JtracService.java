@@ -6,6 +6,7 @@ import info.jtrac.domain.User;
 import info.jtrac.domain.UserSpaceRole;
 import info.jtrac.domain.Attachment;
 import info.jtrac.domain.CountsHolder;
+import info.jtrac.domain.Field;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
@@ -53,6 +54,8 @@ public interface JtracService {
     Space findSpaceByPrefixCode(String prefixCode);
 
     void removeSpaceByPrefixCode(String prefixCode);
+
+    void addCustomFieldToSpace(String prefixCode, Field field);
 
     UserSpaceRole loadUserSpaceRole(long id);
 
