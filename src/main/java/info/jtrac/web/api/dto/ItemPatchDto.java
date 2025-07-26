@@ -16,5 +16,5 @@ public class ItemPatchDto {
 
     @Schema(description = "A map of custom field values to update. The key is the internal field name (e.g., 'CUS_INT_01').",
             example = "{\"CUS_INT_01\": 1, \"CUS_STR_01\": \"Customer ABC\"}")
-    private Map<String, Object> customFields;
+    private Map<String, String> customFields;
 }

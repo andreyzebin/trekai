@@ -1,10 +1,12 @@
 package info.jtrac.web.api;
 
 import info.jtrac.domain.Item;
+import info.jtrac.domain.Metadata;
 import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
 import info.jtrac.service.JtracService;
 import info.jtrac.web.api.dto.ItemCreateDto;
+import info.jtrac.web.api.dto.ItemPatchDto;
 import info.jtrac.web.api.dto.ItemResponseDto;
 import info.jtrac.web.api.dto.ItemUpdateDto;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -112,6 +115,39 @@ public class ApiItemController {
         }
         if (itemDto.getComment() != null) {
             item.setEditReason(itemDto.getComment());
+        }
+
+        jtracService.updateItem(item, loggedInUser);
+
+        return new ResponseEntity<>(new ItemResponseDto(item), HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ItemResponseDto> patchItem(@PathVariable long id, @RequestBody ItemPatchDto itemDto) {
+        Item item = jtracService.findItemById(id);
+        Metadata metadata = item.getSpace().getMetadata();
+        if (item == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User loggedInUser = jtracService.findUserByLoginName(auth.getName());
+
+        if (itemDto.getAssignedToId() != null) {
+            User assignedTo = jtracService.loadUser(itemDto.getAssignedToId());
+            if (assignedTo == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            item.setAssignedTo(assignedTo);
+        }
+
+        if (itemDto.getCustomFields() != null) {
+            if (itemDto.getCustomFields().keySet().stream()
+                    .anyMatch((code) -> !metadata.getFields().containsKey(code))) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            itemDto.getCustomFields().forEach(item::setValue);
         }
 
         jtracService.updateItem(item, loggedInUser);

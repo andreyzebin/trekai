@@ -176,7 +176,7 @@ public class JtracServiceImpl implements JtracService {
         }
 
         if (patchDto.getCustomFields() != null) {
-            for (Map.Entry<String, Object> entry : patchDto.getCustomFields().entrySet()) {
+            for (Map.Entry<String, String> entry : patchDto.getCustomFields().entrySet()) {
                 item.setValue(entry.getKey(), entry.getValue());
             }
         }

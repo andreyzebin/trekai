@@ -2,10 +2,11 @@ package info.jtrac.web.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import info.jtrac.domain.Space;
 import info.jtrac.service.JtracService;
 import info.jtrac.web.api.dto.AuthenticationRequest;
 import info.jtrac.web.api.dto.CustomFieldDto;
+import info.jtrac.web.api.dto.ItemCreateDto;
+import info.jtrac.web.api.dto.ItemPatchDto;
 import info.jtrac.web.api.dto.SpaceDto;
 import info.jtrac.web.api.dto.UserDto;
 import info.jtrac.web.api.dto.UserSpaceRoleDto;
@@ -23,11 +24,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -83,7 +86,9 @@ public class SpaceControllerTest {
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userDto)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andReturn();
+
 
         // 2. Create a space
         SpaceDto spaceDto = new SpaceDto();
@@ -148,7 +153,7 @@ public class SpaceControllerTest {
 
         // 2. Add a custom field to it
         CustomFieldDto customFieldDto = new CustomFieldDto();
-        customFieldDto.setName("CUS_STR_01");
+        customFieldDto.setName("customerName");
         customFieldDto.setLabel("Customer Name");
         customFieldDto.setType(2); // Text
 
@@ -164,7 +169,45 @@ public class SpaceControllerTest {
                         .header("Authorization", "Bearer " + jwtToken)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.metadata.fields['CUS_STR_01'].label", is("Customer Name")))
+                .andExpect(jsonPath("$.metadata.fields['customerName'].label", is("Customer Name")))
+                .andDo(print());
+
+        // 4. Create Item
+        ItemCreateDto createDto = new ItemCreateDto();
+        createDto.setSpacePrefix("CUSTOM");
+        createDto.setSummary("Test Summary");
+        createDto.setDetail("Test Detail");
+
+        MvcResult createResult = mockMvc.perform(post("/api/items")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createDto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.summary", is("Test Summary")))
+                .andDo(print())
+                .andReturn();
+
+        long itemId = objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asLong();
+
+        ItemPatchDto patchDto = new ItemPatchDto();
+        patchDto.setCustomFields(Map.of("customerName", "John Doe"));
+
+        mockMvc.perform(patch("/api/items/" + itemId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(patchDto)))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        // 2. Get Item
+        mockMvc.perform(get("/api/items/" + itemId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fieldValues['customerName']", is("John Doe")))
                 .andDo(print());
     }
 }

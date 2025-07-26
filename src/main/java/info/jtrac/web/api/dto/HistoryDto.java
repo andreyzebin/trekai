@@ -18,10 +18,15 @@ public class HistoryDto {
 
     public HistoryDto(History history) {
         this.id = history.getId();
-        this.loggedBy = history.getLoggedBy().getLoginName();
-        if (history.getAssignedTo() != null) {
-            this.assignedTo = history.getAssignedTo().getLoginName();
-        }
+
+        this.loggedBy = history.getLoggedBy() != null
+                ? history.getLoggedBy().getLoginName()
+                : null;
+
+        this.assignedTo = history.getAssignedTo() != null
+                ? history.getAssignedTo().getLoginName()
+                : null;
+
         this.comment = history.getComment();
         this.status = history.getStatus();
         this.timeStamp = history.getTimeStamp();
