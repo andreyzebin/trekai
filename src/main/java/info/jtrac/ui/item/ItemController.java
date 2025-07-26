@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -91,16 +92,26 @@ public class ItemController {
     public String showCreateForm(@RequestParam(required = false) String spacePrefix, Model model, Principal principal) {
         User user = jtracService.findUserByLoginName(principal.getName());
         ItemCreateDto itemCreateDto = new ItemCreateDto();
-        if (spacePrefix != null && !spacePrefix.trim().isBlank()) {
-            Space space = jtracService.findSpaceByPrefixCode(spacePrefix);
-            itemCreateDto.setSpaceId(space.getId());
-            itemCreateDto.setSpacePrefix(spacePrefix);
+        
+        List<Space> userSpaces = new ArrayList<>(user.getSpaces());
+        model.addAttribute("userSpaces", userSpaces);
+
+        Space space = null;
+        if (spacePrefix != null && !spacePrefix.isBlank()) {
+            space = jtracService.findSpaceByPrefixCode(spacePrefix);
+        } else if (!userSpaces.isEmpty()) {
+            space = userSpaces.get(0); // Default to the first space
         }
+
+        if (space != null) {
+            itemCreateDto.setSpacePrefix(space.getPrefixCode());
+            model.addAttribute("space", space);
+            model.addAttribute("customFields", space.getMetadata().getFieldList());
+        } else {
+            model.addAttribute("customFields", Collections.emptyList());
+        }
+        
         model.addAttribute("itemCreateForm", itemCreateDto);
-        if (spacePrefix != null) {
-            model.addAttribute("spacePrefix", spacePrefix);
-        }
-        model.addAttribute("userSpaces", user.getSpaces());
         model.addAttribute("assignableUsers", jtracService.findAllUsers());
         return "item-form";
     }

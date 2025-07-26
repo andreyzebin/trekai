@@ -7,45 +7,44 @@
 </head>
 <body>
 <div class="container mt-4"  layout:fragment="content">
-    <div class="heading">
-        <span>Create New Item</span>
-    </div>
+    <h2 class="mb-4">Create New Item</h2>
     <form th:action="@{/web/item/new}" th:object="${itemCreateForm}" method="post">
         <input type="hidden" th:field="*{spacePrefix}" />
-        <table class="jtrac">
-            <tr>
-                <td class="label">Space</td>
-                <td>
-                    <select th:field="*{spaceId}">
-                        <option th:each="space : ${userSpaces}" th:value="${space.id}" th:text="${space.name}" th:selected="${space.prefixCode == spacePrefix}">Space Name</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">Summary</td>
-                <td><input type="text" th:field="*{summary}" size="80"/></td>
-            </tr>
-            <tr>
-                <td class="label">Detail</td>
-                <td><textarea rows="10" cols="80" th:field="*{detail}"></textarea></td>
-            </tr>
-            <tr>
-                <td class="label">Assigned To</td>
-                <td>
-                    <select th:field="*{assignedToId}">
-                        <option value="">-- Any --</option>
-                        <option th:each="user : ${assignableUsers}" th:value="${user.id}" th:text="${user.name}">User Name</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>
-                    <input type="submit" value="Submit"/>
-                    <input type="button" value="Cancel" onclick="history.back()"/>
-                </td>
-            </tr>
-        </table>
+        <div class="mb-3">
+            <label for="spaceId" class="form-label">Space</label>
+            <select id="spaceId" class="form-select" th:field="*{spaceId}" disabled="true">
+                <option th:each="space : ${userSpaces}" th:value="${space.id}" th:text="${space.name}" th:selected="${space.prefixCode == spacePrefix}">Space Name</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="summary" class="form-label">Summary</label>
+            <input type="text" id="summary" class="form-control" th:field="*{summary}" />
+        </div>
+        <div class="mb-3">
+            <label for="detail" class="form-label">Detail</label>
+            <textarea id="detail" class="form-control" rows="10" th:field="*{detail}"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="assignedToId" class="form-label">Assigned To</label>
+            <select id="assignedToId" class="form-select" th:field="*{assignedToId}">
+                <option th:each="user : ${assignableUsers}" th:value="${user.id}" th:text="${user.name}">User Name</option>
+            </select>
+        </div>
+
+        <!-- Custom Fields -->
+        <div th:each="field : ${customFields}" class="mb-3">
+            <label th:for="${'cus_' + field.name.name()}" class="form-label" th:text="${field.label}">Custom Field Label</label>
+            <div th:switch="${field.name.type}">
+                <select th:case="1" class="form-select" th:id="${'cus_' + field.name.name()}" th:name="${'customFields[' + field.name.name() + ']'}">
+                    <option th:each="opt : ${field.options}" th:value="${opt.key}" th:text="${opt.value}"></option>
+                </select>
+                <input th:case="2" type="text" class="form-control" th:id="${'cus_' + field.name.name()}" th:name="${'customFields[' + field.name.name() + ']'}"/>
+                <input th:case="3" type="number" class="form-control" th:id="${'cus_' + field.name.name()}" th:name="${'customFields[' + field.name.name() + ']'}"/>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <a th:href="@{/web/dashboard}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 </body>
