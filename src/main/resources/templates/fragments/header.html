@@ -12,21 +12,29 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/web/dashboard}">
-                        <img th:src="@{/resources/dashboard.gif}" alt="Dashboard"/> Dashboard
+                    <a class="nav-link"
+                       th:href="@{/web/dashboard}"
+                       th:classappend="${currentPath != null and currentPath.startsWith('/web/dashboard')} ? ' active' : ''">
+                        <i class="bi bi-speedometer2 fs-4"></i>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/web/item/search}">
-                        <img th:src="@{/resources/search.gif}" alt="Search"/> Search
+                    <a class="nav-link"
+                       th:href="@{/web/item/search}"
+                       th:classappend="${currentPath != null and currentPath.startsWith('/web/item/search')} ? ' active' : ''">
+                        <i class="bi bi-search fs-4"></i>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/web/item/new}">
-                        <img th:src="@{/resources/add.gif}" alt="New Item"/> New Item
+                    <a class="nav-link"
+                       th:href="@{/web/item/new}"
+                       th:classappend="${currentPath != null and currentPath.startsWith('/web/item/new')} ? ' active' : ''">
+                        <i class="bi bi-plus-circle fs-4"></i>
                     </a>
                 </li>
+
             </ul>
+
             <div class="dropdown me-3">
                 <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
                    href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">

@@ -27,6 +27,7 @@ public class DashboardController {
         model.addAttribute("user", user);
         model.addAttribute("countsHolder", countsHolder);
         model.addAttribute("spaceRoles", user.getSpaceRoles());
+        model.addAttribute("currentPath", "/web/dashboard");
 
         return "dashboard";
     }

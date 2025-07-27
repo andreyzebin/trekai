@@ -82,6 +82,7 @@ public class ItemController {
         model.addAttribute("items", items);
 
 
+        model.addAttribute("currentPath", "/web/item/search");
         model.addAttribute("itemSearchForm", itemSearchForm);
         return "item-search";
     }
@@ -125,6 +126,7 @@ public class ItemController {
             model.addAttribute("customFields", Collections.emptyList());
         }
 
+        model.addAttribute("currentPath", "/web/item/new");
         model.addAttribute("itemCreateForm", itemCreateDto);
         model.addAttribute("assignableUsers", jtracService.findAllUsers());
         return "item-form";
