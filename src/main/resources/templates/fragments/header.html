@@ -3,7 +3,7 @@
 <body>
 <nav th:fragment="header"
      th:if="${loginPage != true}"
-     class="navbar navbar-expand-lg navbar-dark bg-dark">
+     class="navbar navbar-expand-sm navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" th:href="@{/web/dashboard}">Jtrac</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,14 +25,6 @@
                         <i class="bi bi-search fs-4"></i>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link"
-                       th:href="@{/web/item/new}"
-                       th:classappend="${currentPath != null and currentPath.startsWith('/web/item/new')} ? ' active' : ''">
-                        <i class="bi bi-plus-circle fs-4"></i>
-                    </a>
-                </li>
-
             </ul>
 
             <div class="dropdown me-3">
