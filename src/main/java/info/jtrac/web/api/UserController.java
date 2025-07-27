@@ -4,6 +4,7 @@ import info.jtrac.domain.User;
 import info.jtrac.service.JtracService;
 import info.jtrac.web.api.dto.UserDto;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Users API", description = "Endpoints for managing user accounts")
 public class UserController {
 
     private final JtracService jtracService;

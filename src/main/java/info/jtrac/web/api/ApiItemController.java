@@ -12,6 +12,7 @@ import info.jtrac.web.api.dto.ItemPatchDto;
 import info.jtrac.web.api.dto.ItemResponseDto;
 import info.jtrac.web.api.dto.ItemUpdateDto;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 @SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/items")
+@Tag(name = "Items API", description = "Endpoints for managing items")
 public class ApiItemController {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiItemController.class);

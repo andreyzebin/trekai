@@ -3,6 +3,7 @@ package info.jtrac.web.api;
 import info.jtrac.config.jwt.TokenProvider;
 import info.jtrac.web.api.dto.AuthenticationRequest;
 import info.jtrac.web.api.dto.AuthenticationResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Authentication API", description = "Endpoints for managing auth")
 public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;
