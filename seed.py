@@ -85,20 +85,20 @@ def seed_data(auth_header):
     # 3. Add custom fields
     print("\nAdding custom fields...")
     priority_field = {
-        "name": "CUS_INT_01", "label": "Priority", "type": 1,
+        "name": "priority", "label": "Priority", "type": 1,
         "options": {"1": "High", "2": "Medium", "3": "Low"}
     }
     requests.post(f"{BACKEND_URL}/api/spaces/PROJ1/fields", json=priority_field, headers=headers).raise_for_status()
     print("  - Field 'Priority' added to PROJ1.")
 
     severity_field = {
-        "name": "CUS_INT_02", "label": "Severity", "type": 1,
+        "name": "severity", "label": "Severity", "type": 1,
         "options": {"1": "Critical", "2": "Major", "3": "Minor"}
     }
     requests.post(f"{BACKEND_URL}/api/spaces/PROJ1/fields", json=severity_field, headers=headers).raise_for_status()
     print("  - Field 'Severity' added to PROJ1.")
 
-    customer_field = {"name": "CUS_STR_01", "label": "Customer Name", "type": 2}
+    customer_field = {"name": "customerName", "label": "Customer Name", "type": 2}
     requests.post(f"{BACKEND_URL}/api/spaces/PROJ2/fields", json=customer_field, headers=headers).raise_for_status()
     print("  - Field 'Customer Name' added to PROJ2.")
 

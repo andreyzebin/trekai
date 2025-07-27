@@ -1,5 +1,6 @@
 package info.jtrac.web.api;
 
+import info.jtrac.config.ItemWebSocketController;
 import info.jtrac.domain.Item;
 import info.jtrac.domain.Metadata;
 import info.jtrac.domain.Space;
@@ -37,9 +38,11 @@ public class ApiItemController {
     private static final Logger logger = LoggerFactory.getLogger(ApiItemController.class);
 
     private final JtracService jtracService;
+    private final ItemWebSocketController ws;
 
-    public ApiItemController(JtracService jtracService) {
+    public ApiItemController(JtracService jtracService, ItemWebSocketController ws) {
         this.jtracService = jtracService;
+        this.ws = ws;
     }
 
     @PostMapping
@@ -141,6 +144,13 @@ public class ApiItemController {
             item.setAssignedTo(assignedTo);
         }
 
+        if (itemDto.getStatus() != null) {
+            if (!List.of(1L, 2L).contains(itemDto.getStatus())) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            item.setStatus(itemDto.getStatus().intValue());
+        }
+
         if (itemDto.getCustomFields() != null) {
             if (itemDto.getCustomFields().keySet().stream()
                     .anyMatch((code) -> !metadata.getFields().containsKey(code))) {
@@ -151,6 +161,7 @@ public class ApiItemController {
         }
 
         jtracService.updateItem(item, loggedInUser);
+        ws.notifyItemUpdate(item.getId());
 
         return new ResponseEntity<>(new ItemResponseDto(item), HttpStatus.OK);
     }

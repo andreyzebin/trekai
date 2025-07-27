@@ -67,6 +67,9 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 
     implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.2.1")
+    // WebSocket + STOMP + SockJS
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+
 }
 
 tasks.withType<Test> {

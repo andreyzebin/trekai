@@ -81,6 +81,16 @@ public class SecurityFilters {
                 .csrf(csrf -> csrf.disable());
         return http.build();
     }
+
+    @Bean
+    public SecurityFilterChain websocketSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/ws/**")
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .csrf(csrf -> csrf.disable());
+        return http.build();
+    }
+
 }
 
 

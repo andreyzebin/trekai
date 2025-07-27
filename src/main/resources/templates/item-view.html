@@ -37,6 +37,45 @@
             });
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script th:inline="javascript">
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+
+        const itemId = [[${item.id}]];
+
+        stompClient.connect({}, function () {
+            const wsIndicator = document.getElementById('ws-indicator');
+            if (wsIndicator) {
+                wsIndicator.classList.remove('text-secondary');
+                wsIndicator.classList.add('text-success');
+                wsIndicator.setAttribute('title', 'WebSocket connected');
+            }
+
+            stompClient.subscribe(`/topic/item/${itemId}`, function (message) {
+                location.reload(); // Обновляем страницу
+            });
+        });
+
+        socket.onclose = function () {
+            const wsIndicator = document.getElementById('ws-indicator');
+            if (wsIndicator) {
+                wsIndicator.classList.remove('text-success');
+                wsIndicator.classList.add('text-secondary');
+                wsIndicator.setAttribute('title', 'WebSocket disconnected');
+            }
+        };
+
+        socket.onerror = function () {
+            const wsIndicator = document.getElementById('ws-indicator');
+            if (wsIndicator) {
+                wsIndicator.classList.remove('text-success');
+                wsIndicator.classList.add('text-warning');
+                wsIndicator.setAttribute('title', 'WebSocket error');
+            }
+        };
+    </script>
 </head>
 <body>
 <div class="container mt-4" layout:fragment="content">
