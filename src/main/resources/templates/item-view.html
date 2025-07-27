@@ -3,25 +3,15 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/layout}">
 <head>
-    <title th:text="${'Item ' + item.refId}">Item Details</title>
+    <title th:text="'Item ' + ${item.refId}">Item Details</title>
     <script>
         function patchField(input) {
-            console.log("Выбранное значение:", input.value);              // ID пользователя или ""
-            console.log("ID элемента:", input.dataset.itemId);            // Из data-item-id
-            console.log("Исходное значение:", input.dataset.originalValue); // Из data-original-value
-            console.log("input.name:", input.name);
-            console.log("input.id:", input.id);
-            console.log("input.dataset.fieldCode:", input.dataset.fieldCode);
-
-
             const currentValue = input.value;
             const originalValue = input.dataset.originalValue;
-
             if (currentValue === originalValue) return;
 
             const itemId = input.dataset.itemId;
             const fieldCode = input.dataset.fieldCode || input.id;
-
             const csrfToken = document.querySelector('meta[name="_csrf"]').content;
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
@@ -47,67 +37,69 @@
             });
         }
     </script>
-
-
 </head>
 <body>
 <div class="container mt-4" layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6"> <!-- Ширина формы -->
     <h2 class="mb-4" th:text="${item.refId + ' - ' + item.summary}">ITEM-1 - Summary</h2>
 
+    <!-- Main Info Card -->
     <div class="card mb-4">
         <div class="card-body">
-            <div class="row">
+            <div class="row mb-3">
                 <div class="col-md-6">
-                    <p><strong>Status:</strong>
-                        <select id="status"
-                                class="form-select d-inline w-auto"
-                                th:data-item-id="${item.id}"
-                                th:data-original-value="${item.status}"
-                                onchange="patchField(this)">
-                            <option value="">-- Unassigned --</option>
-                            <option th:each="status : ${statuses.entrySet()}"
-                                    th:value="${status.key}"
-                                    th:text="${status.value}"
-                                    th:selected="${status.key == item.status}">
-                            </option>
-                        </select>
-                    </p>
-                    <p><strong>Logged By:</strong> <span th:text="${item.loggedBy?.name}">Some User</span></p>
+                    <label class="fw-bold">Status:</label>
+                    <select id="status"
+                            class="form-select form-select-sm"
+                            th:data-item-id="${item.id}"
+                            th:data-original-value="${item.status}"
+                            onchange="patchField(this)">
+                        <option value="">-- Unassigned --</option>
+                        <option th:each="status : ${statuses.entrySet()}"
+                                th:value="${status.key}"
+                                th:text="${status.value}"
+                                th:selected="${status.key == item.status}">
+                        </option>
+                    </select>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>Assigned To:</strong>
-                        <select id="assignedToId"
-                                class="form-select d-inline w-auto"
-                                th:data-item-id="${item.id}"
-                                th:data-original-value="${item.assignedTo?.id}"
-                                onchange="patchField(this)">
-                            <option value="">-- Unassigned --</option>
-                            <option th:each="user : ${users}"
-                                    th:value="${user.id}"
-                                    th:text="${user.name}"
-                                    th:selected="${user.id == item.assignedTo?.id}">
-                            </option>
-                        </select>
-                    </p>
-                    <p><strong>Date Submitted:</strong> <span
-                            th:text="${#dates.format(item.timeStamp, 'yyyy-MM-dd HH:mm')}">2025-07-25 10:00</span></p>
+                    <label class="fw-bold">Assigned To:</label>
+                    <select id="assignedToId"
+                            class="form-select form-select-sm"
+                            th:data-item-id="${item.id}"
+                            th:data-original-value="${item.assignedTo?.id}"
+                            onchange="patchField(this)">
+                        <option value="">-- Unassigned --</option>
+                        <option th:each="user : ${users}"
+                                th:value="${user.id}"
+                                th:text="${user.name}"
+                                th:selected="${user.id == item.assignedTo?.id}">
+                        </option>
+                    </select>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-6"><strong>Logged By:</strong> <span th:text="${item.loggedBy?.name}">User</span></div>
+                <div class="col-md-6"><strong>Submitted:</strong> <span th:text="${#dates.format(item.timeStamp, 'yyyy-MM-dd HH:mm')}">Date</span></div>
+            </div>
             <hr>
-            <p><strong>Detail:</strong></p>
+            <div><strong>Detail:</strong></div>
             <p th:text="${item.detail}">Detailed description of the item.</p>
         </div>
     </div>
 
+    <!-- Custom Fields -->
     <div class="card mb-4">
         <div class="card-body">
             <h5 class="card-title">Custom Fields</h5>
-            <div th:each="field : ${customFields}" class="row mb-2">
-                <div class="col-md-4 fw-bold" th:text="${field.label}">Custom Field Label</div>
+            <div th:each="field : ${customFields}" class="row mb-3 align-items-center">
+                <label class="col-md-4 fw-bold col-form-label" th:text="${field.label}">Field Label</label>
                 <div class="col-md-8">
                     <div th:switch="${field.fieldType.type}">
-                        <select th:case="3" th:id="${field.code}" id="${field.code}"
-                                class="form-select d-inline w-auto"
+                        <select th:case="3"
+                                th:id="${field.code}"
+                                class="form-select form-select-sm"
                                 th:data-item-id="${item.id}"
                                 th:data-original-value="${item.getValue(field.code)}"
                                 onchange="patchField(this)">
@@ -119,76 +111,58 @@
                             </option>
                         </select>
 
-                        <div th:case="5" class="input-group">
-                            <input type="text"
-                                   class="form-control"
-                                   th:name="${field.code}"
-                                   th:value="${item.getRender(field.code)}"
-                                   th:data-item-id="${item.id}"
-                                   th:data-field-code="${field.code}"
-                                   th:attr="data-original-value=${item.getRender(field.code)}"
-                                   onchange="patchField(this)"
-                                   onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
-                            <span class="input-group-text" title="Click to edit">
-                        🖉
-                        </span>
-                        </div>
-                        <div th:case="7" class="input-group">
-                            <input type="text"
-                                   class="form-control"
-                                   th:name="${field.code}"
-                                   th:value="${item.getRender(field.code)}"
-                                   th:data-item-id="${item.id}"
-                                   th:data-field-code="${field.code}"
-                                   th:attr="data-original-value=${item.getRender(field.code)}"
-                                   onchange="patchField(this)"
-                                   onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
-                            <span class="input-group-text" title="Click to edit">
-                        🖉
-                        </span>
-                        </div>
-                        <div th:case="4" class="input-group">
-                            <input type="number"
-                                   class="form-control"
-                                   th:name="${field.code}"
-                                   th:value="${item.getRender(field.code)}"
-                                   th:data-item-id="${item.id}"
-                                   th:data-field-code="${field.code}"
-                                   th:attr="data-original-value=${item.getRender(field.code)}"
-                                   onchange="patchField(this)"
-                                   onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
-                            <span class="input-group-text" title="Click to edit">
-                        🖉
-                        </span>
+                        <div th:case="*">
+                            <div th:if="${field.fieldType.type == 5 or field.fieldType.type == 7 or field.fieldType.type == 4}"
+                                 class="input-group input-group-sm">
+                                <input th:type="${field.fieldType.type == 4 ? 'number' : 'text'}"
+                                       class="form-control"
+                                       th:name="${field.code}"
+                                       th:value="${item.getRender(field.code)}"
+                                       th:data-item-id="${item.id}"
+                                       th:data-field-code="${field.code}"
+                                       th:attr="data-original-value=${item.getRender(field.code)}"
+                                       onchange="patchField(this)"
+                                       onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }" />
+                                <span class="input-group-text" title="Редактируемое поле">🖉</span>
+                            </div>
                         </div>
                     </div>
-
-
                 </div>
             </div>
         </div>
     </div>
 
-    <h3 class="mt-5">History</h3>
-    <div class="list-group">
-        <div class="list-group-item" th:each="history : ${item.history}">
-            <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1" th:text="${history.loggedBy?.name}">User Name</h5>
-                <small th:text="${#dates.format(history.timeStamp, 'yyyy-MM-dd HH:mm')}">2025-07-25 10:05</small>
+    <!-- History Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">History</h5>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item" th:each="history : ${item.history}">
+                    <div class="d-flex justify-content-between">
+                        <strong th:text="${history.loggedBy?.name}">User</strong>
+                        <small th:text="${#dates.format(history.timeStamp, 'yyyy-MM-dd HH:mm')}">Date</small>
+                    </div>
+                    <p class="mb-1" th:text="${history.comment}">Comment</p>
+                </div>
             </div>
-            <p class="mb-1" th:text="${history.comment}"></p>
         </div>
     </div>
 
-    <h3 class="mt-5">Update Item</h3>
-    <form th:action="@{'/web/item/' + ${item.id}}" th:object="${itemUpdateForm}" method="post">
-        <div class="mb-3">
-            <label for="comment" class="form-label">Comment</label>
-            <textarea id="comment" class="form-control" rows="5" th:field="*{comment}"></textarea>
+    <!-- Comment Form -->
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Update Item</h5>
+            <form th:action="@{'/web/item/' + ${item.id}}" th:object="${itemUpdateForm}" method="post">
+                <div class="mb-3">
+                    <label for="comment" class="form-label">Comment</label>
+                    <textarea id="comment" class="form-control" rows="4" th:field="*{comment}"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
         </div>
-        <!-- Fields for changing status, assignee etc. will go here -->
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+    </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>
