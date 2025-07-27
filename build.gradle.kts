@@ -2,6 +2,7 @@ plugins {
     id("org.springframework.boot") version "3.5.3"
     id("io.spring.dependency-management") version "1.1.0"
     id("java")
+    id("org.openapi.generator") version "7.6.0"
 }
 
 group = "info.jtrac"
@@ -18,7 +19,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    
+
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-cache")
 
@@ -31,7 +32,7 @@ dependencies {
     implementation("org.apache.poi:poi-ooxml:5.2.3")
     implementation("org.apache.lucene:lucene-core:9.6.0")
     implementation("org.apache.lucene:lucene-queryparser:9.6.0")
-    
+
     // Ehcache 3 for caching
     implementation("javax.cache:cache-api:1.1.1")
     implementation("org.ehcache:ehcache:3.10.8")
@@ -52,7 +53,6 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:2.15.3")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.15.3")
 
-    
 
     // Lombok
     compileOnly("org.projectlombok:lombok:1.18.34")
@@ -76,4 +76,21 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+// Autogenerate openapi html
 
+openApiGenerate {
+    generatorName.set("html") // можно также "markdown", "asciidoc", "pdf"
+    inputSpec.set("$buildDir/openapi.json") // путь к спецификации
+    outputDir.set("$buildDir/generated-docs")
+    apiPackage.set("com.example.api") // опционально
+    modelPackage.set("com.example.model") // опционально
+    configOptions.set(mapOf("hideGenerationTimestamp" to "true"))
+}
+
+tasks.register<Exec>("downloadOpenApiSpec") {
+    commandLine("curl", "-s", "http://localhost:8082/swagger-ui/docs/public", "-o", "$buildDir/openapi.json")
+}
+
+tasks.named("openApiGenerate") {
+    dependsOn("downloadOpenApiSpec")
+}
