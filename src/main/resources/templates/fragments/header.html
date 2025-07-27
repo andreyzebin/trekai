@@ -27,9 +27,23 @@
                     </a>
                 </li>
             </ul>
-            <form class="d-flex" th:action="@{/web/logout}" method="post">
-                <button class="btn btn-outline-light" type="submit">Logout</button>
-            </form>
+            <div class="dropdown me-3">
+                <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+                   href="#" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img th:src="${currentUser.avatarUrl != null ? currentUser.avatarUrl : '/resources/avatar-default.png'}"
+                         alt="Avatar" width="32" height="32" class="rounded-circle me-2">
+                    <span th:text="${currentUser.name}">User Name</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" th:href="@{/web/profile}">Профиль</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form th:action="@{/web/logout}" method="post">
+                            <button class="dropdown-item" type="submit">Выход</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </nav>

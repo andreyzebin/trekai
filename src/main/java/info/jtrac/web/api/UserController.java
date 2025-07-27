@@ -34,6 +34,7 @@ public class UserController {
         user.setLoginName(userDto.getLoginName());
         user.setName(userDto.getName());
         user.setEmail(userDto.getEmail());
+        user.setAvatarUrl(userDto.getAvatarUrl());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         jtracService.saveUser(user);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
@@ -45,8 +46,16 @@ public class UserController {
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
+        if(userDto.getName() != null) {
+            user.setName(userDto.getName());
+        }
+        if(userDto.getEmail() != null) {
+            user.setEmail(userDto.getEmail());
+        }
+        if(userDto.getAvatarUrl() != null) {
+            user.setAvatarUrl(userDto.getAvatarUrl());
+        }
+
         if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         }

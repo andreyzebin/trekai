@@ -41,7 +41,7 @@ def seed_data(auth_header):
     # 1. Create users
     print("Creating users...")
     users_to_create = [
-        {"loginName": "dev1", "name": "Developer One", "email": "dev1@jtrac.info", "password": "password"},
+        {"loginName": "dev1", "name": "Developer One", "email": "dev1@jtrac.info", "password": "password", "avatarUrl": "https://robohash.org/mail@ashallendesign.co.uk"},
         {"loginName": "manager1", "name": "Manager One", "email": "manager1@jtrac.info", "password": "password"}
     ]
     user_ids = {}

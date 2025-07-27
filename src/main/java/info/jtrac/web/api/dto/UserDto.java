@@ -16,5 +16,6 @@ public class UserDto {
     private String email;
     @Schema(description = "Password for the new user", example = "password123")
     private String password;
+    private String avatarUrl;
 }
 
