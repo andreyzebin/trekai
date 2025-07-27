@@ -10,50 +10,61 @@
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6"> <!-- Ширина формы -->
             <h2 class="mb-4">Create New Item</h2>
-            <form th:action="@{/web/spaces/{spacePrefix}/create(spacePrefix=${spacePrefix})}" th:object="${itemCreateForm}" method="post">
-                <input type="hidden" th:field="*{spacePrefix}" />
-                <input type="hidden" th:field="*{spaceId}" />
-                <div class="mb-3">
-                    <label for="spaceId" class="form-label">Space</label>
-                    <select id="spaceId" class="form-select" th:field="*{spaceId}" disabled="true">
-                        <option th:each="space : ${userSpaces}" th:value="${space.id}"
-                                th:text="${space.name}" th:selected="${space.prefixCode == spacePrefix}">
-                            Space Name
-                        </option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="summary" class="form-label">Summary</label>
-                    <input type="text" id="summary" class="form-control" th:field="*{summary}" />
-                </div>
-                <div class="mb-3">
-                    <label for="detail" class="form-label">Detail</label>
-                    <textarea id="detail" class="form-control" rows="10" th:field="*{detail}"></textarea>
-                </div>
-                <div class="mb-3">
-                    <label for="assignedToId" class="form-label">Assigned To</label>
-                    <select id="assignedToId" class="form-select" th:field="*{assignedToId}">
-                        <option th:each="user : ${assignableUsers}" th:value="${user.id}" th:text="${user.name}">
-                            User Name
-                        </option>
-                    </select>
-                </div>
-
-                <!-- Custom Fields -->
-                <div th:each="field : ${customFields}" class="mb-3">
-                    <label th:for="${'cus_' + field.code}" class="form-label" th:text="${field.label}">Custom Field Label</label>
-                    <div th:switch="${field.fieldType.type}">
-                        <select th:case="3" class="form-select" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}">
-                            <option th:each="opt : ${field.options}" th:value="${opt.key}" th:text="${opt.value}"></option>
+            <form th:action="@{/web/spaces/{spacePrefix}/create(spacePrefix=${spacePrefix})}"
+                  th:object="${itemCreateForm}" method="post">
+                <input type="hidden" th:field="*{spacePrefix}"/>
+                <input type="hidden" th:field="*{spaceId}"/>
+                <div class="card mb-4">
+                    <div class="card-body">
+                    <div class="mb-3">
+                        <label for="spaceId" class="form-label">Space</label>
+                        <select id="spaceId" class="form-select" th:field="*{spaceId}" disabled="true">
+                            <option th:each="space : ${userSpaces}" th:value="${space.id}"
+                                    th:text="${space.name}" th:selected="${space.prefixCode == spacePrefix}">
+                                Space Name
+                            </option>
                         </select>
-                        <input th:case="5" type="text" class="form-control" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}"/>
-                        <input th:case="7" type="text" class="form-control" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}"/>
-                        <input th:case="4" type="number" class="form-control" th:id="${'cus_' + field.code}" th:name="${'customFields[' + field.code + ']'}"/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="summary" class="form-label">Summary</label>
+                        <input type="text" id="summary" class="form-control" th:field="*{summary}"/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="detail" class="form-label">Detail</label>
+                        <textarea id="detail" class="form-control" rows="10" th:field="*{detail}"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="assignedToId" class="form-label">Assigned To</label>
+                        <select id="assignedToId" class="form-select" th:field="*{assignedToId}">
+                            <option th:each="user : ${assignableUsers}" th:value="${user.id}" th:text="${user.name}">
+                                User Name
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Fields -->
+                    <div th:each="field : ${customFields}" class="mb-3">
+                        <label th:for="${'cus_' + field.code}" class="form-label" th:text="${field.label}">Custom Field
+                            Label</label>
+                        <div th:switch="${field.fieldType.type}">
+                            <select th:case="3" class="form-select" th:id="${'cus_' + field.code}"
+                                    th:name="${'customFields[' + field.code + ']'}">
+                                <option th:each="opt : ${field.options}" th:value="${opt.key}"
+                                        th:text="${opt.value}"></option>
+                            </select>
+                            <input th:case="5" type="text" class="form-control" th:id="${'cus_' + field.code}"
+                                   th:name="${'customFields[' + field.code + ']'}"/>
+                            <input th:case="7" type="text" class="form-control" th:id="${'cus_' + field.code}"
+                                   th:name="${'customFields[' + field.code + ']'}"/>
+                            <input th:case="4" type="number" class="form-control" th:id="${'cus_' + field.code}"
+                                   th:name="${'customFields[' + field.code + ']'}"/>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <a th:href="@{/web/dashboard}" class="btn btn-secondary">Cancel</a>
                     </div>
                 </div>
-
-                <button type="submit" class="btn btn-primary">Submit</button>
-                <a th:href="@{/web/dashboard}" class="btn btn-secondary">Cancel</a>
             </form>
         </div>
     </div>
