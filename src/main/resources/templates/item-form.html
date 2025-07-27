@@ -10,7 +10,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6"> <!-- Ширина формы -->
             <h2 class="mb-4">Create New Item</h2>
-            <form th:action="@{/web/item/new}" th:object="${itemCreateForm}" method="post">
+            <form th:action="@{/web/spaces/{spacePrefix}/create(spacePrefix=${spacePrefix})}" th:object="${itemCreateForm}" method="post">
                 <input type="hidden" th:field="*{spacePrefix}" />
                 <input type="hidden" th:field="*{spaceId}" />
                 <div class="mb-3">

@@ -28,7 +28,7 @@
         <tr th:each="usr : ${spaceRoles}">
             <td th:text="${usr.space.name}">Test Space</td>
             <td>
-                <a th:href="@{/web/item/new(spacePrefix=${usr.space.prefixCode})}">
+                <a th:href="@{/web/spaces/{spacePrefix}/create(spacePrefix=${usr.space.prefixCode})}">
                     <img th:src="@{/resources/add.gif}" title="New Item" style="border: 0"/>
                 </a>
                 &nbsp;
