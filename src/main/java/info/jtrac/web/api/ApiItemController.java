@@ -6,6 +6,7 @@ import info.jtrac.domain.Metadata;
 import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
 import info.jtrac.service.JtracService;
+import info.jtrac.web.api.dto.CommentDto;
 import info.jtrac.web.api.dto.ItemCreateDto;
 import info.jtrac.web.api.dto.ItemPatchDto;
 import info.jtrac.web.api.dto.ItemResponseDto;
@@ -165,6 +166,32 @@ public class ApiItemController {
 
         return new ResponseEntity<>(new ItemResponseDto(item), HttpStatus.OK);
     }
+
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<?> addComment(
+            @PathVariable long id,
+            @RequestBody CommentDto dto
+    ) {
+        Item item = jtracService.findItemById(id);
+        if (item == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User loggedInUser = jtracService.findUserByLoginName(auth.getName());
+
+        if (dto.getText() == null || dto.getText().trim().isEmpty()) {
+            return new ResponseEntity<>("Comment text is required", HttpStatus.BAD_REQUEST);
+        }
+
+        item.setEditReason(dto.getText());
+        jtracService.updateItem(item, loggedInUser);
+
+        ws.notifyItemUpdate(id); // если WebSocket используется
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 
     @GetMapping
     public ResponseEntity<List<ItemResponseDto>> findItems(
