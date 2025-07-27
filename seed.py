@@ -1,15 +1,14 @@
 import requests
 import time
 import os
-import json
+import yaml
+import sys
 
-# Get configuration from environment variables
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8082")
 ADMIN_USER = os.getenv("ADMIN_USER", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin")
 
 def wait_for_backend():
-    """Waits for the backend to become available."""
     print(f"Waiting for backend at {BACKEND_URL}...")
     while True:
         try:
@@ -22,137 +21,103 @@ def wait_for_backend():
         time.sleep(2)
 
 def get_auth_token():
-    """Gets a JWT token for the admin user."""
     print("Authenticating admin user...")
-    auth_payload = {
-        "username": ADMIN_USER,
-        "password": ADMIN_PASSWORD
-    }
+    auth_payload = {"username": ADMIN_USER, "password": ADMIN_PASSWORD}
     response = requests.post(f"{BACKEND_URL}/api/auth", json=auth_payload)
     response.raise_for_status()
     token = response.json()["token"]
-    print("Authentication successful.")
     return f"Bearer {token}"
 
-def seed_data(auth_header):
-    """Seeds the initial data."""
+def load_yaml_data(path):
+    with open(path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+def seed_data(auth_header, data):
     headers = {"Authorization": auth_header, "Content-Type": "application/json"}
-
-    # 1. Create users
-    print("Creating users...")
-    users_to_create = [
-        {"loginName": "dev1", "name": "Developer One", "email": "dev1@jtrac.info", "password": "password", "avatarUrl": "https://robohash.org/mail@ashallendesign.co.uk"},
-        {"loginName": "manager1", "name": "Manager One", "email": "manager1@jtrac.info", "password": "password"}
-    ]
     user_ids = {}
-    for user_data in users_to_create:
-        # Check if user exists
-        get_user_res = requests.get(f"{BACKEND_URL}/api/users/{user_data['loginName']}", headers=headers)
-        if get_user_res.status_code == 404:
-             res = requests.post(f"{BACKEND_URL}/api/users", json=user_data, headers=headers)
-             res.raise_for_status()
-             user_id = res.json()["id"]
-             user_ids[user_data['loginName']] = user_id
-             print(f"  - User '{user_data['loginName']}' created with ID: {user_id}")
-        else:
-             user_id = get_user_res.json()["id"]
-             user_ids[user_data['loginName']] = user_id
-             print(f"  - User '{user_data['loginName']}' already exists with ID: {user_id}")
-
-
-    # 2. Create spaces
-    print("\nCreating spaces...")
-    spaces_to_create = [
-        {"prefixCode": "PROJ1", "name": "Project One"},
-        {"prefixCode": "PROJ2", "name": "Project Two"}
-    ]
     space_ids = {}
-    for space_data in spaces_to_create:
-        prefix_code = space_data['prefixCode']
-        get_space_res = requests.get(f"{BACKEND_URL}/api/spaces/{prefix_code}", headers=headers)
-        if get_space_res.status_code == 404:
-            res = requests.post(f"{BACKEND_URL}/api/spaces", json=space_data, headers=headers)
-            res.raise_for_status()
-            space_id = res.json()["id"]
-            space_ids[prefix_code] = space_id
-            print(f"  - Space '{prefix_code}' created with ID: {space_id}")
+
+    # Users
+    print("Creating users...")
+    for user in data.get("users", []):
+        login = user["loginName"]
+        res = requests.get(f"{BACKEND_URL}/api/users/{login}", headers=headers)
+        if res.status_code == 404:
+            created = requests.post(f"{BACKEND_URL}/api/users", json=user, headers=headers)
+            created.raise_for_status()
+            user_ids[login] = created.json()["id"]
+            print(f"  - Created user: {login}")
         else:
-            get_space_res.raise_for_status()
-            space_id = get_space_res.json()["id"]
-            space_ids[prefix_code] = space_id
-            print(f"  - Space '{prefix_code}' already exists with ID: {space_id}")
+            user_ids[login] = res.json()["id"]
+            print(f"  - User exists: {login}")
 
-    # 3. Add custom fields
-    print("\nAdding custom fields...")
-    priority_field = {
-        "name": "priority", "label": "Priority", "type": 1,
-        "options": {"1": "High", "2": "Medium", "3": "Low"}
-    }
-    requests.post(f"{BACKEND_URL}/api/spaces/PROJ1/fields", json=priority_field, headers=headers).raise_for_status()
-    print("  - Field 'Priority' added to PROJ1.")
+    # Spaces
+    print("\nCreating spaces...")
+    for space in data.get("spaces", []):
+        prefix = space["prefixCode"]
+        res = requests.get(f"{BACKEND_URL}/api/spaces/{prefix}", headers=headers)
+        if res.status_code == 404:
+            created = requests.post(f"{BACKEND_URL}/api/spaces", json={
+                "prefixCode": prefix, "name": space["name"]
+            }, headers=headers)
+            created.raise_for_status()
+            space_ids[prefix] = created.json()["id"]
+            print(f"  - Created space: {prefix}")
+        else:
+            space_ids[prefix] = res.json()["id"]
+            print(f"  - Space exists: {prefix}")
 
-    severity_field = {
-        "name": "severity", "label": "Severity", "type": 1,
-        "options": {"1": "Critical", "2": "Major", "3": "Minor"}
-    }
-    requests.post(f"{BACKEND_URL}/api/spaces/PROJ1/fields", json=severity_field, headers=headers).raise_for_status()
-    print("  - Field 'Severity' added to PROJ1.")
+        # Fields
+        for field in space.get("fields", []):
+            res = requests.post(f"{BACKEND_URL}/api/spaces/{prefix}/fields", json=field, headers=headers)
+            res.raise_for_status()
+            print(f"    - Field added: {field['name']}")
 
-    customer_field = {"name": "customerName", "label": "Customer Name", "type": 2}
-    requests.post(f"{BACKEND_URL}/api/spaces/PROJ2/fields", json=customer_field, headers=headers).raise_for_status()
-    print("  - Field 'Customer Name' added to PROJ2.")
-
-
-    # 4. Assign roles
+    # Roles
     print("\nAssigning roles...")
-    roles_to_assign = [
-        {"prefixCode": "PROJ1", "loginName": "dev1", "roleKey": "ROLE_DEVELOPER"},
-        {"prefixCode": "PROJ1", "loginName": "manager1", "roleKey": "ROLE_MANAGER"},
-        {"prefixCode": "PROJ2", "loginName": "dev1", "roleKey": "ROLE_GUEST"}
-    ]
-    for role_data in roles_to_assign:
-        payload = {"loginName": role_data["loginName"], "roleKey": role_data["roleKey"]}
-        res = requests.post(f"{BACKEND_URL}/api/spaces/{role_data['prefixCode']}/users", json=payload, headers=headers)
+    for role in data.get("roles", []):
+        payload = {
+            "loginName": role["loginName"],
+            "roleKey": role["roleKey"]
+        }
+        res = requests.post(f"{BACKEND_URL}/api/spaces/{role['prefixCode']}/users", json=payload, headers=headers)
         res.raise_for_status()
-        print(f"  - Assigned '{role_data['roleKey']}' to '{role_data['loginName']}' in space '{role_data['prefixCode']}'")
+        print(f"  - Assigned {payload['roleKey']} to {payload['loginName']} in {role['prefixCode']}")
 
-    # 5. Create items
+    # Items
     print("\nCreating items...")
-    item1_payload = {
-        "spacePrefix": "PROJ1",
-        "summary": "Fix login button alignment",
-        "detail": "The login button on the main page is misaligned on Firefox.",
-        "assignedToId": user_ids["dev1"]
-    }
-    res = requests.post(f"{BACKEND_URL}/api/items", json=item1_payload, headers=headers)
-    res.raise_for_status()
-    item1_id = res.json()["id"]
-    print(f"  - Created item 'Fix login button alignment' with ID: {item1_id}")
+    for item in data.get("items", []):
+        payload = {
+            "spacePrefix": item["spacePrefix"],
+            "summary": item["summary"],
+            "detail": item["detail"],
+            "assignedToId": user_ids[item["assignedTo"]]
+        }
+        res = requests.post(f"{BACKEND_URL}/api/items", json=payload, headers=headers)
+        res.raise_for_status()
+        item_id = res.json()["id"]
+        print(f"  - Created item: {payload['summary']}")
 
-    item2_payload = {
-        "spacePrefix": "PROJ1",
-        "summary": "Implement password recovery feature",
-        "detail": "Users need a way to recover their password if they forget it.",
-        "assignedToId": user_ids["dev1"]
-    }
-    res = requests.post(f"{BACKEND_URL}/api/items", json=item2_payload, headers=headers)
-    res.raise_for_status()
-    print(f"  - Created item 'Implement password recovery feature' with ID: {res.json()['id']}")
+        # Updates (optional)
+        for update in item.get("updates", []):
+            update_payload = {
+                "comment": update["comment"],
+                "assignedToId": user_ids[update["assignedTo"]],
+                "status": update["status"]
+            }
+            res = requests.put(f"{BACKEND_URL}/api/items/{item_id}", json=update_payload, headers=headers)
+            res.raise_for_status()
+            print(f"    - Added update to item ID {item_id}")
 
-    # 6. Add comments and updates to an item
-    print("\nAdding comments/updates to an item...")
-    update_payload = {
-        "comment": "I've investigated this. It seems to be a CSS float issue. I'll work on a fix.",
-        "assignedToId": user_ids["manager1"],
-        "status": 1 # Assuming 1 is some "In Progress" status
-    }
-    res = requests.put(f"{BACKEND_URL}/api/items/{item1_id}", json=update_payload, headers=headers)
-    res.raise_for_status()
-    print(f"  - Added comment and updated item ID: {item1_id}")
-
-    print("\nData seeding complete!")
+    print("\nSeeding complete.")
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python seed.py <path-to-yaml>")
+        sys.exit(1)
+
+    yaml_path = sys.argv[1]
     wait_for_backend()
     token = get_auth_token()
-    seed_data(token)
+    data = load_yaml_data(yaml_path)
+    seed_data(token, data)

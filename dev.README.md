@@ -111,8 +111,17 @@ docker run --rm -d --name jtrac-app --network=jtrac-src-github_default -p 8082:8
 docker build -t jtrac-seeder -f seeder.Dockerfile .
 
 # Run the seeder, connecting to the Docker network
-docker run --rm --network=jtrac-src-github_default -e BACKEND_URL=http://jtrac-app:8082 jtrac-seeder
+docker run --rm --network=jtrac-src-github_default \
+  -e BACKEND_URL=http://jtrac-app:8082 \
+  -e SEED_FILE=data.yaml jtrac-seeder \
+  -v "$(pwd)/seed.yaml:/app/data.yaml"
 ```
+Explanation:
+
+* -v "$(pwd)/seed.yaml:/app/data.yaml" — mounts your YAML file into the container.
+* -e SEED_FILE=data.yaml — tells the seeder which file to use.
+
+By default, if no SEED_FILE is provided, data.yaml is assumed.
 
 #### Running Locally (Without Docker)
 
@@ -144,10 +153,10 @@ The script needs the `requests` library. It's best to use a virtual environment.
 # Create virtual environment and install dependencies
 python3 -m venv .venv
 source .venv/bin/activate
-pip install requests
+pip install requests pyyaml
 
 # Run the script (it will connect to http://localhost:8082 by default)
-python seed.py
+python seed.py seed.yaml
 
 # Deactivate the virtual environment
 deactivate
@@ -164,3 +173,5 @@ To build the project and create the executable JAR file without running it:
 ```
 
 The JAR file will be located in `build/libs/`.
+
+

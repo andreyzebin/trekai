@@ -28,14 +28,17 @@
         <tr th:each="usr : ${spaceRoles}">
             <td th:text="${usr.space.name}">Test Space</td>
             <td>
-                <a th:href="@{/web/spaces/{spacePrefix}/create(spacePrefix=${usr.space.prefixCode})}">
-                    <img th:src="@{/resources/add.gif}" title="New Item" style="border: 0"/>
+                <a th:href="@{/web/spaces/{spacePrefix}/create(spacePrefix=${usr.space.prefixCode})}"
+                   title="Создать тикет 🎨" class="btn btn-sm btn-outline-success me-1">
+                    <i class="bi bi-pencil-square me-1"></i> 🧁
                 </a>
-                &nbsp;
-                <a th:href="@{/web/item/search(spacePrefix=${usr.space.prefixCode})}">
-                    <img th:src="@{/resources/search.gif}" title="Search" style="border: 0"/>
+                <a th:href="@{/web/item/search(spacePrefix=${usr.space.prefixCode})}"
+                   title="Искать тикеты 🔍" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-search-heart me-1"></i> 🦄
                 </a>
             </td>
+
+
             <td>
                 <!-- Status links would go here -->
             </td>

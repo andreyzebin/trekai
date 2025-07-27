@@ -1,0 +1,62 @@
+users:
+  - loginName: dev1
+    name: Developer One
+    email: dev1@jtrac.info
+    password: password
+    avatarUrl: https://robohash.org/mail@ashallendesign.co.uk
+
+  - loginName: manager1
+    name: Manager One
+    email: manager1@jtrac.info
+    password: password
+
+spaces:
+  - prefixCode: PROJ1
+    name: Project One
+    fields:
+      - name: priority
+        label: Priority
+        type: 1
+        options:
+          1: High
+          2: Medium
+          3: Low
+      - name: severity
+        label: Severity
+        type: 1
+        options:
+          1: Critical
+          2: Major
+          3: Minor
+
+  - prefixCode: PROJ2
+    name: Project Two
+    fields:
+      - name: customerName
+        label: Customer Name
+        type: 2
+
+roles:
+  - prefixCode: PROJ1
+    loginName: dev1
+    roleKey: ROLE_DEVELOPER
+  - prefixCode: PROJ1
+    loginName: manager1
+    roleKey: ROLE_MANAGER
+  - prefixCode: PROJ2
+    loginName: dev1
+    roleKey: ROLE_GUEST
+
+items:
+  - spacePrefix: PROJ1
+    summary: Fix login button alignment
+    detail: Misaligned on Firefox
+    assignedTo: dev1
+    updates:
+      - comment: Investigated CSS float issue
+        assignedTo: manager1
+        status: 1
+  - spacePrefix: PROJ1
+    summary: Password recovery feature
+    detail: Users need a way to recover their password
+    assignedTo: dev1
