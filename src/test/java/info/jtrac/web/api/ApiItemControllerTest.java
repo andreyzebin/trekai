@@ -3,6 +3,7 @@ package info.jtrac.web.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
+import info.jtrac.repository.ItemRepository;
 import info.jtrac.repository.SpaceRepository;
 import info.jtrac.repository.UserRepository;
 import info.jtrac.service.JtracService;
@@ -55,6 +56,9 @@ public class ApiItemControllerTest {
     private SpaceRepository spaceRepository;
 
     @Autowired
+    private ItemRepository itemRepository;
+
+    @Autowired
     private JtracService jtracService;
 
     private String jwtToken;
@@ -70,6 +74,9 @@ public class ApiItemControllerTest {
 
     @BeforeEach
     public void setup() throws Exception {
+        itemRepository.deleteAll();
+        spaceRepository.deleteAll();
+        userRepository.deleteAll();
         // Admin user for setup
         org.springframework.security.core.userdetails.User adminUser = new org.springframework.security.core.userdetails.User("admin", passwordEncoder.encode("admin"), new ArrayList<>());
         given(userDetailsService.loadUserByUsername("admin")).willReturn(adminUser);

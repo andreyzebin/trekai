@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import info.jtrac.config.SecurityConfig;
 import info.jtrac.config.SecurityFilters;
 import info.jtrac.config.jwt.TokenProvider;
+import info.jtrac.repository.ItemRepository;
+import info.jtrac.repository.SpaceRepository;
+import info.jtrac.repository.UserRepository;
+import info.jtrac.service.JtracServiceImpl;
 import info.jtrac.web.api.dto.AuthenticationRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +49,15 @@ public class AuthenticationControllerTest {
 
     @MockitoBean
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private SpaceRepository spaceRepository;
+
+    @Autowired
+    private ItemRepository itemRepository;
 
     @Test
     public void whenAuthenticateWithValidCredentials_thenReturnsJwtToken() throws Exception {
