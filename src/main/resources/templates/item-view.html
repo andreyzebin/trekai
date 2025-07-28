@@ -17,7 +17,18 @@
             position: relative;
             padding-right: 24px;
             cursor: pointer;
+            text-align: left;
         }
+
+        .edit-text {
+            display: block;          /* делает span блочным */
+            text-align: left;        /* на всякий случай */
+            margin: 0;
+            padding: 0;
+            position: absolute;
+            top: 0px;
+        }
+
 
         .editable-display:hover .edit-icon {
             opacity: 1;
@@ -63,6 +74,7 @@
             console.log("editor deactivated!")
             const display = container.querySelector('.editable-display');
             const textarea = container.querySelector('textarea');
+            const editText = container.querySelector('.edit-text');
             const newValue = textarea.value.trim();
             const originalValue = (textarea.dataset.originalValue || '').trim();
 
@@ -70,7 +82,7 @@
             display.classList.remove('hidden');
 
             if (save && newValue !== originalValue) {
-                display.textContent = newValue;
+                editText.textContent = newValue;
                 patchField(textarea);
             }
         }
