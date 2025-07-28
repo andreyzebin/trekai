@@ -4,14 +4,110 @@
       layout:decorate="~{fragments/layout}">
 <head>
     <title th:text="'Item ' + ${item.refId}">Item Details</title>
+    <style>
+        .editable-container {
+            position: relative;
+        }
+
+        .editable-display {
+            max-height: 100px;
+            overflow: hidden;
+            white-space: pre-wrap;
+            text-overflow: ellipsis;
+            position: relative;
+            padding-right: 24px;
+            cursor: pointer;
+        }
+
+        .editable-display:hover .edit-icon {
+            opacity: 1;
+        }
+
+        .edit-icon {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            font-size: 14px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .edit-icon:hover {
+            opacity: 1;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        textarea.editable-input {
+            width: 100%;
+            min-height: 100px;
+            resize: vertical;
+        }
+    </style>
     <script>
-        function patchField(input) {
-            const currentValue = input.value;
-            const originalValue = input.dataset.originalValue;
+        function activateEditor(container) {
+            console.log("editor activated!")
+            const display = container.querySelector('.editable-display');
+            const textarea = container.querySelector('textarea');
+
+            textarea.value = textarea.dataset.originalValue;
+            display.classList.add('hidden');
+            textarea.classList.remove('hidden');
+            textarea.focus();
+        }
+
+
+        function deactivateEditor(container, save = true) {
+            console.log("editor deactivated!")
+            const display = container.querySelector('.editable-display');
+            const textarea = container.querySelector('textarea');
+            const newValue = textarea.value.trim();
+            const originalValue = (textarea.dataset.originalValue || '').trim();
+
+            textarea.classList.add('hidden');
+            display.classList.remove('hidden');
+
+            if (save && newValue !== originalValue) {
+                display.textContent = newValue;
+                patchField(textarea);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.editable-container').forEach(container => {
+                const display = container.querySelector('.editable-display');
+                const textarea = container.querySelector('textarea');
+
+                display.addEventListener('click', () => activateEditor(container));
+                textarea.addEventListener('blur', () => deactivateEditor(container));
+            });
+        });
+    </script>
+
+
+    <script>
+        function patchField(component) {
+            console.log("[PATCH] Field", {
+              id: component.id,
+              value: component.value,
+              original: component.dataset.originalValue,
+              dataset: component.dataset
+            });
+
+            const currentValue = component.value;
+            const originalValue = component.dataset.originalValue;
+
+            console.log("patchField called");
+            console.log("Current:", currentValue, "Original:", originalValue);
+
+
+
             if (currentValue === originalValue) return;
 
-            const itemId = input.dataset.itemId;
-            const fieldCode = input.dataset.fieldCode || input.id;
+            const itemId = component.dataset.itemId;
+            const fieldCode = component.dataset.fieldCode || component.id;
             const csrfToken = document.querySelector('meta[name="_csrf"]').content;
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
@@ -20,7 +116,7 @@
                     [fieldCode]: currentValue
                 }
             };
-
+            console.log("Sending PATCH:", payload);
             fetch(`/web/item/${itemId}`, {
                 method: 'PATCH',
                 headers: {
@@ -30,9 +126,12 @@
                 body: JSON.stringify(payload)
             }).then(res => {
                 if (res.ok) {
-                    input.dataset.originalValue = currentValue;
+                    component.dataset.originalValue = currentValue;
+                    console.log("Patch successful");
                 } else {
                     res.text().then(text => alert("Ошибка: " + text));
+                    console.error("Ошибка:", text);
+                    alert("Ошибка: " + text);
                 }
             });
         }
@@ -139,7 +238,21 @@
                     </div>
                     <hr>
                     <div>Detail:</div>
-                    <p th:text="${item.detail}">Detailed description of the item.</p>
+                    <div class="editable-container mt-2">
+                        <div class="editable-display">
+                            <span class="edit-text"
+                                  th:data-original-value="${item.detail}"
+                                  th:text="${item.detail}">Detailed description of the item.</span>
+                            <span class="edit-icon">✎</span>
+                        </div>
+                        <textarea class="form-control editable-input hidden"
+                                  th:text="${item.detail}"
+                                  th:data-original-value="${item.detail}"
+                                  th:data-item-id="${item.id}"
+                                  data-field-code="detail">
+                        </textarea>
+                    </div>
+
 
                 </div>
             </div>
