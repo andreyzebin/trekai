@@ -10,7 +10,7 @@
         }
 
         .editable-display {
-            max-height: 100px;
+            max-height: 200px;
             overflow: hidden;
             white-space: pre-wrap;
             text-overflow: ellipsis;
@@ -25,7 +25,7 @@
             text-align: left;        /* на всякий случай */
             margin: 0;
             padding: 0;
-            position: absolute;
+            //position: absolute;
             top: 0px;
         }
 
@@ -53,7 +53,7 @@
 
         textarea.editable-input {
             width: 100%;
-            min-height: 100px;
+            min-height: 250px;
             resize: vertical;
         }
     </style>
@@ -255,7 +255,7 @@
                             <span class="edit-text"
                                   th:data-original-value="${item.detail}"
                                   th:text="${item.detail}">Detailed description of the item.</span>
-                            <span class="edit-icon">✎</span>
+                            <span class="edit-icon">🖉</span>
                         </div>
                         <textarea class="form-control editable-input hidden"
                                   th:text="${item.detail}"
