@@ -37,6 +37,7 @@
             });
         }
     </script>
+    <!-- Websockets -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <script th:inline="javascript">
@@ -81,7 +82,19 @@
 <div class="container mt-4" layout:fragment="content">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6"> <!-- Ширина формы -->
-            <h2 class="mb-4" th:text="${item.refId + ' - ' + item.summary}">ITEM-1 - Summary</h2>
+            <div class="mb-4 d-flex align-items-center gap-2">
+                <h2 class="mb-0" th:text="${item.refId}">ITEM-1</h2>
+                <input type="text"
+                       class="form-control form-control-sm flex-grow-1"
+                       style="max-width: 400px;"
+                       id="summary"
+                       th:value="${item.summary}"
+                       th:data-item-id="${item.id}"
+                       th:attr="data-original-value=${item.summary}"
+                       onchange="patchField(this)"
+                       onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
+            </div>
+
 
             <!-- Main Info Card -->
             <div class="card mb-4">
@@ -127,6 +140,7 @@
                     <hr>
                     <div>Detail:</div>
                     <p th:text="${item.detail}">Detailed description of the item.</p>
+
                 </div>
             </div>
 

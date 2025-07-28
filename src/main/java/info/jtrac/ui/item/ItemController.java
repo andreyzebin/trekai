@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 @Controller
 @RequestMapping("/web/item")
@@ -94,7 +96,7 @@ public class ItemController {
             return "redirect:/web/dashboard";
         }
         model.addAttribute("item", item);
-        model.addAttribute("statuses", Map.of(1,"Open", 2, "Closed"));
+        model.addAttribute("statuses", Map.of(1, "Open", 2, "Closed"));
         model.addAttribute("customFields", item.getSpace().getMetadata().getOrderedFields());
         model.addAttribute("itemUpdateForm", new ItemUpdateDto());
         model.addAttribute("users", jtracService.findAllUsers());
@@ -181,20 +183,22 @@ public class ItemController {
         if (itemDto.getCustomFields() != null) {
             Map<String, String> customFields = new HashMap<>(itemDto.getCustomFields());
 
-            // assignedToId
-            if (itemDto.getCustomFields().containsKey("assignedToId")) {
-                itemDto.setAssignedToId(Long.parseLong(itemDto.getCustomFields().get("assignedToId")));
-                customFields.remove("assignedToId");
-                itemDto.setCustomFields(customFields);
-            }
-
-            // status
-            if (itemDto.getCustomFields().containsKey("status")) {
-                itemDto.setStatus(Long.parseLong(itemDto.getCustomFields().get("status")));
-                customFields.remove("status");
-                itemDto.setCustomFields(customFields);
-            }
-
+            fillLong(itemDto,
+                    customFields,
+                    "assignedToId",
+                    ItemPatchDto::setAssignedToId);
+            fillLong(itemDto,
+                    customFields,
+                    "status",
+                    ItemPatchDto::setStatus);
+            fillString(itemDto,
+                    customFields,
+                    "summary",
+                    ItemPatchDto::setSummary);
+            fillString(itemDto,
+                    customFields,
+                    "detail",
+                    ItemPatchDto::setDetail);
 
             if (itemDto.getCustomFields().keySet().stream()
                     .anyMatch((code) -> !item.getSpace().getMetadata().getFields().containsKey(code))) {
@@ -215,10 +219,39 @@ public class ItemController {
         if (itemDto.getStatus() != null) {
             item.setStatus(Math.toIntExact(itemDto.getStatus()));
         }
+        if (itemDto.getSummary() != null) {
+            item.setSummary(itemDto.getSummary());
+        }
+        if (itemDto.getDetail() != null) {
+            item.setDetail(itemDto.getDetail());
+        }
+
         // Сохраняем как новый History (если логируется)
         jtracService.updateItem(item, user);
 
         return ResponseEntity.ok("Field updated");
+    }
+
+    private static void fillLong(ItemPatchDto itemDto,
+                                 Map<String, String> customFields,
+                                 String fieldName,
+                                 BiConsumer<ItemPatchDto, Long> setter) {
+        if (itemDto.getCustomFields().containsKey(fieldName)) {
+            setter.accept(itemDto, Long.parseLong(itemDto.getCustomFields().get(fieldName)));
+            customFields.remove(fieldName);
+            itemDto.setCustomFields(customFields);
+        }
+    }
+
+    private static void fillString(ItemPatchDto itemDto,
+                                   Map<String, String> customFields,
+                                   String fieldName,
+                                   BiConsumer<ItemPatchDto, String> setter) {
+        if (itemDto.getCustomFields().containsKey(fieldName)) {
+            setter.accept(itemDto, itemDto.getCustomFields().get(fieldName));
+            customFields.remove(fieldName);
+            itemDto.setCustomFields(customFields);
+        }
     }
 
     @PatchMapping("/{id}/field")
