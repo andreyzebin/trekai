@@ -9,6 +9,21 @@
             position: relative;
         }
 
+        .editable-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    gap: 12px;
+}
+        .editable-input {
+    width: 100%;
+    padding: 6px 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
         .editable-display {
             max-height: 200px;
             overflow: hidden;
@@ -62,11 +77,25 @@
             console.log("editor activated!")
             const display = container.querySelector('.editable-display');
             const textarea = container.querySelector('textarea');
+            const input = container.querySelector('.editable-input');
 
-            textarea.value = textarea.dataset.originalValue;
             display.classList.add('hidden');
-            textarea.classList.remove('hidden');
-            textarea.focus();
+            if (textarea) {
+                textarea.value = textarea.dataset.originalValue;
+                textarea.classList.remove('hidden');
+                textarea.focus();
+            }
+
+            if (input) {
+                input.value = input.dataset.originalValue;
+                input.classList.remove('hidden');
+                input.focus();
+            }
+
+
+
+
+
         }
 
 
@@ -74,26 +103,48 @@
             console.log("editor deactivated!")
             const display = container.querySelector('.editable-display');
             const textarea = container.querySelector('textarea');
+            const input = container.querySelector('.editable-input');
+
             const editText = container.querySelector('.edit-text');
-            const newValue = textarea.value.trim();
-            const originalValue = (textarea.dataset.originalValue || '').trim();
+            const newValue = textarea ? textarea.value.trim() : input.value.trim()
+            const originalValue = textarea ? (textarea.dataset.originalValue || '').trim() : (input.dataset.originalValue || '').trim();
 
-            textarea.classList.add('hidden');
             display.classList.remove('hidden');
+            if (textarea) {
+                textarea.classList.add('hidden');
 
-            if (save && newValue !== originalValue) {
-                editText.textContent = newValue;
-                patchField(textarea);
+                if (save && newValue !== originalValue) {
+                    editText.textContent = newValue;
+                    patchField(textarea);
+                }
+
+            } else {
+                input.classList.add('hidden');
+
+                if (save && newValue !== originalValue) {
+                    editText.textContent = newValue;
+                    patchField(input);
+                }
+
             }
+
+
+
+
         }
 
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.editable-container').forEach(container => {
                 const display = container.querySelector('.editable-display');
                 const textarea = container.querySelector('textarea');
+                const input = container.querySelector('.editable-input');
 
                 display.addEventListener('click', () => activateEditor(container));
-                textarea.addEventListener('blur', () => deactivateEditor(container));
+                if(textarea) {
+                    textarea.addEventListener('blur', () => deactivateEditor(container));
+                } else {
+                    input.addEventListener('blur', () => deactivateEditor(container));
+                }
             });
         });
     </script>
@@ -273,9 +324,13 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <div th:each="field : ${customFields}" class="row mb-3 align-items-center">
+                        <!-- Левая колонка — Название поля -->
                         <label class="col-md-4 form-label col-form-label" th:text="${field.label}">Field Label</label>
+
+                        <!-- Правая колонка — Значение -->
                         <div class="col-md-8">
                             <div th:switch="${field.fieldType.type}">
+                                <!-- SELECT -->
                                 <select th:case="3"
                                         th:id="${field.code}"
                                         class="form-select form-select-sm"
@@ -290,24 +345,35 @@
                                     </option>
                                 </select>
 
+                                <!-- ТЕКСТ -->
                                 <div th:case="*">
-                                    <div th:if="${field.fieldType.type == 5 or field.fieldType.type == 7 or field.fieldType.type == 4}"
-                                         class="input-group input-group-sm">
-                                        <input th:type="${field.fieldType.type == 4 ? 'number' : 'text'}"
-                                               class="form-control"
-                                               th:name="${field.code}"
-                                               th:value="${item.getRender(field.code)}"
-                                               th:data-item-id="${item.id}"
-                                               th:data-field-code="${field.code}"
-                                               th:attr="data-original-value=${item.getRender(field.code)}"
-                                               onchange="patchField(this)"
-                                               onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
-                                        <span class="input-group-text" title="Редактируемое поле">🖉</span>
+                                    <div class="input-group input-group-sm">
+                                        <div class="editable-container w-100">
+                                            <!-- Режим просмотра -->
+                                            <div class="editable-display d-flex justify-content-between align-items-center">
+                                                <span class="edit-text flex-grow-1 text-truncate"
+                                                      th:text="${item.getRender(field.code)}"
+                                                      th:data-original-value="${item.getRender(field.code)}">
+                                                    Value
+                                                </span>
+                                                <span class="edit-icon ms-2">🖉</span>
+                                            </div>
+
+                                            <!-- Режим редактирования -->
+                                            <input type="text"
+                                                   class="editable-input form-control form-control-sm hidden mt-1"
+                                                   th:id="${field.code}"
+                                                   th:name="${field.code}"
+                                                   th:value="${item.getRender(field.code)}"
+                                                   th:data-item-id="${item.id}"
+                                                   th:data-original-value="${item.getRender(field.code)}"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
 
