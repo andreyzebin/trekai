@@ -233,7 +233,6 @@
                            th:value="${item.summary}"
                            th:data-item-id="${item.id}"
                            th:attr="data-original-value=${item.summary}"
-                           onchange="patchField(this)"
                            onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
                     <!-- Режим редактирования -->
                 </div>
@@ -348,7 +347,8 @@
                                                    th:name="${field.code}"
                                                    th:value="${item.getRender(field.code)}"
                                                    th:data-item-id="${item.id}"
-                                                   th:data-original-value="${item.getRender(field.code)}"/>
+                                                   th:data-original-value="${item.getRender(field.code)}"
+                                                   onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
                                         </div>
                                     </div>
                                 </div>
@@ -372,7 +372,8 @@
                                                    th:name="${field.code}"
                                                    th:value="${item.getRender(field.code)}"
                                                    th:data-item-id="${item.id}"
-                                                   th:data-original-value="${item.getRender(field.code)}"/>
+                                                   th:data-original-value="${item.getRender(field.code)}"
+                                                   onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
                                         </div>
                                     </div>
                                 </div>
