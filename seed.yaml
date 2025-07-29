@@ -30,9 +30,12 @@ spaces:
           3: Minor
       - name: customerName
         label: Customer Name
-        type: 4
+        type: 5
       - name: promoName
         label: Promo Name
+        type: 5
+      - name: cashback
+        label: Cashback
         type: 4
 
   - prefixCode: PROJ2
