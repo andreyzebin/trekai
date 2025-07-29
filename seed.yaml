@@ -28,6 +28,12 @@ spaces:
           1: Critical
           2: Major
           3: Minor
+      - name: customerName
+        label: Customer Name
+        type: 4
+      - name: promoName
+        label: Promo Name
+        type: 4
 
   - prefixCode: PROJ2
     name: Project Two
