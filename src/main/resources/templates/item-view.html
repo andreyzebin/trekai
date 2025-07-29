@@ -216,15 +216,28 @@
         <div class="col-md-8 col-lg-6"> <!-- Ширина формы -->
             <div class="mb-4 d-flex align-items-center gap-2">
                 <h2 class="mb-0" th:text="${item.refId}">ITEM-1</h2>
-                <input type="text"
-                       class="form-control form-control-sm flex-grow-1"
-                       style="max-width: 400px;"
-                       id="summary"
-                       th:value="${item.summary}"
-                       th:data-item-id="${item.id}"
-                       th:attr="data-original-value=${item.summary}"
-                       onchange="patchField(this)"
-                       onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
+                <div class="editable-container">
+                    <!-- Режим просмотра -->
+                    <div class="editable-display d-flex justify-content-between align-items-center">
+                                                <span class="edit-text flex-grow-1 text-truncate"
+                                                      th:text="${item.summary}"
+                                                      th:data-original-value="${item.summary}">
+                                                    Value
+                                                </span>
+                        <span class="edit-icon ms-2">🖉</span>
+                    </div>
+
+                    <input type="text"
+                           class="editable-input form-control form-control-sm hidden mt-1"
+                           style="max-width: 400px;"
+                           id="summary"
+                           th:value="${item.summary}"
+                           th:data-item-id="${item.id}"
+                           th:attr="data-original-value=${item.summary}"
+                           onchange="patchField(this)"
+                           onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
+                    <!-- Режим редактирования -->
+                </div>
             </div>
 
 
