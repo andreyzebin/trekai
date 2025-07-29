@@ -10,19 +10,19 @@
         }
 
         .editable-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 0;
-    gap: 12px;
-}
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+            gap: 12px;
+        }
         .editable-input {
-    width: 100%;
-    padding: 6px 8px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
+            width: 100%;
+            padding: 6px 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
 
         .editable-display {
             max-height: 200px;
@@ -63,9 +63,8 @@
         }
 
         .hidden {
-            display: none;
+          display: none !important;
         }
-
         textarea.editable-input {
             width: 100%;
             min-height: 250px;
@@ -76,25 +75,13 @@
         function activateEditor(container) {
             console.log("editor activated!")
             const display = container.querySelector('.editable-display');
-            const textarea = container.querySelector('textarea');
+
             const input = container.querySelector('.editable-input');
 
             display.classList.add('hidden');
-            if (textarea) {
-                textarea.value = textarea.dataset.originalValue;
-                textarea.classList.remove('hidden');
-                textarea.focus();
-            }
-
-            if (input) {
-                input.value = input.dataset.originalValue;
-                input.classList.remove('hidden');
-                input.focus();
-            }
-
-
-
-
+            input.value = input.dataset.originalValue;
+            input.classList.remove('hidden');
+            input.focus();
 
         }
 
@@ -102,23 +89,15 @@
         function deactivateEditor(container, save = true) {
             console.log("editor deactivated!")
             const display = container.querySelector('.editable-display');
-            const textarea = container.querySelector('textarea');
+
             const input = container.querySelector('.editable-input');
 
             const editText = container.querySelector('.edit-text');
-            const newValue = textarea ? textarea.value.trim() : input.value.trim()
-            const originalValue = textarea ? (textarea.dataset.originalValue || '').trim() : (input.dataset.originalValue || '').trim();
+            const newValue = input.value.trim()
+            const originalValue = (input.dataset.originalValue || '').trim();
 
             display.classList.remove('hidden');
-            if (textarea) {
-                textarea.classList.add('hidden');
 
-                if (save && newValue !== originalValue) {
-                    editText.textContent = newValue;
-                    patchField(textarea);
-                }
-
-            } else {
                 input.classList.add('hidden');
 
                 if (save && newValue !== originalValue) {
@@ -126,25 +105,16 @@
                     patchField(input);
                 }
 
-            }
-
-
-
-
         }
 
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.editable-container').forEach(container => {
                 const display = container.querySelector('.editable-display');
-                const textarea = container.querySelector('textarea');
                 const input = container.querySelector('.editable-input');
 
                 display.addEventListener('click', () => activateEditor(container));
-                if(textarea) {
-                    textarea.addEventListener('blur', () => deactivateEditor(container));
-                } else {
-                    input.addEventListener('blur', () => deactivateEditor(container));
-                }
+                input.addEventListener('blur', () => deactivateEditor(container));
+
             });
         });
     </script>
