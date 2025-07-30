@@ -110,6 +110,8 @@
             document.querySelectorAll('.editable-container').forEach(container => {
                 const display = container.querySelector('.editable-display');
                 const input = container.querySelector('.editable-input');
+                // Фокус по Tab — тоже редактировать
+                display.addEventListener('focus', () => activateEditor(container));
 
                 display.addEventListener('click', () => activateEditor(container));
                 input.addEventListener('blur', () => deactivateEditor(container));
@@ -215,9 +217,10 @@
         <div class="col-md-8 col-lg-6"> <!-- Ширина формы -->
             <div class="mb-4 d-flex align-items-center gap-2">
                 <h2 class="mb-0" th:text="${item.refId}">ITEM-1</h2>
+                <!-- Summary -->
                 <div class="editable-container">
                     <!-- Режим просмотра -->
-                    <div class="editable-display d-flex justify-content-between align-items-center">
+                    <div class="editable-display d-flex justify-content-between align-items-center" tabindex="0">
                                                 <span class="edit-text flex-grow-1 text-truncate"
                                                       th:text="${item.summary}"
                                                       th:data-original-value="${item.summary}">
@@ -281,9 +284,10 @@
                                 th:text="${#dates.format(item.timeStamp, 'yyyy-MM-dd HH:mm')}">Date</span></div>
                     </div>
                     <hr>
+                    <!-- Detail -->
                     <div>Detail:</div>
                     <div class="editable-container mt-2">
-                        <div class="editable-display">
+                        <div class="editable-display" tabindex="0">
                             <span class="edit-text"
                                   th:data-original-value="${item.detail}"
                                   th:text="${item.detail}">Detailed description of the item.</span>
@@ -296,8 +300,6 @@
                                   data-field-code="detail">
                         </textarea>
                     </div>
-
-
                 </div>
             </div>
 
@@ -326,12 +328,12 @@
                                     </option>
                                 </select>
 
-                                <!-- ТЕКСТ -->
+                                <!-- NUMBER -->
                                 <div th:case="4">
                                     <div class="input-group input-group-sm">
                                         <div class="editable-container w-100">
                                             <!-- Режим просмотра -->
-                                            <div class="editable-display d-flex justify-content-between align-items-center">
+                                            <div class="editable-display d-flex justify-content-between align-items-center" tabindex="0">
                                                 <span class="edit-text flex-grow-1 text-truncate"
                                                       th:text="${val != null and !#strings.isEmpty(val) ? val : '—'}"
                                                       th:data-original-value="${item.getRender(field.code)}">
@@ -352,11 +354,12 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- STRING -->
                                 <div th:case="5">
                                     <div class="input-group input-group-sm">
                                         <div class="editable-container w-100">
                                             <!-- Режим просмотра -->
-                                            <div class="editable-display d-flex justify-content-between align-items-center">
+                                            <div class="editable-display d-flex justify-content-between align-items-center" tabindex="0">
                                                 <span class="edit-text flex-grow-1 text-truncate"
                                                       th:text="${val != null and !#strings.isEmpty(val) ? val : '-'}"
                                                       th:data-original-value="${item.getRender(field.code)}">
@@ -380,7 +383,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -405,10 +407,7 @@
                         </div>
                     </div>
                 </div>
-
             </div>
-
-
         </div>
     </div>
 </div>
