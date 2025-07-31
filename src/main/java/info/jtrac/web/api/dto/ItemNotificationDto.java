@@ -9,8 +9,8 @@ import java.util.List;
 @NoArgsConstructor
 public class ItemNotificationDto {
     private Long itemId;
-    private String loggedBy;
-    private ChangeType changeType;
+    private String author;
+    private ChangeType type;
     private List<FieldUpdateDto> updates;
     private CommentDto comment;
 
