@@ -212,6 +212,48 @@ public class ApiItemControllerTest {
     }
 
     @Test
+    public void testItemApiWorkflowAssignByLogin() throws Exception {
+        // 1. Create Item
+        ItemCreateDto createDto = new ItemCreateDto();
+        createDto.setSpacePrefix(testSpace.getPrefixCode());
+        createDto.setSummary("Test Summary");
+        createDto.setDetail("Test Detail");
+
+        MvcResult createResult = mockMvc.perform(post("/api/items")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createDto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.summary", is("Test Summary")))
+                .andDo(print())
+                .andReturn();
+
+        long itemId = objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asLong();
+
+        ItemPatchDto patch = new ItemPatchDto();
+        patch.setAssignedToLogin("admin");
+
+
+        // 2. Patch Item
+        mockMvc.perform(patch("/api/items/" + itemId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(patch)))
+                .andDo(print());
+
+        // 4. Get list of items with filter
+        mockMvc.perform(get("/api/items/" + itemId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.assignedTo", is("admin")))
+                .andDo(print());
+
+    }
+
+    @Test
     public void testItemApiWorkflowWrongField() throws Exception {
         // 1. Create Item
         ItemCreateDto createDto = new ItemCreateDto();

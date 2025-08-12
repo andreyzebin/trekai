@@ -139,12 +139,21 @@ public class ApiItemController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User loggedInUser = jtracService.findUserByLoginName(auth.getName());
 
+        // Обработка назначения по ID
         if (itemDto.getAssignedToId() != null) {
             User assignedTo = jtracService.loadUser(itemDto.getAssignedToId());
             if (assignedTo == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             item.setAssignedTo(assignedTo);
+        }
+        // Обработка назначения по логину
+        else if (itemDto.getAssignedToLogin() != null && !itemDto.getAssignedToLogin().isBlank()) {
+            User users = jtracService.findUserByLoginName(itemDto.getAssignedToLogin());
+            if (users == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            item.setAssignedTo(users);
         }
 
         if (itemDto.getStatus() != null) {

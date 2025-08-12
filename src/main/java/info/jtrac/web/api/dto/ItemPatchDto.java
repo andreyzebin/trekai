@@ -13,6 +13,10 @@ public class ItemPatchDto {
 
     @Schema(description = "ID of the new user to assign the item to (optional)", example = "3")
     private Long assignedToId;
+
+    @Schema(description = "Login name of the new user to assign the item to (optional)", example = "john.doe")
+    private String assignedToLogin;
+
     private Long status;
     private String summary;
     private String detail;
