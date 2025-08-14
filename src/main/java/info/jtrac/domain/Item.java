@@ -26,6 +26,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "items")
@@ -52,6 +54,7 @@ public class Item extends AbstractItem {
     @Convert(converter = MapToJsonConverter.class)
     private Map<String, String> fieldValues;
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<History> history;
 

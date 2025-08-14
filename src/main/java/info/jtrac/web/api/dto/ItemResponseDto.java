@@ -1,10 +1,12 @@
 package info.jtrac.web.api.dto;
 
+import info.jtrac.domain.AbstractItem;
 import info.jtrac.domain.Item;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,7 +33,10 @@ public class ItemResponseDto {
         this.assignedTo = item.getAssignedTo() != null ? item.getAssignedTo().getLoginName() : null;
         this.status = item.getStatus();
         this.history = item.getHistory() != null
-                ? item.getHistory().stream().map(HistoryDto::new).collect(Collectors.toList())
+                ? item.getHistory().stream()
+                .sorted(Comparator.comparing(AbstractItem::getId))
+                .map(HistoryDto::new)
+                .collect(Collectors.toList())
                 : Collections.emptyList();
         this.fieldValues = item.getFieldValues();
     }

@@ -189,19 +189,27 @@ public class ApiItemControllerTest {
 
         long itemId = objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asLong();
 
+        // 2. Verify initial history (should be empty)
+        mockMvc.perform(get("/api/items/" + itemId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.history", hasSize(1))) // Initially empty
+                .andDo(print());
+
         ItemPatchDto patch = new ItemPatchDto();
         patch.setAssignedToId(admin.getId());
 
-
-        // 2. Patch Item
+        // 3. Patch Item
         mockMvc.perform(patch("/api/items/" + itemId)
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(patch)))
+                .andExpect(status().isOk())
                 .andDo(print());
 
-        // 4. Get list of items with filter
+        // 4. Verify item was assigned
         mockMvc.perform(get("/api/items/" + itemId)
                         .header("Authorization", "Bearer " + jwtToken)
                         .accept(MediaType.APPLICATION_JSON))
@@ -209,6 +217,48 @@ public class ApiItemControllerTest {
                 .andExpect(jsonPath("$.assignedTo", is("admin")))
                 .andDo(print());
 
+        // 5. Verify history contains the assignment update
+        mockMvc.perform(get("/api/items/" + itemId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.history", hasSize(2))) // Now has one history record
+                .andExpect(jsonPath("$.history[1].assignedTo", is("admin"))) // assignment change
+                .andExpect(jsonPath("$.history[1].loggedBy", is("admin"))) // who made the change
+                .andDo(print());
+
+
+        // patch second time!!!
+        ItemPatchDto patch2 = new ItemPatchDto();
+        patch2.setAssignedToId(testUser.getId());
+
+
+        // 3. Patch Item
+        mockMvc.perform(patch("/api/items/" + itemId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(patch2)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        // 4. Verify item was assigned
+        mockMvc.perform(get("/api/items/" + itemId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.assignedTo", is("testuser")))
+                .andDo(print());
+
+        // 5. Verify history contains the assignment update
+        mockMvc.perform(get("/api/items/" + itemId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.history", hasSize(3))) // Now has one history record
+                .andExpect(jsonPath("$.history[2].assignedTo", is("testuser"))) // assignment change
+                .andExpect(jsonPath("$.history[2].loggedBy", is("admin"))) // who made the change
+                .andDo(print());
     }
 
     @Test
@@ -231,19 +281,27 @@ public class ApiItemControllerTest {
 
         long itemId = objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asLong();
 
+        // 2. Verify initial history (should be empty)
+        mockMvc.perform(get("/api/items/" + itemId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.history", hasSize(1))) // Initially empty
+                .andDo(print());
+
         ItemPatchDto patch = new ItemPatchDto();
         patch.setAssignedToLogin("admin");
 
-
-        // 2. Patch Item
+        // 3. Patch Item
         mockMvc.perform(patch("/api/items/" + itemId)
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(patch)))
+                .andExpect(status().isOk())
                 .andDo(print());
 
-        // 4. Get list of items with filter
+        // 4. Verify item was assigned
         mockMvc.perform(get("/api/items/" + itemId)
                         .header("Authorization", "Bearer " + jwtToken)
                         .accept(MediaType.APPLICATION_JSON))
@@ -251,6 +309,15 @@ public class ApiItemControllerTest {
                 .andExpect(jsonPath("$.assignedTo", is("admin")))
                 .andDo(print());
 
+        // 5. Verify history contains the assignment update
+        mockMvc.perform(get("/api/items/" + itemId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.history", hasSize(2))) // Now has one history record
+                .andExpect(jsonPath("$.history[1].assignedTo", is("admin"))) // assignment change
+                .andExpect(jsonPath("$.history[1].loggedBy", is("admin"))) // who made the change
+                .andDo(print());
     }
 
     @Test
