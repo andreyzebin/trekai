@@ -1,14 +1,14 @@
 package info.jtrac.service;
 
+import info.jtrac.domain.Attachment;
+import info.jtrac.domain.CountsHolder;
+import info.jtrac.domain.Field;
 import info.jtrac.domain.Item;
 import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
 import info.jtrac.domain.UserSpaceRole;
-import info.jtrac.domain.Attachment;
-import info.jtrac.domain.CountsHolder;
-import info.jtrac.domain.Field;
+import info.jtrac.web.api.dto.FieldUpdateDto;
 import info.jtrac.web.api.dto.ItemPatchDto;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
@@ -41,6 +41,8 @@ public interface JtracService {
     Item storeItem(Item item, Attachment attachment);
 
     void updateItem(Item item, User user);
+
+    void updateItem(Item item, User user, List<FieldUpdateDto> upd);
 
     Item patchItem(long itemId, ItemPatchDto patchDto, User user);
 

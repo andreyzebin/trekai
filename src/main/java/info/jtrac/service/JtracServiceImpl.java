@@ -3,7 +3,6 @@ package info.jtrac.service;
 import info.jtrac.domain.Attachment;
 import info.jtrac.domain.CountsHolder;
 import info.jtrac.domain.Field;
-import info.jtrac.domain.FieldType;
 import info.jtrac.domain.History;
 import info.jtrac.domain.Item;
 import info.jtrac.domain.Metadata;
@@ -16,6 +15,7 @@ import info.jtrac.repository.SpaceRepository;
 import info.jtrac.repository.SpaceSequenceRepository;
 import info.jtrac.repository.UserRepository;
 import info.jtrac.repository.UserSpaceRoleRepository;
+import info.jtrac.web.api.dto.FieldUpdateDto;
 import info.jtrac.web.api.dto.ItemPatchDto;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,6 +152,21 @@ public class JtracServiceImpl implements JtracService {
         history.setComment(item.getEditReason());
         history.setTimeStamp(new Date());
         history.setStatus(item.getStatus());
+        item.add(history);
+        itemRepository.save(item);
+    }
+
+    @Override
+    public void updateItem(Item item, User user, List<FieldUpdateDto> upd) {
+        History history = new History();
+        history.setLoggedBy(user);
+        history.setAssignedTo(item.getAssignedTo());
+        history.setComment(item.getEditReason());
+        history.setTimeStamp(new Date());
+        history.setStatus(item.getStatus());
+        if (!upd.isEmpty()) {
+            history.setChange(upd.get(0));
+        }
         item.add(history);
         itemRepository.save(item);
     }

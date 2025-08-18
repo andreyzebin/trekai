@@ -16,6 +16,8 @@
 
 package info.jtrac.domain;
 
+import info.jtrac.web.api.dto.FieldUpdateDto;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -34,6 +36,9 @@ public class History extends AbstractItem {
 
     @ManyToOne
     private Attachment attachment;
+
+    @Embedded
+    private FieldUpdateDto change;
 
     public History() {
         // zero arg constructor

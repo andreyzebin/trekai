@@ -5,6 +5,7 @@ import info.jtrac.domain.Item;
 import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
 import info.jtrac.service.JtracService;
+import info.jtrac.web.api.dto.FieldUpdateDto;
 import info.jtrac.web.api.dto.ItemCreateDto;
 import info.jtrac.web.api.dto.ItemPatchDto;
 import info.jtrac.web.api.dto.ItemUpdateDto;
@@ -173,6 +174,7 @@ public class ItemController {
     ) {
         User user = jtracService.findUserByLoginName(principal.getName());
         Item item = jtracService.findItemById(id);
+        List<FieldUpdateDto> upd = new ArrayList<>();
 
         // Проверка, что пользователь имеет доступ
         if (!user.getSpaces().contains(item.getSpace())) {
@@ -205,7 +207,17 @@ public class ItemController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            itemDto.getCustomFields().forEach(item::setValue);
+            for (Map.Entry<String, String> entry : itemDto.getCustomFields().entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+
+                upd.add(FieldUpdateDto.builder()
+                        .fieldName(key)
+                        .valueBefore(item.getValue(key))
+                        .valueAfter(value)
+                        .build());
+                item.setValue(key, value);
+            }
         }
 
         if (itemDto.getAssignedToId() != null) {
@@ -213,10 +225,20 @@ public class ItemController {
             if (assignedTo == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
+            upd.add(FieldUpdateDto.builder()
+                    .fieldName("assignedTo")
+                    .valueBefore(item.getAssignedTo() != null ? item.getAssignedTo().getLoginName() : "")
+                    .valueAfter(assignedTo.getLoginName())
+                    .build());
             item.setAssignedTo(assignedTo);
         }
 
         if (itemDto.getStatus() != null) {
+            upd.add(FieldUpdateDto.builder()
+                    .fieldName("status")
+                    .valueBefore(String.valueOf(item.getStatus()))
+                    .valueAfter(String.valueOf(itemDto.getStatus().intValue()))
+                    .build());
             item.setStatus(Math.toIntExact(itemDto.getStatus()));
         }
         if (itemDto.getSummary() != null) {
@@ -227,7 +249,7 @@ public class ItemController {
         }
 
         // Сохраняем как новый History (если логируется)
-        jtracService.updateItem(item, user);
+        jtracService.updateItem(item, user, upd);
 
         return ResponseEntity.ok("Field updated");
     }
@@ -264,6 +286,7 @@ public class ItemController {
     ) {
         User user = jtracService.findUserByLoginName(principal.getName());
         Item item = jtracService.findItemById(id);
+        List<FieldUpdateDto> upd = new ArrayList<>();
 
         // Проверка, что пользователь имеет доступ
         if (!user.getSpaces().contains(item.getSpace())) {
@@ -276,11 +299,16 @@ public class ItemController {
             return ResponseEntity.badRequest().body("Unknown field: " + fieldCode);
         }
 
+        upd.add(FieldUpdateDto.builder()
+                .fieldName(fieldCode)
+                .valueBefore(item.getValue(fieldCode))
+                .valueAfter(fieldValue)
+                .build());
         // Установка значения в нужное поле
         item.setValue(fieldCode, fieldValue);  // сохранится как строка; преобразование — отдельно при необходимости
 
         // Сохраняем как новый History (если логируется)
-        jtracService.updateItem(item, user);
+        jtracService.updateItem(item, user, upd);
 
         return ResponseEntity.ok("Field updated");
     }
