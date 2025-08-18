@@ -404,10 +404,10 @@
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
-                        <div class="list-group-item" th:each="history : ${item.history}">
+                        <div class="list-group-item" th:each="history : ${item.getHistoryPage()}">
                             <div class="d-flex justify-content-between">
                                 <strong th:text="${history.loggedBy?.name}">User</strong>
-                                <small th:text="${#dates.format(history.timeStamp, 'yyyy-MM-dd HH:mm')}">Date</small>
+                                <small th:text="${#dates.format(history.timeStamp, 'yyyy-MM-dd HH:mm:ss')}">Date</small>
                             </div>
                             <p class="mb-1" th:text="${history.comment}">Comment</p>
                         </div>

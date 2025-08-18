@@ -27,8 +27,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -36,8 +37,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @Data
 @Entity
 @Table(name = "items")
@@ -54,7 +56,6 @@ public class Item extends AbstractItem {
     @Convert(converter = MapToJsonConverter.class)
     private Map<String, String> fieldValues;
 
-    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<History> history;
 
@@ -87,6 +88,14 @@ public class Item extends AbstractItem {
             this.fieldValues = new HashMap<>();
         }
         return this.fieldValues.get(code);
+    }
+
+    public List<History> getHistoryPage() {
+        return getHistory() != null
+                ? getHistory().stream()
+                .sorted(Comparator.comparing(AbstractItem::getTimeStamp))
+                .collect(Collectors.toList())
+                : Collections.emptyList();
     }
 
     public String getRender(String code) {

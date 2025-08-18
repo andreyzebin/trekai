@@ -27,6 +27,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -40,6 +41,7 @@ import static jakarta.persistence.InheritanceType.TABLE_PER_CLASS;
 @Inheritance(strategy = TABLE_PER_CLASS)
 public abstract class AbstractItem implements Serializable {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     protected long id;
@@ -59,6 +61,7 @@ public abstract class AbstractItem implements Serializable {
     @ManyToOne
     private User assignedTo;
 
+    @EqualsAndHashCode.Include
     private Date timeStamp;
     private Double plannedEffort;
     //===========================
