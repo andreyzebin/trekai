@@ -224,6 +224,10 @@ public class ApiItemController {
             return new ResponseEntity<>("Comment text is required", HttpStatus.BAD_REQUEST);
         }
 
+        if (dto.getText().length() > 250) {
+            dto.setText(dto.getText().substring(0, 250) + "...");
+        }
+
         item.setEditReason(dto.getText());
         jtracService.updateItem(item, loggedInUser);
 

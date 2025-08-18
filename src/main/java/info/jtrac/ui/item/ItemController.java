@@ -323,9 +323,18 @@ public class ItemController {
 
         User user = jtracService.findUserByLoginName(principal.getName());
 
-        if (itemUpdateDto.getComment() != null && !itemUpdateDto.getComment().isEmpty()) {
-            item.setEditReason(itemUpdateDto.getComment());
+        if (itemUpdateDto.getComment() == null || itemUpdateDto.getComment().trim().isEmpty()) {
+            throw new IllegalArgumentException("Comment text is required");
         }
+
+        itemUpdateDto.setComment(itemUpdateDto.getComment().trim());
+
+
+        if (itemUpdateDto.getComment().length() > 250) {
+            itemUpdateDto.setComment(itemUpdateDto.getComment().substring(0, 250) + "...");
+        }
+        item.setEditReason(itemUpdateDto.getComment());
+
         if (itemUpdateDto.getStatus() != null) {
             item.setStatus(itemUpdateDto.getStatus());
         }
