@@ -405,22 +405,24 @@
                 <div class="card-body">
                     <div class="list-group list-group-flush">
                         <div class="list-group-item p-2" th:each="history : ${item.getHistoryPage()}">
-                            <!-- Изменение поля (если есть) -->
+                            <!-- Изменение поля -->
                             <div th:if="${history.change != null}" class="mb-1">
-                                <span class="fw-semibold" th:text="${history.change.fieldName}">field</span>:
-                                <span class="text-muted" th:text="${history.change.valueBefore} ?: 'empty'">before</span>
-                                <span class="mx-1">→</span>
-                                <span th:text="${history.change.valueAfter} ?: 'empty'">after</span>
+                                <span class="fw-semibold" th:text="${history.change.fieldName + ':'}"></span>
+                                <span class="text-muted" th:text="${history.change.valueBefore} ?: 'empty'"></span>
+                                <span class="mx-1 text-muted">→</span>
+                                <span th:text="${history.change.valueAfter} ?: 'empty'"></span>
                             </div>
 
-                            <!-- Комментарий (если есть) -->
-                            <div th:if="${not #strings.isEmpty(history.comment)}" class="text-break mb-1" th:text="${history.comment}"></div>
+                            <!-- Комментарий -->
+                            <div th:if="${not #strings.isEmpty(history.comment)}"
+                                 class="text-break mb-1 small text-muted"
+                                 th:text="${history.comment}"></div>
 
                             <!-- Мета-информация -->
-                            <div class="d-flex justify-content-end text-muted small">
-                                <span th:text="${history.loggedBy?.name}">User</span>
+                            <div class="d-flex justify-content-end small text-muted">
+                                <span th:text="${history.loggedBy?.name}"></span>
                                 <span class="mx-1">•</span>
-                                <span th:text="${#dates.format(history.timeStamp, 'yyyy-MM-dd HH:mm')}">Date</span>
+                                <span th:text="${#dates.format(history.timeStamp, 'dd.MM.yy HH:mm')}"></span>
                             </div>
                         </div>
                     </div>
