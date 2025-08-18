@@ -5,6 +5,43 @@
 <head>
     <title th:text="'Item ' + ${item.refId}">Item Details</title>
     <style>
+        /* Стили для скролла */
+        .scrollable-history {
+            max-height: 300px;
+            overflow-y: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+            transition: overflow-y 0.3s ease;
+        }
+
+        .scrollable-history:hover {
+            overflow-y: auto;
+        }
+
+        /* Для WebKit браузеров (Chrome, Safari) */
+        .scrollable-history::-webkit-scrollbar {
+            width: 8px;
+            background-color: transparent;
+        }
+
+        .scrollable-history::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 4px;
+            visibility: hidden;
+        }
+
+        .scrollable-history:hover::-webkit-scrollbar-thumb {
+            visibility: visible;
+        }
+
+        /* Для Firefox */
+        @supports (scrollbar-color: auto) {
+            .scrollable-history {
+                scrollbar-color: rgba(0,0,0,0.2) transparent;
+            }
+        }
+    </style>
+    <style>
         .editable-container {
             position: relative;
         }
@@ -397,13 +434,13 @@
                 <div class="card-body">
                     <form th:action="@{'/web/item/' + ${item.id}}" th:object="${itemUpdateForm}" method="post">
                         <div class="mb-3">
-                            <textarea id="comment" class="form-control" rows="4" th:field="*{comment}"></textarea>
+                            <textarea id="comment" class="form-control" rows="4" th:field="*{comment}" placeholder="Add a comment..."></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Comment</button>
                     </form>
                 </div>
                 <div class="card-body">
-                    <div class="list-group list-group-flush">
+                    <div class="list-group list-group-flush scrollable-history">
                         <div class="list-group-item p-2" th:each="history : ${item.getHistoryPage()}">
                             <!-- Изменение поля -->
                             <div th:if="${history.change != null}" class="mb-1">
@@ -428,6 +465,8 @@
                     </div>
                 </div>
             </div>
+
+
         </div>
     </div>
 </div>

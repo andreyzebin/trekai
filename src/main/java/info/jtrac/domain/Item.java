@@ -93,7 +93,7 @@ public class Item extends AbstractItem {
     public List<History> getHistoryPage() {
         return getHistory() != null
                 ? getHistory().stream()
-                .sorted(Comparator.comparing(AbstractItem::getTimeStamp))
+                .sorted(Comparator.comparing(AbstractItem::getTimeStamp).reversed())
                 .collect(Collectors.toList())
                 : Collections.emptyList();
     }
