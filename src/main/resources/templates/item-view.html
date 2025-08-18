@@ -404,26 +404,23 @@
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
-                        <div class="list-group-item" th:each="history : ${item.getHistoryPage()}">
-                            <div class="d-flex justify-content-between">
-                                <strong th:text="${history.loggedBy?.name}">User</strong>
-                                <small th:text="${#dates.format(history.timeStamp, 'yyyy-MM-dd HH:mm:ss')}">Date</small>
-                            </div>
-
-                            <!-- Отображение комментария (если есть) -->
-                            <div th:if="${not #strings.isEmpty(history.comment)}" class="mb-2">
-                                <p class="mb-1 font-weight-bold">Commented:</p>
-                                <pre class="mb-1 p-2" th:text="${history.comment}">Comment text</pre>
-                            </div>
-
-                            <!-- Отображение изменения поля (если есть) -->
+                        <div class="list-group-item p-2" th:each="history : ${item.getHistoryPage()}">
+                            <!-- Изменение поля (если есть) -->
                             <div th:if="${history.change != null}" class="mb-1">
-                                <p class="mb-1 font-weight-bold">Changed:</p>
-                                <div class="mb-1 p-2">
-                                    <span th:text="${history.change.fieldName}">field</span>:
-                                    <span th:text="${history.change.valueBefore} ?: 'empty'">before</span> →
-                                    <span th:text="${history.change.valueAfter} ?: 'empty'">after</span>
-                                </div>
+                                <span class="fw-semibold" th:text="${history.change.fieldName}">field</span>:
+                                <span class="text-muted" th:text="${history.change.valueBefore} ?: 'empty'">before</span>
+                                <span class="mx-1">→</span>
+                                <span th:text="${history.change.valueAfter} ?: 'empty'">after</span>
+                            </div>
+
+                            <!-- Комментарий (если есть) -->
+                            <div th:if="${not #strings.isEmpty(history.comment)}" class="text-break mb-1" th:text="${history.comment}"></div>
+
+                            <!-- Мета-информация -->
+                            <div class="d-flex justify-content-end text-muted small">
+                                <span th:text="${history.loggedBy?.name}">User</span>
+                                <span class="mx-1">•</span>
+                                <span th:text="${#dates.format(history.timeStamp, 'yyyy-MM-dd HH:mm')}">Date</span>
                             </div>
                         </div>
                     </div>
