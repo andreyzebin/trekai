@@ -453,7 +453,7 @@
                             <!-- Комментарий -->
                             <div th:if="${not #strings.isEmpty(history.comment)}"
                                  class="text-break mb-1 small text-muted"
-                                 th:text="${history.comment}"></div>
+                                 th:utext="${history.comment}"></div>
 
                             <!-- Мета-информация -->
                             <div class="d-flex justify-content-end small text-muted">
