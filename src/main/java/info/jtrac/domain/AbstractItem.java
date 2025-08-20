@@ -17,6 +17,7 @@
 package info.jtrac.domain;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -53,6 +54,7 @@ public abstract class AbstractItem implements Serializable {
     private Item parent; // slightly different meaning for Item and History
 
     private String summary;
+    @Column(columnDefinition = "TEXT")
     private String detail;
 
     @ManyToOne

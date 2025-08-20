@@ -17,6 +17,7 @@
 package info.jtrac.domain;
 
 import info.jtrac.web.api.dto.FieldUpdateDto;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -31,6 +32,7 @@ import lombok.EqualsAndHashCode;
 public class History extends AbstractItem {
 
     private Integer type;
+    @Column(columnDefinition = "TEXT")
     private String comment;
     private Double actualEffort;
 
