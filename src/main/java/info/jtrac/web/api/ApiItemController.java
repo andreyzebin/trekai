@@ -233,7 +233,7 @@ public class ApiItemController {
 
         ws.notifyItemUpdate(id); // если WebSocket используется
 
-        return new ResponseEntity<>(new ItemResponseDto(item), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new ItemResponseDto(item), HttpStatus.OK);
     }
 
 
