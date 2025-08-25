@@ -16,6 +16,8 @@ public class HistoryDto {
     private Integer status;
     private Date timeStamp;
 
+    private FieldUpdateDto change;
+
     public HistoryDto(History history) {
         this.id = history.getId();
 
@@ -30,6 +32,7 @@ public class HistoryDto {
         this.comment = history.getComment();
         this.status = history.getStatus();
         this.timeStamp = history.getTimeStamp();
+        this.change = history.getChange();
     }
 
     // Getters and setters...

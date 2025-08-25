@@ -11,6 +11,7 @@ import info.jtrac.web.api.dto.AuthenticationRequest;
 import info.jtrac.web.api.dto.ItemCreateDto;
 import info.jtrac.web.api.dto.ItemPatchDto;
 import info.jtrac.web.api.dto.ItemUpdateDto;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -302,12 +303,41 @@ public class ApiItemControllerTest {
                 .andDo(print());
 
         // 4. Verify item was assigned
-        mockMvc.perform(get("/api/items/" + itemId)
+        MvcResult patchResult = mockMvc.perform(get("/api/items/" + itemId)
                         .header("Authorization", "Bearer " + jwtToken)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.assignedTo", is("admin")))
-                .andDo(print());
+                .andDo(print())
+                .andReturn();
+        long historyId = objectMapper.readTree(patchResult.getResponse().getContentAsString())
+                .get("history")
+                .get(1)
+                .get("id")
+                .asLong();
+        String historyValueAfter = objectMapper.readTree(patchResult.getResponse().getContentAsString())
+                .get("history")
+                .get(1)
+                .get("change")
+                .get("valueAfter")
+                .asText();
+        String historyValueBefore = objectMapper.readTree(patchResult.getResponse().getContentAsString())
+                .get("history")
+                .get(1)
+                .get("change")
+                .get("valueBefore")
+                .asText();
+        String historyChangeFieldName = objectMapper.readTree(patchResult.getResponse().getContentAsString())
+                .get("history")
+                .get(1)
+                .get("change")
+                .get("fieldName")
+                .asText();
+
+        Assertions.assertEquals(3, historyId);
+        Assertions.assertEquals("admin", historyValueAfter);
+        Assertions.assertEquals("", historyValueBefore);
+        Assertions.assertEquals("assignedTo", historyChangeFieldName);
 
         // 5. Verify history contains the assignment update
         mockMvc.perform(get("/api/items/" + itemId)

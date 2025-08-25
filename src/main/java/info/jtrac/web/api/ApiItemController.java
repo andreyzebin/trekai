@@ -208,7 +208,7 @@ public class ApiItemController {
     }
 
     @PostMapping("/{id}/comments")
-    public ResponseEntity<?> addComment(
+    public ResponseEntity<ItemResponseDto> addComment(
             @PathVariable long id,
             @RequestBody CommentDto dto
     ) {
@@ -221,7 +221,7 @@ public class ApiItemController {
         User loggedInUser = jtracService.findUserByLoginName(auth.getName());
 
         if (dto.getText() == null || dto.getText().trim().isEmpty()) {
-            return new ResponseEntity<>("Comment text is required", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         if (dto.getText().length() > 250) {
@@ -233,7 +233,7 @@ public class ApiItemController {
 
         ws.notifyItemUpdate(id); // если WebSocket используется
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new ItemResponseDto(item), HttpStatus.NO_CONTENT);
     }
 
 
