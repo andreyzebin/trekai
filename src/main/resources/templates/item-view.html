@@ -117,7 +117,21 @@
             display.classList.add('hidden');
             input.value = input.dataset.originalValue || '';
             input.classList.remove('hidden');
-            input.focus();
+
+            setTimeout(() => {
+                input.focus();
+
+                // Особенная обработка для полей даты - курсор в начало
+                if (input.type === 'text' && input.hasAttribute('placeholder') &&
+                    input.getAttribute('placeholder') === 'dd-MM-yyyy') {
+                    input.setSelectionRange(0, 0);
+                }
+                // Для обычных текстовых полей и textarea - курсор в конец
+                else if (input.type === 'text' || input.tagName === 'TEXTAREA') {
+                    const length = input.value.length;
+                    input.setSelectionRange(length, length);
+                }
+            }, 10);
 
         }
 
@@ -159,6 +173,13 @@
                 }
             }
         }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('input[placeholder="dd-MM-yyyy"]').forEach(input => {
+                input._lastValueLength = 0;
+            });
+        });
 
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.editable-container').forEach(container => {
@@ -211,21 +232,57 @@
         }
 
         function formatDateInput(input) {
-            let value = input.value.replace(/\D/g, '');
+            const cursorPosition = input.selectionStart;
+            const originalValue = input.value;
+            const isDeletion = originalValue.length < input._lastValueLength;
 
-            if (value.length > 2) {
-                value = value.substring(0, 2) + '-' + value.substring(2);
+            // Сохраняем предыдущее значение для сравнения
+            input._lastValueLength = originalValue.length;
+
+            // Сохраняем только цифры из всей строки
+            const allDigits = originalValue.replace(/\D/g, '');
+
+            // Форматируем с разделителями
+            let formattedValue = '';
+            if (allDigits.length > 0) {
+                formattedValue = allDigits.substring(0, 2);
             }
-            if (value.length > 5) {
-                value = value.substring(0, 5) + '-' + value.substring(5, 9);
+            if (allDigits.length > 2) {
+                formattedValue += '-' + allDigits.substring(2, 4);
             }
-            if (value.length > 10) {
-                value = value.substring(0, 10);
+            if (allDigits.length > 4) {
+                formattedValue += '-' + allDigits.substring(4, 8);
             }
 
-            input.value = value;
+            // Устанавливаем новое значение
+            input.value = formattedValue;
 
-            // Валидация в реальном времени
+            // Определяем новую позицию курсора
+            let newCursorPosition;
+
+            if (isDeletion) {
+                // При удалении сохраняем позицию курсора
+                newCursorPosition = Math.min(cursorPosition, formattedValue.length);
+            } else {
+                // При вводе вычисляем позицию на основе количества цифр
+                const digitsBeforeCursor = originalValue.substring(0, cursorPosition).replace(/\D/g, '').length;
+
+                if (digitsBeforeCursor <= 2) {
+                    newCursorPosition = digitsBeforeCursor;
+                } else if (digitsBeforeCursor <= 4) {
+                    newCursorPosition = 3 + (digitsBeforeCursor - 2);
+                } else {
+                    newCursorPosition = 6 + (digitsBeforeCursor - 4);
+                }
+            }
+
+            // Ограничиваем позицию курсора
+            newCursorPosition = Math.min(newCursorPosition, formattedValue.length);
+
+            // Устанавливаем курсор
+            input.setSelectionRange(newCursorPosition, newCursorPosition);
+
+            // Валидация
             validateDateField(input);
         }
 
