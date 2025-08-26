@@ -125,22 +125,39 @@
         function deactivateEditor(container, save = true) {
             console.log("editor deactivated!")
             const display = container.querySelector('.editable-display');
-
             const input = container.querySelector('.editable-input');
-
             const editText = container.querySelector('.edit-text');
-            const newValue = input.value.trim()
+
+            const newValue = input.value.trim();
             const originalValue = (input.dataset.originalValue || '').trim();
 
             display.classList.remove('hidden');
+            input.classList.add('hidden');
 
-                input.classList.add('hidden');
+            // Особенная обработка для полей даты
+            if (input.type === 'text' && input.hasAttribute('placeholder') &&
+                input.getAttribute('placeholder') === 'dd-MM-yyyy') {
 
+                if (save && newValue !== originalValue) {
+                    if (validateDateField(input)) {
+                        // Форматируем дату для бэкенда (добавляем год если нужно)
+                        const formattedValue = formatDateForBackend(newValue);
+                        editText.textContent = formattedValue;
+                        input.value = formattedValue;
+                        patchField(input);
+                    } else {
+                        // Если валидация не прошла, восстанавливаем оригинальное значение
+                        input.value = originalValue;
+                        editText.textContent = originalValue;
+                    }
+                }
+            } else {
+                // Обычная обработка для других полей
                 if (save && newValue !== originalValue) {
                     editText.textContent = newValue;
                     patchField(input);
                 }
-
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -161,6 +178,74 @@
     <script th:inline="javascript">
         var BASE_URL = /*[[@{/}]]*/ '';
 
+        function isValidDate(dateString) {
+            // Проверяем формат dd-MM-yyyy или dd-MM
+            const datePattern = /^(\d{2})-(\d{2})(-(\d{4}))?$/;
+            const match = dateString.match(datePattern);
+
+            if (!match) return false;
+
+            let day = parseInt(match[1], 10);
+            let month = parseInt(match[2], 10);
+            let year = match[4] ? parseInt(match[4], 10) : new Date().getFullYear();
+
+            // Проверяем валидность месяца
+            if (month < 1 || month > 12) return false;
+
+            // Проверяем валидность дня для данного месяца
+            const daysInMonth = new Date(year, month, 0).getDate();
+            return day >= 1 && day <= daysInMonth;
+        }
+
+        function formatDateForBackend(dateString) {
+            const datePattern = /^(\d{2})-(\d{2})(-(\d{4}))?$/;
+            const match = dateString.match(datePattern);
+
+            if (!match) return dateString;
+
+            let day = match[1];
+            let month = match[2];
+            let year = match[4] ? match[4] : new Date().getFullYear();
+
+            return `${day}-${month}-${year}`;
+        }
+
+        function formatDateInput(input) {
+            let value = input.value.replace(/\D/g, '');
+
+            if (value.length > 2) {
+                value = value.substring(0, 2) + '-' + value.substring(2);
+            }
+            if (value.length > 5) {
+                value = value.substring(0, 5) + '-' + value.substring(5, 9);
+            }
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+
+            input.value = value;
+
+            // Валидация в реальном времени
+            validateDateField(input);
+        }
+
+        function validateDateField(input) {
+            const value = input.value.trim();
+
+            if (value === '') {
+                input.classList.remove('is-invalid');
+                return true;
+            }
+
+            if (isValidDate(value)) {
+                input.classList.remove('is-invalid');
+                return true;
+            } else {
+                input.classList.add('is-invalid');
+                return false;
+            }
+        }
+
         function patchField(component) {
             console.log("[PATCH] Field", {
               id: component.id,
@@ -175,7 +260,17 @@
             console.log("patchField called");
             console.log("Current:", currentValue, "Original:", originalValue);
 
+            if (component.type === 'text' && component.hasAttribute('placeholder') &&
+                component.getAttribute('placeholder') === 'dd-MM-yyyy') {
 
+                if (!validateDateField(component)) {
+                    alert('Пожалуйста, введите корректную дату в формате dd-MM-yyyy');
+                    return;
+                }
+
+                // Форматируем дату перед отправкой
+                component.value = formatDateForBackend(component.value);
+            }
 
             if (currentValue === originalValue) return;
 
@@ -420,6 +515,34 @@
                                                    th:data-item-id="${item.id}"
                                                    th:data-original-value="${item.getRender(field.code)}"
                                                    onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- DATE -->
+                                <div th:case="6">
+                                    <div class="input-group input-group-sm">
+                                        <div class="editable-container w-100">
+                                            <!-- Режим просмотра -->
+                                            <div class="editable-display d-flex justify-content-between align-items-center" tabindex="0">
+                                                <span class="edit-text flex-grow-1 text-truncate"
+                                                      th:text="${val != null and !#strings.isEmpty(val) ? val : '—'}"
+                                                      th:data-original-value="${val != null ? val : ''}">
+                                                    Value
+                                                </span>
+                                                <span class="edit-icon ms-2">🖉</span>
+                                            </div>
+
+                                            <!-- Режим редактирования -->
+                                            <input type="text"
+                                                   class="editable-input form-control form-control-sm hidden mt-1"
+                                                   th:id="${field.code}"
+                                                   th:name="${field.code}"
+                                                   th:value="${val != null ? val : ''}"
+                                                   th:data-item-id="${item.id}"
+                                                   th:data-original-value="${val != null ? val : ''}"
+                                                   placeholder="dd-MM-yyyy"
+                                                   onkeydown="if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }"
+                                                   oninput="formatDateInput(this)"/>
                                         </div>
                                     </div>
                                 </div>

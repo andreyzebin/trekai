@@ -37,6 +37,9 @@ spaces:
       - name: cashback
         label: Cashback
         type: 4
+      - name: dateStart
+        label: Start Date
+        type: 6
 
   - prefixCode: PROJ2
     name: Project Two
