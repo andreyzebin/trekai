@@ -43,7 +43,8 @@ public class Field implements Serializable {
 
     @Transient
     public String getRenderValue(String val) {
-        if (Objects.requireNonNull(fieldType) == FieldType.SELECT) {
+        if (Objects.requireNonNull(fieldType) == FieldType.SELECT ||
+                (options != null && !options.isEmpty())) {
             return options.get(val);
         }
         return val;

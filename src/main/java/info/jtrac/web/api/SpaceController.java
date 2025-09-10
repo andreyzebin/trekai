@@ -162,7 +162,11 @@ public class SpaceController {
         field.setLabel(customFieldDto.getLabel());
         // Type is determined by the Field.Name enum, so we don't set it directly.
         field.setOptions(customFieldDto.getOptions());
-        field.setFieldType(FieldType.ofInt(customFieldDto.getType()));
+        if (customFieldDto.getType() != null) {
+            field.setFieldType(FieldType.ofInt(customFieldDto.getType()));
+        } else {
+            field.setFieldType(FieldType.ofJsonSchemaType(customFieldDto.getJsonSchemaType()));
+        }
 
         jtracService.addCustomFieldToSpace(prefixCode, field);
 

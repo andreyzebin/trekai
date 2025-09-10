@@ -17,8 +17,9 @@ public class CustomFieldDto {
     @Schema(description = "The user-visible label for the field", example = "Priority")
     private String label;
 
-    @Schema(description = "The type of the field (1 = Dropdown, 2 = Text, 3 = Number, etc.)", example = "1")
-    private int type;
+    @Schema(description = "The type of the field data container (string, integer)", example = "1")
+    private String jsonSchemaType;
+
 
     @Schema(description = "A map of options for dropdown fields (key = value, value = display text)", example = "{\"1\": \"High\", \"2\": \"Medium\", \"3\": \"Low\"}")
     private Map<String, String> options;

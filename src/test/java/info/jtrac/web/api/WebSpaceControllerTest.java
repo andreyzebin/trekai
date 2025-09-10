@@ -140,10 +140,35 @@ public class WebSpaceControllerTest {
 
     @Test
     public void testAddCustomFieldToSpace() throws Exception {
-        // 1. Create a new space
+
+
+        CustomFieldDto customFieldDto = new CustomFieldDto();
+        customFieldDto.setName("customerName");
+        customFieldDto.setLabel("Customer Name");
+        customFieldDto.setType(2); // Text
+
         SpaceDto spaceDto = new SpaceDto();
         spaceDto.setPrefixCode("CUSTOM");
         spaceDto.setName("Custom Field Space");
+        addFieldLifecycle(customFieldDto, spaceDto);
+
+
+        CustomFieldDto customFieldDto2 = new CustomFieldDto();
+        customFieldDto2.setName("customerName2");
+        customFieldDto2.setLabel("Customer Name");
+        customFieldDto2.setJsonSchemaType("string");
+
+        SpaceDto spaceDto1 = new SpaceDto();
+        spaceDto1.setPrefixCode("CUSTOM2");
+        spaceDto1.setName("Custom Field Space 2");
+        addFieldLifecycle(customFieldDto2, spaceDto1);
+
+    }
+
+    private void addFieldLifecycle(CustomFieldDto customFieldDto, SpaceDto spaceDto) throws Exception {
+        String customerName = customFieldDto.getName();
+
+        // 1. Create a new space
         mockMvc.perform(post("/api/spaces")
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -151,13 +176,9 @@ public class WebSpaceControllerTest {
                 .andExpect(status().isCreated())
                 .andDo(print());
 
-        // 2. Add a custom field to it
-        CustomFieldDto customFieldDto = new CustomFieldDto();
-        customFieldDto.setName("customerName");
-        customFieldDto.setLabel("Customer Name");
-        customFieldDto.setType(2); // Text
 
-        mockMvc.perform(post("/api/spaces/CUSTOM/fields")
+        String custom = spaceDto.getPrefixCode();
+        mockMvc.perform(post("/api/spaces/" + custom + "/fields")
                         .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customFieldDto)))
@@ -165,16 +186,16 @@ public class WebSpaceControllerTest {
                 .andDo(print());
 
         // 3. Verify the field was added
-        mockMvc.perform(get("/api/spaces/CUSTOM")
+        mockMvc.perform(get("/api/spaces/" + custom)
                         .header("Authorization", "Bearer " + jwtToken)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.metadata.fields['customerName'].label", is("Customer Name")))
+                .andExpect(jsonPath("$.metadata.fields['" + customerName + "'].label", is(customFieldDto.getLabel())))
                 .andDo(print());
 
         // 4. Create Item
         ItemCreateDto createDto = new ItemCreateDto();
-        createDto.setSpacePrefix("CUSTOM");
+        createDto.setSpacePrefix(spaceDto.getPrefixCode());
         createDto.setSummary("Test Summary");
         createDto.setDetail("Test Detail");
 
@@ -191,7 +212,7 @@ public class WebSpaceControllerTest {
         long itemId = objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asLong();
 
         ItemPatchDto patchDto = new ItemPatchDto();
-        patchDto.setCustomFields(Map.of("customerName", "John Doe"));
+        patchDto.setCustomFields(Map.of(customerName, "John Doe"));
 
         mockMvc.perform(patch("/api/items/" + itemId)
                         .header("Authorization", "Bearer " + jwtToken)
@@ -207,7 +228,7 @@ public class WebSpaceControllerTest {
                         .header("Authorization", "Bearer " + jwtToken)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.fieldValues['customerName']", is("John Doe")))
+                .andExpect(jsonPath("$.fieldValues['" + customerName + "']", is("John Doe")))
                 .andDo(print());
     }
 }
