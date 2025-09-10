@@ -33,6 +33,8 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import static info.jtrac.web.api.ApiItemController.TRIM_COMMENT_LENGTH_TRIGGER;
+
 @Controller
 @RequestMapping("/web/item")
 public class ItemController {
@@ -330,8 +332,8 @@ public class ItemController {
         itemUpdateDto.setComment(itemUpdateDto.getComment().trim());
 
 
-        if (itemUpdateDto.getComment().length() > 250) {
-            itemUpdateDto.setComment(itemUpdateDto.getComment().substring(0, 250) + "...");
+        if (itemUpdateDto.getComment().length() > TRIM_COMMENT_LENGTH_TRIGGER) {
+            itemUpdateDto.setComment(itemUpdateDto.getComment().substring(0, TRIM_COMMENT_LENGTH_TRIGGER - 3) + "...");
         }
         item.setEditReason(itemUpdateDto.getComment());
 

@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 public class ApiItemController {
 
     private static final Logger logger = LoggerFactory.getLogger(ApiItemController.class);
+    public static final int TRIM_COMMENT_LENGTH_TRIGGER = 1024;
 
     private final JtracService jtracService;
     private final ItemWebSocketController ws;
@@ -224,8 +225,8 @@ public class ApiItemController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (dto.getText().length() > 250) {
-            dto.setText(dto.getText().substring(0, 250) + "...");
+        if (dto.getText().length() > TRIM_COMMENT_LENGTH_TRIGGER) {
+            dto.setText(dto.getText().substring(0, TRIM_COMMENT_LENGTH_TRIGGER - 3) + "...");
         }
 
         item.setEditReason(dto.getText());
