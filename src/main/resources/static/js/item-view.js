@@ -107,9 +107,7 @@ class ItemView {
             console.log('📅 Validating date field');
             if (!this.dateFieldHandler.validateDateField(component)) {
                 console.warn('❌ Date validation failed');
-                alert('Пожалуйста, введите корректную дату в формате dd-MM-yyyy');
-                component.value = originalValue;
-                return;
+                return Promise.reject(new Error('Пожалуйста, введите корректную дату в формате dd-MM-yyyy'));
             }
 
             const formattedValue = this.dateFieldHandler.formatDateForBackend(component.value);
@@ -119,7 +117,7 @@ class ItemView {
 
         if (currentValue === originalValue) {
             console.log('⏩ No changes detected, skipping patch');
-            return;
+            return Promise.resolve(); // Возвращаем resolved promise
         }
 
         try {
@@ -127,10 +125,10 @@ class ItemView {
             await this.apiService.patchField(this.itemId, fieldName, currentValue);
             component.dataset.originalValue = currentValue;
             console.log('✅ Patch successful');
+            return Promise.resolve(); // Успешное завершение
         } catch (error) {
             console.error('❌ Patch failed:', error);
-            alert(error.message);
-            component.value = originalValue;
+            return Promise.reject(error); // Пробрасываем ошибку
         }
     }
 

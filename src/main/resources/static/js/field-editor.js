@@ -32,6 +32,15 @@ export class FieldEditor {
                     console.log('👋 Field blur:', input.id);
                     this.deactivateEditor(container);
                 });
+
+                // Обработка Escape для отмены изменений
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        console.log('⎋ Escape pressed, canceling edit');
+                        this.deactivateEditor(container, false); // Не сохранять
+                        e.preventDefault();
+                    }
+                });
             }
         });
 
@@ -47,6 +56,9 @@ export class FieldEditor {
             console.warn('⚠️ Editor elements not found in container');
             return;
         }
+
+        // Сохраняем оригинальное значение для возможной отмены
+        input.dataset.tempOriginalValue = input.dataset.originalValue;
 
         display.classList.add('hidden');
         input.value = input.dataset.originalValue || '';
@@ -86,20 +98,77 @@ export class FieldEditor {
 
         console.log('📊 Field values:', { newValue, originalValue, changed: newValue !== originalValue });
 
+        // Сначала обновляем отображение, потом синхронизируем с сервером
+        if (save && newValue !== originalValue) {
+            console.log('🔄 Updating display immediately');
+
+            // Для date полей используем специальную обработку
+            if (input.type === 'text' && input.hasAttribute('placeholder') &&
+                input.getAttribute('placeholder') === 'dd-MM-yyyy') {
+
+                if (this.itemView.dateFieldHandler.validateDateField(input)) {
+                    // Получаем полное значение с годом для отображения
+                    const formattedValue = this.itemView.dateFieldHandler.getFullDateValue(input);
+                    editText.textContent = formattedValue;
+                    // Также обновляем значение в input для последующей отправки
+                    input.value = formattedValue;
+                    console.log('📅 Date formatted for display and backend:', formattedValue);
+                } else {
+                    // Если валидация не прошла, восстанавливаем оригинальное значение
+                    editText.textContent = originalValue;
+                    input.value = originalValue;
+                    console.log('❌ Date validation failed, restoring original value');
+                }
+            } else {
+                // Для обычных полей просто обновляем текст
+                editText.textContent = newValue;
+                console.log('✅ Text updated in display');
+            }
+        } else if (!save) {
+            // Отмена изменений - восстанавливаем оригинальное значение
+            editText.textContent = input.dataset.tempOriginalValue || originalValue;
+            input.value = input.dataset.tempOriginalValue || originalValue;
+            console.log('❌ Edit canceled, restoring original value');
+        }
+
+        // Всегда скрываем input и показываем display
         display.classList.remove('hidden');
         input.classList.add('hidden');
 
-        if (input.type === 'text' && input.hasAttribute('placeholder') &&
-            input.getAttribute('placeholder') === 'dd-MM-yyyy') {
+        // Запускаем синхронизацию с сервером только если нужно сохранить и есть изменения
+        if (save && newValue !== originalValue) {
+            if (input.type === 'text' && input.hasAttribute('placeholder') &&
+                input.getAttribute('placeholder') === 'dd-MM-yyyy') {
 
-            if (save && newValue !== originalValue) {
-                console.log('📅 Date field changed, triggering patch');
-                this.itemView.patchField(input);
-            }
-        } else {
-            if (save && newValue !== originalValue) {
+                if (this.itemView.dateFieldHandler.validateDateField(input)) {
+                    console.log('📅 Date field changed, triggering patch');
+                    // Убедимся, что значение в input уже отформатировано с годом
+                    const finalValue = this.itemView.dateFieldHandler.getFullDateValue(input);
+                    input.value = finalValue; // На всякий случай обновляем еще раз
+
+                    this.itemView.patchField(input).then(() => {
+                        // После успешного сохранения обновляем originalValue
+                        input.dataset.originalValue = input.value;
+                        console.log('✅ Server sync completed');
+                    }).catch(error => {
+                        console.error('❌ Server sync failed:', error);
+                        // В случае ошибки восстанавливаем оригинальное значение
+                        editText.textContent = originalValue;
+                        input.value = originalValue;
+                        input.dataset.originalValue = originalValue;
+                    });
+                }
+            } else {
                 console.log('📝 Field changed, triggering patch');
-                this.itemView.patchField(input);
+                this.itemView.patchField(input).then(() => {
+                    input.dataset.originalValue = newValue;
+                    console.log('✅ Server sync completed');
+                }).catch(error => {
+                    console.error('❌ Server sync failed:', error);
+                    editText.textContent = originalValue;
+                    input.value = originalValue;
+                    input.dataset.originalValue = originalValue;
+                });
             }
         }
 
