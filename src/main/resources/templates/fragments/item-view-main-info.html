@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="item-view-main-info">
+    <!-- Main Info Card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Status:</label>
+                    <select id="status"
+                            class="form-select form-select-sm"
+                            th:data-item-id="${item.id}"
+                            th:data-original-value="${item.status}">
+                        <option value="">-- Unassigned --</option>
+                        <option th:each="status : ${statuses.entrySet()}"
+                                th:value="${status.key}"
+                                th:text="${status.value}"
+                                th:selected="${status.key == item.status}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Assigned To:</label>
+                    <select id="assignedToId"
+                            class="form-select form-select-sm"
+                            th:data-item-id="${item.id}"
+                            th:data-original-value="${item.assignedTo?.id}">
+                        <option value="">-- Unassigned --</option>
+                        <option th:each="user : ${users}"
+                                th:value="${user.id}"
+                                th:text="${user.name}"
+                                th:selected="${user.id == item.assignedTo?.id}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">Logged By: <span th:text="${item.loggedBy?.name}">User</span></div>
+                <div class="col-md-6">Submitted: <span th:text="${#dates.format(item.timeStamp, 'yyyy-MM-dd HH:mm')}">Date</span></div>
+            </div>
+            <hr>
+            <!-- Detail -->
+            <div>Detail:</div>
+            <div class="editable-container mt-2">
+                <div class="editable-display" tabindex="0">
+                    <span class="edit-text"
+                          th:data-original-value="${item.detail}"
+                          th:text="${item.detail}">Detailed description of the item.</span>
+                    <span class="edit-icon">🖉</span>
+                </div>
+                <textarea class="form-control editable-input hidden"
+                          th:text="${item.detail}"
+                          th:data-original-value="${item.detail}"
+                          th:data-item-id="${item.id}"
+                          data-field-code="detail">
+                </textarea>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

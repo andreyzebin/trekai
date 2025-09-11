@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="item-view-header">
+    <div class="mb-4 d-flex align-items-center gap-2">
+        <h2 class="mb-0" th:text="${item.refId}">ITEM-1</h2>
+        <span id="ws-indicator" class="ws-indicator ws-disconnected" title="WebSocket disconnected">●</span>
+
+        <div class="editable-container">
+            <div class="editable-display d-flex justify-content-between align-items-center" tabindex="0">
+                <span class="edit-text flex-grow-1 text-truncate"
+                      th:text="${item.summary}"
+                      th:data-original-value="${item.summary}">
+                    Value
+                </span>
+                <span class="edit-icon ms-2">🖉</span>
+            </div>
+
+            <input type="text"
+                   class="editable-input form-control form-control-sm hidden mt-1"
+                   style="max-width: 400px;"
+                   id="summary"
+                   th:value="${item.summary}"
+                   th:data-item-id="${item.id}"
+                   th:attr="data-original-value=${item.summary}"/>
+        </div>
+    </div>
+</div>
+</html>

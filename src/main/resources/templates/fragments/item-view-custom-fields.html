@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="item-view-custom-fields">
+    <!-- Custom Fields -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div th:each="field : ${customFields}" th:with="val=${item.getRender(field.code)}" class="row mb-3 align-items-center">
+                <label class="col-md-4 form-label col-form-label" th:text="${field.label}">Field Label</label>
+
+                <div class="col-md-8">
+                    <div th:switch="${field.fieldType.type}">
+                        <!-- SELECT -->
+                        <select th:case="3"
+                                th:id="${field.code}"
+                                class="form-select form-select-sm"
+                                th:data-item-id="${item.id}"
+                                th:data-original-value="${item.getValue(field.code)}">
+                            <option value="">-- Unassigned --</option>
+                            <option th:each="opt : ${field.options}"
+                                    th:value="${opt.key}"
+                                    th:text="${opt.value}"
+                                    th:selected="${opt.key == item.getValue(field.code)}">
+                            </option>
+                        </select>
+
+                        <!-- NUMBER -->
+                        <div th:case="4">
+                            <div class="input-group input-group-sm">
+                                <div class="editable-container w-100">
+                                    <div class="editable-display d-flex justify-content-between align-items-center" tabindex="0">
+                                        <span class="edit-text flex-grow-1 text-truncate"
+                                              th:text="${val != null and !#strings.isEmpty(val) ? val : '—'}"
+                                              th:data-original-value="${item.getRender(field.code)}">
+                                            Value
+                                        </span>
+                                        <span class="edit-icon ms-2">🖉</span>
+                                    </div>
+
+                                    <input type="number"
+                                           class="editable-input form-control form-control-sm hidden mt-1"
+                                           th:id="${field.code}"
+                                           th:name="${field.code}"
+                                           th:value="${item.getRender(field.code)}"
+                                           th:data-item-id="${item.id}"
+                                           th:data-original-value="${item.getRender(field.code)}"/>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- STRING -->
+                        <div th:case="5">
+                            <div class="input-group input-group-sm">
+                                <div class="editable-container w-100">
+                                    <div class="editable-display d-flex justify-content-between align-items-center" tabindex="0">
+                                        <span class="edit-text flex-grow-1 text-truncate"
+                                              th:text="${val != null and !#strings.isEmpty(val) ? val : '-'}"
+                                              th:data-original-value="${item.getRender(field.code)}">
+                                            Value
+                                        </span>
+                                        <span class="edit-icon ms-2">🖉</span>
+                                    </div>
+
+                                    <input type="text"
+                                           class="editable-input form-control form-control-sm hidden mt-1"
+                                           th:id="${field.code}"
+                                           th:name="${field.code}"
+                                           th:value="${item.getRender(field.code)}"
+                                           th:data-item-id="${item.id}"
+                                           th:data-original-value="${item.getRender(field.code)}"/>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- DATE -->
+                        <div th:case="6">
+                            <div class="input-group input-group-sm">
+                                <div class="editable-container w-100">
+                                    <div class="editable-display d-flex justify-content-between align-items-center" tabindex="0">
+                                        <span class="edit-text flex-grow-1 text-truncate"
+                                              th:text="${val != null and !#strings.isEmpty(val) ? val : '—'}"
+                                              th:data-original-value="${val != null ? val : ''}">
+                                            Value
+                                        </span>
+                                        <span class="edit-icon ms-2">🖉</span>
+                                    </div>
+
+                                    <input type="text"
+                                           class="editable-input form-control form-control-sm hidden mt-1"
+                                           th:id="${field.code}"
+                                           th:name="${field.code}"
+                                           th:value="${val != null ? val : ''}"
+                                           th:data-item-id="${item.id}"
+                                           th:data-original-value="${val != null ? val : ''}"
+                                           placeholder="dd-MM-yyyy"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="item-view-history">
+    <!-- History Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{'/web/item/' + ${item.id}}" th:object="${itemUpdateForm}" method="post">
+                <div class="mb-3">
+                    <textarea id="comment" class="form-control" rows="4" th:field="*{comment}" placeholder="Add a comment..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Comment</button>
+            </form>
+        </div>
+        <div class="card-body">
+            <div class="list-group list-group-flush scrollable-history">
+                <div class="list-group-item p-2" th:each="history : ${item.getHistoryPage()}">
+                    <!-- Изменение поля -->
+                    <div th:if="${history.change != null}" class="mb-1">
+                        <span class="fw-semibold" th:text="${history.change.fieldName + ':'}"></span>
+                        <span class="text-muted" th:text="${history.change.valueBefore} ?: 'empty'"></span>
+                        <span class="mx-1 text-muted">→</span>
+                        <span th:text="${history.change.valueAfter} ?: 'empty'"></span>
+                    </div>
+
+                    <!-- Комментарий -->
+                    <div th:if="${not #strings.isEmpty(history.comment)}"
+                         class="text-break mb-1 small text-muted"
+                         th:utext="${history.comment}"></div>
+
+                    <!-- Мета-информация -->
+                    <div class="d-flex justify-content-end small text-muted">
+                        <span th:text="${history.loggedBy?.name}"></span>
+                        <span class="mx-1">•</span>
+                        <span th:text="${#dates.format(history.timeStamp, 'dd.MM.yy HH:mm')}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>
