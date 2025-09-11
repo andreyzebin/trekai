@@ -6,7 +6,11 @@
         <div class="card-body">
             <form th:action="@{'/web/item/' + ${item.id}}" th:object="${itemUpdateForm}" method="post">
                 <div class="mb-3">
-                    <textarea id="comment" class="form-control" rows="4" th:field="*{comment}" placeholder="Add a comment..."></textarea>
+                    <textarea id="comment" class="form-control" rows="4" th:field="*{comment}"
+                              placeholder="Add a comment..."></textarea>
+                    <small class="form-text text-muted">
+                        Formatting: **bold** _italic_ `code` [text](url)
+                    </small>
                 </div>
                 <button type="submit" class="btn btn-primary">Comment</button>
             </form>
@@ -24,11 +28,11 @@
 
                     <!-- Комментарий -->
                     <div th:if="${not #strings.isEmpty(history.comment)}"
-                         class="text-break mb-1 small text-muted"
+                         class="text-break mb-1 small comment-content"
                          th:utext="${history.comment}"></div>
 
                     <!-- Мета-информация -->
-                    <div class="d-flex justify-content-end small text-muted">
+                    <div class="d-flex justify-content-end small text-muted mt-1">
                         <span th:text="${history.loggedBy?.name}"></span>
                         <span class="mx-1">•</span>
                         <span th:text="${#dates.format(history.timeStamp, 'dd.MM.yy HH:mm')}"></span>

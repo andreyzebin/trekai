@@ -121,3 +121,60 @@ textarea.editable-input {
 .ws-error {
     color: #ffc107 !important;
 }
+
+/* Markdown стили для комментариев */
+.comment-content {
+    color: #6c757d; /* Такой же цвет как у обычного текста */
+    line-height: 1.4;
+}
+
+.comment-content strong {
+    font-weight: 600; /* Полужирный вместо жирного для лучшей читаемости */
+    color: inherit; /* Наследует цвет от родителя */
+}
+
+.comment-content em {
+    font-style: italic;
+    color: inherit; /* Наследует цвет от родителя */
+}
+
+.comment-content code {
+    background-color: #f8f9fa;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9em;
+    color: #d63384;
+    border: 1px solid #e9ecef;
+}
+
+.comment-content pre {
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 8px 0;
+    border: 1px solid #e9ecef;
+}
+
+.comment-content pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    border: none;
+}
+
+.comment-content a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.comment-content a:hover {
+    text-decoration: underline;
+}
+
+/* Стили для подсказки по форматированию */
+.form-text small {
+    font-size: 0.8rem;
+    color: #6c757d;
+}

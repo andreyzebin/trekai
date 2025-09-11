@@ -3,6 +3,7 @@ import { FieldEditor } from './field-editor.js';
 import { DateFieldHandler } from './date-field-handler.js';
 import { ApiService } from './api-service.js';
 import { WebSocketService } from './websocket-service.js';
+import { MarkdownParser } from './markdown-parser.js';
 
 class ItemView {
     constructor() {
@@ -16,6 +17,7 @@ class ItemView {
         this.dateFieldHandler = new DateFieldHandler();
         this.apiService = new ApiService(this.baseUrl);
         this.webSocketService = new WebSocketService(this.baseUrl);
+        this.markdownParser = MarkdownParser;
 
         this.init();
     }
@@ -34,8 +36,25 @@ class ItemView {
             this.dateFieldHandler.initDateFields();
             this.initSelectFields();
             this.initGlobalEventHandlers();
+            this.initMarkdownComments(); // Добавляем инициализацию Markdown
+
             console.log('✅ All components initialized');
 
+    }
+
+    initMarkdownComments() {
+        console.log('📝 Initializing Markdown comments');
+        const comments = document.querySelectorAll('.comment-content');
+
+        comments.forEach(comment => {
+            const originalText = comment.textContent;
+            const formattedHtml = this.markdownParser.formatComment(originalText);
+
+            if (formattedHtml !== originalText) {
+                comment.innerHTML = formattedHtml;
+                console.log('✅ Comment formatted with Markdown');
+            }
+        });
     }
 
     initGlobalEventHandlers() {
