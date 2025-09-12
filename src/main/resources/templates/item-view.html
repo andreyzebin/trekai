@@ -18,23 +18,118 @@
 </head>
 <body>
 <div class="container mt-4" layout:fragment="content">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <!-- Заголовок и summary -->
-            <div th:replace="fragments/item-view-header :: item-view-header"></div>
+    <div class="row">
+        <div class="col-md-7 col-lg-8">
 
-            <!-- Основная информация -->
-            <div th:replace="fragments/item-view-main-info :: item-view-main-info"></div>
+            <!-- Заголовок и summary в одну строку -->
+            <div class="mb-4 d-flex align-items-start gap-3">
+                <!-- Заголовок -->
+                <div class="flex-shrink-0">
+                    <h2 class="mb-0" th:text="${item.refId}">ITEM-1</h2>
+                </div>
+
+                <!-- Summary -->
+                <div class="editable-container flex-grow-1">
+                    <div class="editable-display d-flex justify-content-between align-items-center" tabindex="0">
+                        <span class="edit-text flex-grow-1 text-truncate"
+                              th:text="${item.summary}"
+                              th:data-original-value="${item.summary}">
+                            Value
+                        </span>
+                        <span class="edit-icon ms-2">🖉</span>
+                    </div>
+
+                    <input type="text"
+                           class="editable-input form-control form-control-sm hidden mt-1"
+                           style="max-width: 100%;"
+                           id="summary"
+                           th:value="${item.summary}"
+                           th:data-item-id="${item.id}"
+                           th:attr="data-original-value=${item.summary}"/>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="row">
+        <!-- Левая колонка - Кастомные поля (шире) -->
+        <div class="col-md-7 col-lg-8">
+            <!-- Плашка с Detail -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Description</h6>
+                </div>
+                <div class="card-body">
+                    <div class="editable-container">
+                        <div class="editable-display" tabindex="0">
+                            <span class="edit-text"
+                                  th:data-original-value="${item.detail}"
+                                  th:text="${item.detail}">
+                                Detailed description of the item.
+                            </span>
+                            <span class="edit-icon">🖉</span>
+                        </div>
+                        <textarea class="form-control editable-input hidden mt-2"
+                                  th:text="${item.detail}"
+                                  th:data-original-value="${item.detail}"
+                                  th:data-item-id="${item.id}"
+                                  data-field-code="detail"
+                                  rows="4">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
 
             <!-- Кастомные поля -->
             <div th:replace="fragments/item-view-custom-fields :: item-view-custom-fields"></div>
+        </div>
+
+        <!-- Правая колонка - Основная информация и История (уже) -->
+        <div class="col-md-5 col-lg-4">
+            <!-- Основная информация (без detail) -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Status:</label>
+                            <select id="status"
+                                    class="form-select form-select-sm"
+                                    th:data-item-id="${item.id}"
+                                    th:data-original-value="${item.status}">
+                                <option value="">-- Unassigned --</option>
+                                <option th:each="status : ${statuses.entrySet()}"
+                                        th:value="${status.key}"
+                                        th:text="${status.value}"
+                                        th:selected="${status.key == item.status}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Assigned To:</label>
+                            <select id="assignedToId"
+                                    class="form-select form-select-sm"
+                                    th:data-item-id="${item.id}"
+                                    th:data-original-value="${item.assignedTo?.id}">
+                                <option value="">-- Unassigned --</option>
+                                <option th:each="user : ${users}"
+                                        th:value="${user.id}"
+                                        th:text="${user.name}"
+                                        th:selected="${user.id == item.assignedTo?.id}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">Logged By: <span th:text="${item.loggedBy?.name}">User</span></div>
+                        <div class="col-md-6">Submitted: <span th:text="${#dates.format(item.timeStamp, 'yyyy-MM-dd HH:mm')}">Date</span></div>
+                    </div>
+                </div>
+            </div>
 
             <!-- История и комментарии -->
             <div th:replace="fragments/item-view-history :: item-view-history"></div>
         </div>
     </div>
 </div>
-
-
 </body>
 </html>
