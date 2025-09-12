@@ -3,6 +3,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.0"
     id("java")
     id("org.openapi.generator") version "7.6.0"
+    id("com.github.node-gradle.node") version "7.1.0"
 }
 
 group = "info.jtrac"
@@ -72,10 +73,6 @@ dependencies {
 
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
-
 // Autogenerate openapi html
 
 openApiGenerate {
@@ -93,4 +90,39 @@ tasks.register<Exec>("downloadOpenApiSpec") {
 
 tasks.named("openApiGenerate") {
     dependsOn("downloadOpenApiSpec")
+}
+
+// Настройка Node.js
+node {
+    version.set("20.15.0") // Более новая версия Node.js
+    npmVersion.set("10.8.1") // Совместимая версия npm
+    download.set(true)
+    workDir.set(file("${project.buildDir}/nodejs"))
+    npmWorkDir.set(file("${project.buildDir}/npm"))
+}
+
+// Задача для запуска npm install
+tasks.register<com.github.gradle.node.npm.task.NpmTask>("npmInstallFrontend") {
+    dependsOn(tasks.named("npmSetup"))
+    npmCommand.set(listOf("install"))
+    args.set(listOf("--no-audit", "--no-fund"))
+    workingDir.set(file(projectDir))
+    inputs.file("package.json")
+    outputs.dir("node_modules")
+}
+
+// Задача для запуска JavaScript тестов
+tasks.register<com.github.gradle.node.npm.task.NpmTask>("testJavaScript") {
+    dependsOn("npmInstallFrontend")
+    npmCommand.set(listOf("run", "test"))
+    workingDir.set(file(projectDir))
+    inputs.dir("src/main/resources/static/js")
+    inputs.dir("src/test/javascript")
+    outputs.upToDateWhen { true }
+}
+
+// Интеграция с основными тестами
+tasks.withType<Test> {
+    useJUnitPlatform()
+    dependsOn("testJavaScript")
 }

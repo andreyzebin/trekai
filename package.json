@@ -1,0 +1,40 @@
+{
+  "name": "jtrac-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest --coverage --verbose",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "babel-jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "collectCoverageFrom": [
+      "src/main/resources/static/js/**/*.js",
+      "!src/main/resources/static/js/**/*.test.js"
+    ],
+    "coverageDirectory": "build/reports/jest-coverage",
+    "coverageReporters": [
+      "html",
+      "text",
+      "lcov"
+    ],
+    "testMatch": [
+      "**/src/test/javascript/**/*.test.js"
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/main/resources/static/js/$1"
+    },
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(your-module|another-module)/)"
+    ]
+  }
+}

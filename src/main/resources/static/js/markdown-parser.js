@@ -1,60 +1,84 @@
 export class MarkdownParser {
-    static parseTelegramMarkdown(text) {
-        if (!text) return '';
+    static parseTelegramMarkdown(input) {
+        if (!input) return '';
 
-        console.log('📝 Parsing Telegram Markdown:', text);
+        let text = input;
 
-        // Экранируем HTML теги для безопасности
-        let html = this.sanitizeHtml(text);
+        // 1. Экранированные маркеры — заменяем на безопасный текст сразу
+        text = text
+            .replace(/\\\*/g, '&#42;')
+            .replace(/\\_/g, '&#95;')
+            .replace(/\\\//g, '&#47;');
 
-        // Временные маркеры для защиты блоков кода
+        // 2. Вырезаем code blocks
         const codeBlocks = [];
-        html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
-            codeBlocks.push(code);
-            return `:::CODEBLOCK${codeBlocks.length - 1}:::`;
+        text = text.replace(/```([\s\S]+?)```/g, (_, code) => {
+            const token = `:::CODEBLOCK${codeBlocks.length}:::`;
+            codeBlocks.push(`<pre><code>${this.escapeHtml(code)}</code></pre>`);
+            return token;
         });
 
+        // 3. Вырезаем inline code
         const inlineCodes = [];
-        html = html.replace(/`([^`]+)`/g, (match, code) => {
-            inlineCodes.push(code);
-            return `:::INLINECODE${inlineCodes.length - 1}:::`;
+        text = text.replace(/`([^`]+?)`/g, (_, code) => {
+            const token = `:::INLINECODE${inlineCodes.length}:::`;
+            inlineCodes.push(`<code>${this.escapeHtml(code)}</code>`);
+            return token;
         });
 
-        // Жирный текст
-        html = html.replace(/(\*\*)(?=\S)([^\r]*?\S)\1/g, '<strong>$2</strong>');
-        html = html.replace(/(__)(?=\S)([^\r]*?\S)\1/g, '<strong>$2</strong>');
-
-        // Курсив
-        html = html.replace(/(?<!\\)\/([^\/\r]+)\/(?!\\)/g, '<em>$1</em>');
-        html = html.replace(/(?<!\\)\_([^\_\r]+)\_(?!\\)/g, '<em>$1</em>');
-
-        // Ссылки
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-
-        // Восстанавливаем блоки кода
-        html = html.replace(/:::CODEBLOCK(\d+):::/g, (match, index) => {
-            return `<pre><code>${codeBlocks[parseInt(index)]}</code></pre>`;
+        // 4. Вырезаем ссылки (не экранируем '&' заранее)
+        const links = [];
+        text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, label, url) => {
+            const token = `:::LINK${links.length}:::`;
+            // экранируем только для HTML-атрибута
+            const safeUrl = url.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+            links.push(`<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(label)}</a>`);
+            return token;
         });
 
-        html = html.replace(/:::INLINECODE(\d+):::/g, (match, index) => {
-            return `<code>${inlineCodes[parseInt(index)]}</code>`;
-        });
+        // 5. Экранируем HTML остального текста
+        text = this.escapeHtml(text);
 
-        // Переносы строк
-        html = html.replace(/\n/g, '<br>');
+        // 6. Bold — ищем минимальные совпадения и не захватываем пустые
+        text = text.replace(/(\*\*|__)(?=\S)(.+?)(?<=\S)\1/g, '<strong>$2</strong>');
 
-        console.log('✅ Parsed to HTML:', html);
-        return html;
+        // 7. Italic — только непустые, и не ломаем соседний HTML
+        text = text.replace(/(?:^|(?<!\w))(\/|_)(?=\S)(.+?)(?<=\S)\1(?!\w)/g, '<em>$2</em>');
+
+        // 8. Переводы строк
+        text = text.replace(/\r?\n/g, '<br>');
+
+        // 9. Возвращаем токены
+        codeBlocks.forEach((html, i) => text = text.replace(`:::CODEBLOCK${i}:::`, html));
+        inlineCodes.forEach((html, i) => text = text.replace(`:::INLINECODE${i}:::`, html));
+        links.forEach((html, i) => text = text.replace(`:::LINK${i}:::`, html));
+
+        return text;
+    }
+
+    static escapeHtml(str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;');
     }
 
     static sanitizeHtml(html) {
-        const div = document.createElement('div');
-        div.textContent = html;
-        return div.innerHTML;
+        // используем ту же функцию, что и в парсере
+        return this.escapeHtml(html);
     }
 
     static formatComment(comment) {
         if (!comment) return '';
         return this.parseTelegramMarkdown(comment);
     }
+}
+
+
+
+// CommonJS совместимость
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { MarkdownParser };
 }
