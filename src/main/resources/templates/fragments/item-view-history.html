@@ -17,7 +17,7 @@
         </div>
         <div class="card-body">
             <div class="list-group list-group-flush scrollable-history">
-                <div class="list-group-item p-2" th:each="history : ${item.getHistoryPage()}">
+                <div class="list-group-item p-2" th:each="history : ${historyItems}">
                     <!-- Изменение поля -->
                     <div th:if="${history.change != null}" class="mb-1">
                         <span class="fw-semibold" th:text="${history.change.fieldName + ':'}"></span>

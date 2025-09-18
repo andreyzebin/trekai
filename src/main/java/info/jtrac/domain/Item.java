@@ -32,12 +32,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @Data
@@ -57,10 +59,7 @@ public class Item extends AbstractItem {
     private Map<String, String> fieldValues;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<History> history;
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Item> children;
+    private List<History> history;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Attachment> attachments;
@@ -110,7 +109,7 @@ public class Item extends AbstractItem {
 
     public void add(History h) {
         if (this.history == null) {
-            this.history = new LinkedHashSet<History>();
+            this.history = new LinkedList<History>();
         }
         h.setParent(this);
         this.history.add(h);

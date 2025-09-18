@@ -5,6 +5,7 @@ import info.jtrac.domain.Item;
 import info.jtrac.domain.Space;
 import info.jtrac.domain.User;
 import info.jtrac.service.JtracService;
+import info.jtrac.ui.HistoryMapper;
 import info.jtrac.web.api.dto.FieldUpdateDto;
 import info.jtrac.web.api.dto.ItemCreateDto;
 import info.jtrac.web.api.dto.ItemPatchDto;
@@ -31,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import static info.jtrac.web.api.ApiItemController.TRIM_COMMENT_LENGTH_TRIGGER;
 
@@ -40,9 +40,11 @@ import static info.jtrac.web.api.ApiItemController.TRIM_COMMENT_LENGTH_TRIGGER;
 public class ItemController {
 
     private final JtracService jtracService;
+    private final HistoryMapper historyMapper;
 
-    public ItemController(JtracService jtracService) {
+    public ItemController(JtracService jtracService, HistoryMapper historyMapper) {
         this.jtracService = jtracService;
+        this.historyMapper = historyMapper;
     }
 
     public static Long longOrNull(String value) {
@@ -99,6 +101,7 @@ public class ItemController {
             return "redirect:/web/dashboard";
         }
         model.addAttribute("item", item);
+        model.addAttribute("historyItems", historyMapper.toDtoList(item.getHistoryPage()));
         model.addAttribute("statuses", Map.of(1, "Open", 2, "Closed"));
         model.addAttribute("customFields", item.getSpace().getMetadata().getOrderedFields());
         model.addAttribute("itemUpdateForm", new ItemUpdateDto());
