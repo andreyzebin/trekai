@@ -24,8 +24,8 @@ class ItemView {
 
     init() {
         console.log('🔧 ItemView initialization started');
-        this.initEventListeners();
         this.initWebSocket();
+        this.initEventListeners();
         console.log('✅ ItemView initialization completed');
     }
 
