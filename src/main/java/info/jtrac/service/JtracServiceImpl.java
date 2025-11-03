@@ -66,7 +66,7 @@ public class JtracServiceImpl implements JtracService {
 
     @Override
     public Item findItemById(Long id) {
-        return itemRepository.findById(id).orElse(null);
+        return itemRepository.findItemByIdWithAssociations(id).orElse(null);
     }
 
     @Override
